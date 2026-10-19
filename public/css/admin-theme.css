@@ -1,0 +1,226 @@
+
+/* =====================================================
+   LoanEngine Admin Theme — Black, White & Grey
+   File: public/css/admin-theme.css
+   ===================================================== */
+
+:root {
+    color-scheme: light;
+
+    /* Brand */
+    --primary: #222222;
+    --primary-hover: #000000;
+    --primary-light: #eeeeee;
+
+    /* Backgrounds */
+    --background: #f3f3f3;
+    --page-bg: #f3f3f3;
+    --surface: #ffffff;
+    --card-bg: #ffffff;
+    --surface-hover: #f7f7f7;
+
+    /* Text */
+    --text: #222222;
+    --text-primary: #222222;
+    --muted: #777777;
+    --text-secondary: #666666;
+    --heading: #222222;
+
+    /* Borders */
+    --border: #e2e2e2;
+    --border-color: #e2e2e2;
+
+    /* Sidebar */
+    --sidebar-width: 250px;
+    --sidebar-bg: #ffffff;
+    --sidebar-text: #333333;
+    --sidebar-muted: #777777;
+    --sidebar-border: #e5e5e5;
+    --sidebar-active: #eeeeee;
+    --sidebar-active-bg: #eeeeee;
+    --sidebar-active-text: #222222;
+    --sidebar-primary: #222222;
+
+    /* Buttons */
+    --button-bg: #222222;
+    --button-text: #ffffff;
+    --button-hover: #000000;
+
+    /* Form controls */
+    --input-bg: #ffffff;
+    --input-border: #d9d9d9;
+    --input-text: #222222;
+    --input-focus: #777777;
+
+    /* Statuses — monochrome */
+    --success: #444444;
+    --danger: #333333;
+    --warning: #555555;
+    --info: #444444;
+
+    /* Legacy variable compatibility */
+    --navy: #222222;
+    --blue: #222222;
+    --primary-color: #222222;
+    --secondary-color: #777777;
+    --brand-color: #222222;
+    --accent: #444444;
+}
+
+/* Base */
+html {
+    background: var(--background);
+}
+
+body {
+    background: var(--background);
+    color: var(--text);
+}
+
+/* Main workspace */
+.admin-layout,
+.admin-main,
+.admin-content,
+.dashboard-page {
+    color: var(--text);
+}
+
+/* Common headings */
+h1,
+h2,
+h3,
+h4,
+.page-title {
+    color: var(--heading);
+}
+
+/* Common cards */
+.panel,
+.card,
+.admin-card,
+.dashboard-card {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+/* Links */
+a {
+    text-decoration-color: currentColor;
+}
+
+.admin-content a:not(.primary-button):not(.edu-modules-primary-btn),
+.dashboard-page a:not(.primary-button):not(.edu-modules-primary-btn) {
+    text-decoration-color: currentColor;
+}
+
+/* Primary buttons */
+.primary-button,
+button.primary-button,
+.edu-modules-primary-btn {
+    background: var(--button-bg);
+    color: var(--button-text);
+    border-color: var(--button-bg);
+}
+
+.primary-button:hover,
+.edu-modules-primary-btn:hover {
+    background: var(--button-hover);
+    color: #ffffff;
+    border-color: #000000;
+}
+
+/* Secondary buttons */
+.secondary-button {
+    background: #ffffff;
+    color: #333333;
+    border-color: #d9d9d9;
+}
+
+.secondary-button:hover {
+    background: #eeeeee;
+    color: #222222;
+}
+
+/* Form controls */
+input,
+select,
+textarea,
+.form-control {
+    color: var(--input-text);
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.form-control:focus {
+    border-color: var(--input-focus);
+    outline-color: #aaaaaa;
+    box-shadow: 0 0 0 2px rgb(0 0 0 / 6%);
+}
+
+/* Tables */
+table {
+    color: var(--text);
+}
+
+thead,
+thead tr {
+    background: #f5f5f5;
+}
+
+th {
+    color: #555555;
+}
+
+td,
+th {
+    border-color: var(--border);
+}
+
+/* Education theme compatibility */
+.edu-modules-page,
+.edu-modules-card {
+    color: var(--text);
+}
+
+.edu-modules-card {
+    background: #ffffff;
+    border-color: var(--border);
+}
+
+.edu-modules-category-name,
+.edu-modules-module-title,
+.edu-modules-view-link {
+    color: #222222;
+}
+
+/* Selection and keyboard focus */
+::selection {
+    background: #dddddd;
+    color: #111111;
+}
+
+:focus-visible {
+    outline-color: #777777;
+}
+
+/* Reduce blue browser autofill styling */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #222222;
+    box-shadow: 0 0 0 1000px #ffffff inset;
+}
+
+/* Respect accessibility preferences */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}

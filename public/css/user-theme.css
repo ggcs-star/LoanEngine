@@ -1,0 +1,289 @@
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+    /* ========================================
+       LOANENGINE USER THEME
+       Change shared design values here
+    ======================================== */
+
+    /* Colors */
+    --u-bg: #f4f5f7;
+    --u-surface: #ffffff;
+    --u-surface-muted: #f0f1f3;
+    --u-surface-hover: #e8eaee;
+
+    --u-sidebar-bg: #111216;
+    --u-sidebar-text: #d9dbe1;
+    --u-sidebar-muted: #969aa4;
+    --u-sidebar-hover: #202126;
+    --u-sidebar-active: #292b31;
+
+    --u-text: #191b20;
+    --u-text-secondary: #626772;
+    --u-text-muted: #858a94;
+
+    --u-border: #e2e4e8;
+    --u-border-strong: #cdd0d6;
+
+    --u-primary: #191b20;
+    --u-primary-hover: #303238;
+    --u-primary-text: #ffffff;
+
+    --u-success: #24623b;
+    --u-success-bg: #edf6ef;
+    --u-warning: #73591e;
+    --u-warning-bg: #f7f2e7;
+    --u-danger: #9b3030;
+    --u-danger-bg: #fff0f0;
+    --u-info: #374151;
+    --u-info-bg: #eef0f3;
+
+    /* Typography */
+    --u-font: "DM Sans", Arial, sans-serif;
+    --u-heading-font: "Manrope", "DM Sans", Arial, sans-serif;
+
+    --u-text-xs: 0.75rem;
+    --u-text-sm: 0.875rem;
+    --u-text-base: 0.9375rem;
+    --u-text-lg: 1.125rem;
+    --u-text-xl: 1.375rem;
+    --u-text-2xl: clamp(1.65rem, 2.5vw, 2.25rem);
+
+    --u-line-height: 1.65;
+    --u-heading-line-height: 1.25;
+
+    /* Spacing */
+    --u-space-1: 4px;
+    --u-space-2: 8px;
+    --u-space-3: 12px;
+    --u-space-4: 16px;
+    --u-space-5: 20px;
+    --u-space-6: 24px;
+    --u-space-8: 32px;
+    --u-space-10: 40px;
+    --u-space-12: 48px;
+
+    /* Corners */
+    --u-radius-sm: 7px;
+    --u-radius-md: 10px;
+    --u-radius-lg: 14px;
+    --u-radius-xl: 20px;
+    --u-radius-pill: 999px;
+
+    /* Shadows */
+    --u-shadow-sm: 0 1px 3px rgb(17 24 39 / 4%);
+    --u-shadow-md: 0 10px 28px rgb(17 24 39 / 7%);
+    --u-shadow-lg: 0 18px 48px rgb(17 24 39 / 10%);
+
+    /* Layout */
+    --u-sidebar-width: 258px;
+    --u-header-height: 82px;
+    --u-content-max: 1500px;
+    --u-page-gutter: clamp(14px, 2.5vw, 34px);
+
+    /* Interaction */
+    --u-transition: 180ms ease;
+    --u-focus-ring: 0 0 0 3px rgb(98 103 114 / 18%);
+}
+
+/* Base reset */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--u-bg);
+    color: var(--u-text);
+    font-family: var(--u-font);
+    font-size: var(--u-text-base);
+    line-height: var(--u-line-height);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* User application */
+.user-app {
+    min-height: 100vh;
+    background: var(--u-bg);
+    color: var(--u-text);
+    font-family: var(--u-font);
+    font-size: var(--u-text-base);
+    line-height: var(--u-line-height);
+}
+
+.user-app *,
+.user-app *::before,
+.user-app *::after {
+    box-sizing: border-box;
+}
+
+.user-app h1,
+.user-app h2,
+.user-app h3,
+.user-app h4,
+.user-app h5,
+.user-app h6 {
+    color: var(--u-text);
+    font-family: var(--u-heading-font);
+    line-height: var(--u-heading-line-height);
+}
+
+.user-app p {
+    overflow-wrap: anywhere;
+}
+
+.user-app a {
+    color: inherit;
+}
+
+.user-app button,
+.user-app input,
+.user-app select,
+.user-app textarea {
+    font: inherit;
+}
+
+.user-app img,
+.user-app video {
+    max-width: 100%;
+}
+
+.user-app button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.user-app :focus-visible {
+    outline: 2px solid var(--u-text-secondary);
+    outline-offset: 3px;
+}
+
+.user-muted {
+    color: var(--u-text-muted);
+}
+
+/* Primary buttons */
+.user-app .user-button-primary,
+.user-app .user-button-dark {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: var(--u-space-2);
+    padding: 0 var(--u-space-4);
+    border: 1px solid var(--u-primary);
+    border-radius: var(--u-radius-md);
+    background: var(--u-primary);
+    color: var(--u-primary-text);
+    font-size: var(--u-text-sm);
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background var(--u-transition),
+        border-color var(--u-transition),
+        transform var(--u-transition);
+}
+
+.user-app .user-button-primary:hover,
+.user-app .user-button-dark:hover {
+    border-color: var(--u-primary-hover);
+    background: var(--u-primary-hover);
+}
+
+.user-app .user-button-primary:active,
+.user-app .user-button-dark:active {
+    transform: translateY(1px);
+}
+
+/* Secondary buttons */
+.user-app .user-button-secondary,
+.user-app .user-button-light {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: var(--u-space-2);
+    padding: 0 var(--u-space-4);
+    border: 1px solid var(--u-border-strong);
+    border-radius: var(--u-radius-md);
+    background: var(--u-surface);
+    color: var(--u-text);
+    font-size: var(--u-text-sm);
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background var(--u-transition),
+        border-color var(--u-transition);
+}
+
+.user-app .user-button-secondary:hover,
+.user-app .user-button-light:hover {
+    border-color: var(--u-text-muted);
+    background: var(--u-surface-muted);
+}
+
+/* Common cards */
+.user-app .user-card {
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius-lg);
+    background: var(--u-surface);
+    box-shadow: var(--u-shadow-sm);
+}
+
+/* Alerts */
+.user-app .user-alert {
+    margin-bottom: var(--u-space-4);
+    padding: 13px var(--u-space-4);
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius-md);
+    font-size: var(--u-text-sm);
+}
+
+.user-app .user-alert-success {
+    border-color: #cfe8d6;
+    background: var(--u-success-bg);
+    color: var(--u-success);
+}
+
+.user-app .user-alert-error {
+    border-color: #f1d0d0;
+    background: var(--u-danger-bg);
+    color: var(--u-danger);
+}
+
+.user-app .user-alert ul {
+    margin: var(--u-space-2) 0 0;
+    padding-left: var(--u-space-5);
+}
+
+/* Responsive typography */
+@media (max-width: 720px) {
+    :root {
+        --u-text-base: 0.875rem;
+        --u-header-height: 66px;
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

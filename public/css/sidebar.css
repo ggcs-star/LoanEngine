@@ -1,0 +1,331 @@
+/* =====================================================
+   LoanEngine Admin Sidebar — Black / Cool Grey
+   File: public/css/sidebar.css
+   ===================================================== */
+
+:root {
+    --sidebar-width: 250px;
+    --sidebar-bg: #080808;
+    --sidebar-text: #f2f2f2;
+    --sidebar-muted: #a3a3a3;
+    --sidebar-border: #303030;
+    --sidebar-active: #303030;
+    --sidebar-primary: #ffffff;
+}
+
+/* Sidebar layout */
+.admin-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    width: var(--sidebar-width);
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    padding: 0 12px 12px;
+    background: #080808 !important;
+    border-right: 1px solid #202020;
+    color: var(--sidebar-text);
+    font-family: inherit;
+}
+
+/* Brand */
+.admin-sidebar .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    height: 72px;
+    min-height: 72px;
+    margin: 0 -12px 12px;
+    padding: 0 27px;
+    border-bottom: 1px solid #202020;
+    background: #080808 !important;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.7px;
+}
+
+.admin-sidebar .brand:hover,
+.admin-sidebar .brand:focus,
+.admin-sidebar .brand:visited {
+    color: #ffffff;
+}
+
+.admin-sidebar .brand-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    color: #ffffff;
+}
+
+.admin-sidebar .brand-mark svg {
+    display: block;
+    width: 34px;
+    height: 34px;
+    color: #ffffff;
+    stroke: currentColor;
+}
+
+.admin-sidebar .brand-light {
+    color: #bdbdbd !important;
+}
+
+/* Navigation scrolling area */
+.admin-sidebar .sidebar-caption {
+    padding: 0 11px;
+    margin: 15px 0 6px;
+    color: #b6b6b6 !important;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    line-height: 16px;
+}
+
+.admin-sidebar .sidebar-nav {
+    min-height: 0;
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 0 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    scrollbar-width: thin;
+    scrollbar-color: #555555 transparent;
+}
+
+/* Navigation links */
+.admin-sidebar .nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    width: 100%;
+    min-height: 41px;
+    padding: 9px 11px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: #f0f0f0 !important;
+    background: transparent !important;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.35;
+    transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.admin-sidebar .nav-item:visited {
+    color: #f0f0f0 !important;
+}
+
+.admin-sidebar .nav-item:hover {
+    color: #ffffff !important;
+    background: #1c1c1c !important;
+    border-color: #303030;
+}
+
+.admin-sidebar .nav-item.active,
+.admin-sidebar .nav-item.active:visited {
+    color: #ffffff !important;
+    background: #303030 !important;
+    border-color: #414141;
+    font-weight: 700;
+}
+
+.admin-sidebar .nav-item.active::before {
+    content: "";
+    position: absolute;
+    left: -13px;
+    top: 7px;
+    bottom: 7px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: #ffffff;
+}
+
+/* Navigation icons */
+.admin-sidebar .nav-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 21px;
+    width: 21px;
+    height: 21px;
+    color: currentColor;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.admin-sidebar .nav-icon svg {
+    color: currentColor;
+    stroke: currentColor;
+}
+
+/* Divider */
+.admin-sidebar .sidebar-divider {
+    flex-shrink: 0;
+    height: 1px;
+    margin: 11px 3px 2px;
+    background: var(--sidebar-border);
+}
+
+/* User profile at the bottom */
+.admin-sidebar .sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    min-height: 68px;
+    padding: 10px 15px;
+    background: #080808 !important;
+    border-top: 1px solid #292929;
+}
+
+.admin-sidebar .avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 37px;
+    height: 37px;
+    flex: 0 0 37px;
+    border-radius: 50%;
+    background: #f2f2f2 !important;
+    color: #111111 !important;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.admin-sidebar .user-details {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.admin-sidebar .user-details strong {
+    overflow: hidden;
+    color: #ffffff !important;
+    font-size: 12px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.admin-sidebar .user-details span {
+    overflow: hidden;
+    color: #b6b6b6 !important;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Keep content layout compatible */
+.admin-layout,
+.admin-main,
+.admin-content {
+    min-width: 0;
+}
+
+/* Mobile overlay */
+.sidebar-overlay {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .admin-sidebar {
+        width: min(var(--sidebar-width), 85vw);
+        transform: translateX(-100%);
+        transition: transform 0.22s ease;
+        box-shadow: none;
+    }
+
+    .admin-sidebar.sidebar-open,
+    .admin-sidebar.is-open {
+        transform: translateX(0);
+        box-shadow: 12px 0 35px rgb(0 0 0 / 30%);
+    }
+
+    .sidebar-overlay.is-visible {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        background: rgb(0 0 0 / 45%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-sidebar,
+    .admin-sidebar .nav-item {
+        transition: none;
+    }
+}
+
+/* Sidebar logout */
+.admin-sidebar .sidebar-logout {
+    flex-shrink: 0;
+    padding: 10px 15px 16px;
+    background: #080808 !important;
+    border-top: 1px solid #292929;
+}
+
+.admin-sidebar .sidebar-logout form {
+    margin: 0;
+}
+
+.admin-sidebar .sidebar-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    background: transparent !important;
+    color: #f0f0f0 !important;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.admin-sidebar .sidebar-logout-btn:hover {
+    background: #1c1c1c !important;
+    color: #ffffff !important;
+    border-color: #303030;
+}
+
+.admin-sidebar .sidebar-logout-btn svg {
+    flex-shrink: 0;
+}
+
+
+/* Final, scoped overrides: keep the global dashboard theme untouched. */
+.admin-sidebar { background-color: #080808 !important; color: #f2f2f2 !important; }
+.admin-sidebar .brand { background-color: #080808 !important; color: #fff !important; }
+.admin-sidebar .nav-item,
+.admin-sidebar .nav-item:visited { color: #f0f0f0 !important; }
+.admin-sidebar .nav-item:hover,
+.admin-sidebar .nav-item:focus-visible { background-color: #1c1c1c !important; color: #fff !important; }
+.admin-sidebar .nav-item.active,
+.admin-sidebar .nav-item.active:visited { background-color: #303030 !important; color: #fff !important; }
+.admin-sidebar .sidebar-user,
+.admin-sidebar .sidebar-logout { background-color: #080808 !important; }
+.admin-sidebar .sidebar-user .user-details strong { color: #fff !important; }
+.admin-sidebar .sidebar-user .user-details span { color: #b6b6b6 !important; }
+.admin-sidebar .sidebar-logout-btn { background-color: transparent !important; color: #f0f0f0 !important; }
+.admin-sidebar .sidebar-logout-btn:hover { background-color: #1c1c1c !important; color: #fff !important; }
