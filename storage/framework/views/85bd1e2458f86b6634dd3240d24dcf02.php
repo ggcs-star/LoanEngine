@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="<?php echo e(asset('css/user-dashboard.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/user-education.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/user-tools.css')); ?>">
-
+    <link rel="stylesheet" href="<?php echo e(asset('css/calculators/home-affordability.css')); ?>">
     <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
 <body>

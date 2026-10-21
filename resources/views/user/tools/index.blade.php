@@ -1,40 +1,109 @@
-
 @extends('user.layouts.app')
 
 @section('title', 'Tools & Calculators | LoanEngine')
 @section('page_heading', 'Tools & Calculators')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/user-tools.css') }}">
+<link rel="stylesheet" href="{{ asset('css/user-tools.css') }}">
 @endpush
 
 @section('content')
+@php
+    $filters = $filters ?? ['search' => '', 'category' => ''];
+    $sort = $sort ?? 'recommended';
+
+    $search = trim((string) ($filters['search'] ?? ''));
+    $selectedCategory = (string) ($filters['category'] ?? '');
+
+    $categories = $categories ?? $tools
+        ->pluck('category')
+        ->filter()
+        ->unique()
+        ->sort()
+        ->values();
+
+    $visibleTools = $tools->filter(function ($tool) use (
+        $search,
+        $selectedCategory
+    ) {
+        $name = mb_strtolower((string) $tool->name);
+        $description = mb_strtolower(
+            (string) ($tool->short_description ?? '')
+        );
+        $category = mb_strtolower((string) ($tool->category ?? ''));
+        $searchTerm = mb_strtolower($search);
+
+        $matchesSearch = $search === ''
+            || str_contains($name, $searchTerm)
+            || str_contains($description, $searchTerm)
+            || str_contains($category, $searchTerm);
+
+        $matchesCategory = $selectedCategory === ''
+            || ($tool->category ?? '') === $selectedCategory;
+
+        return $matchesSearch && $matchesCategory;
+    });
+
+    if ($sort === 'name') {
+        $visibleTools = $visibleTools->sortBy(
+            'name',
+            SORT_NATURAL | SORT_FLAG_CASE
+        );
+    } elseif ($sort === 'newest') {
+        $visibleTools = $visibleTools->sortByDesc('created_at');
+    } else {
+        $visibleTools = $visibleTools->sortBy('display_order');
+    }
+
+    $visibleTools = $visibleTools->values();
+@endphp
+
 <div class="le-tools">
 
+    {{-- Hero --}}
     <section class="le-hero">
         <div>
             <span class="le-eyebrow">YOUR FINANCIAL TOOLKIT</span>
-            <h1>Make clearer financial decisions.</h1>
-            <p>Explore practical calculators and resources to plan your next financial step with confidence.</p>
 
-            <form class="le-search" action="{{ route('user.tools.index') }}" method="GET">
+            <h1>Make clearer financial decisions.</h1>
+
+            <p>
+                Explore practical calculators and resources to plan your
+                next financial step with confidence.
+            </p>
+
+            <form
+                class="le-search"
+                action="{{ route('user.tools.index') }}"
+                method="GET"
+            >
                 <input
                     type="search"
                     name="search"
-                    value="{{ $filters['search'] ?? '' }}"
+                    value="{{ $search }}"
                     placeholder="Search calculators and resources..."
                     aria-label="Search tools"
                 >
 
-                @if (!empty($filters['category']))
-                    <input type="hidden" name="category" value="{{ $filters['category'] }}">
+                @if ($selectedCategory !== '')
+                    <input
+                        type="hidden"
+                        name="category"
+                        value="{{ $selectedCategory }}"
+                    >
                 @endif
 
-                @if (($sort ?? 'recommended') !== 'recommended')
-                    <input type="hidden" name="sort" value="{{ $sort }}">
+                @if ($sort !== 'recommended')
+                    <input
+                        type="hidden"
+                        name="sort"
+                        value="{{ $sort }}"
+                    >
                 @endif
 
-                <button type="submit" class="le-btn le-btn-primary">Search →</button>
+                <button type="submit" class="le-btn le-btn-primary">
+                    Search →
+                </button>
             </form>
         </div>
 
@@ -42,40 +111,59 @@
             <span>▦</span>
             <strong>Plan with clarity</strong>
             <small>Simple tools. Better decisions.</small>
+
             <div class="le-bars">
-                <i></i><i></i><i></i><i></i><i></i>
+                <i></i>
+                <i></i>
+                <i></i>
+                <i></i>
+                <i></i>
             </div>
         </div>
     </section>
 
+    {{-- Tools heading --}}
     <section>
         <div class="le-section-head">
             <div>
                 <span class="le-eyebrow">EXPLORE YOUR OPTIONS</span>
-                <h2>Tools built around your goals</h2>
+                <h2>Tools and calculators</h2>
                 <p>Choose a tool to get started.</p>
             </div>
 
-            <span class="le-count">{{ $tools->total() }} tools available</span>
+            <span class="le-count">
+                {{ $visibleTools->count() }}
+                {{ $visibleTools->count() === 1 ? 'tool' : 'tools' }}
+                available
+            </span>
         </div>
 
-        <form class="le-toolbar" method="GET" action="{{ route('user.tools.index') }}">
+        {{-- Filters --}}
+        <form
+            class="le-toolbar"
+            method="GET"
+            action="{{ route('user.tools.index') }}"
+        >
             <input
                 type="hidden"
                 name="search"
-                value="{{ $filters['search'] ?? '' }}"
+                value="{{ $search }}"
             >
 
             <div class="le-filter-row">
                 <label>
                     <span class="le-sr-only">Category</span>
-                    <select name="category" onchange="this.form.submit()">
+
+                    <select
+                        name="category"
+                        onchange="this.form.submit()"
+                    >
                         <option value="">All categories</option>
 
                         @foreach ($categories as $category)
                             <option
                                 value="{{ $category }}"
-                                @selected(($filters['category'] ?? '') === $category)
+                                @selected($selectedCategory === $category)
                             >
                                 {{ $category }}
                             </option>
@@ -84,15 +172,30 @@
                 </label>
 
                 <label>
-                    <span class="le-sr-only">Sort</span>
-                    <select name="sort" onchange="this.form.submit()">
-                        <option value="recommended" @selected($sort === 'recommended')>
+                    <span class="le-sr-only">Sort tools</span>
+
+                    <select
+                        name="sort"
+                        onchange="this.form.submit()"
+                    >
+                        <option
+                            value="recommended"
+                            @selected($sort === 'recommended')
+                        >
                             Recommended
                         </option>
-                        <option value="name" @selected($sort === 'name')>
+
+                        <option
+                            value="name"
+                            @selected($sort === 'name')
+                        >
                             Name A–Z
                         </option>
-                        <option value="newest" @selected($sort === 'newest')>
+
+                        <option
+                            value="newest"
+                            @selected($sort === 'newest')
+                        >
                             Newest first
                         </option>
                     </select>
@@ -100,18 +203,22 @@
             </div>
 
             @if (
-                ($filters['search'] ?? '') !== ''
-                || ($filters['category'] ?? '') !== ''
+                $search !== ''
+                || $selectedCategory !== ''
                 || $sort !== 'recommended'
             )
-                <a href="{{ route('user.tools.index') }}">Clear filters ×</a>
+                <a href="{{ route('user.tools.index') }}">
+                    Clear filters ×
+                </a>
             @endif
         </form>
 
-        @if ($tools->isNotEmpty())
+        {{-- Tool cards --}}
+        @if ($visibleTools->isNotEmpty())
             <div class="le-grid">
-                @foreach ($tools as $tool)
+                @foreach ($visibleTools as $tool)
                     <article class="le-card">
+
                         <div class="le-card-top">
                             <span class="le-icon" aria-hidden="true">
                                 @switch($tool->icon)
@@ -137,12 +244,15 @@
                                 @endswitch
                             </span>
 
-                            <span class="le-chip">{{ $tool->category }}</span>
+                            <span class="le-chip">
+                                {{ $tool->category ?: 'General' }}
+                            </span>
+
                             <span class="le-arrow">↗</span>
                         </div>
 
                         <div class="le-card-body">
-                            <small>{{ $tool->type }}</small>
+                            <small>{{ $tool->type ?: 'Tool' }}</small>
 
                             <h3>
                                 <a href="{{ route('user.tools.show', $tool->slug) }}">
@@ -150,23 +260,30 @@
                                 </a>
                             </h3>
 
-                            <p>{{ $tool->short_description }}</p>
+                            <p>
+                                {{ $tool->short_description
+                                    ?: 'Explore this tool to learn more.' }}
+                            </p>
                         </div>
 
                         @if ($tool->journeys->isNotEmpty())
                             <div class="le-tags">
                                 @foreach ($tool->journeys->take(2) as $journey)
-                                    <span>{{ $journey->short_label ?: $journey->name }}</span>
+                                    <span>
+                                        {{ $journey->short_label ?: $journey->name }}
+                                    </span>
                                 @endforeach
 
                                 @if ($tool->journeys->count() > 2)
-                                    <span>+{{ $tool->journeys->count() - 2 }}</span>
+                                    <span>
+                                        +{{ $tool->journeys->count() - 2 }}
+                                    </span>
                                 @endif
                             </div>
                         @endif
 
                         <div class="le-card-foot">
-                            <span>● Available to use</span>
+                            <span>● Available to explore</span>
 
                             <a
                                 class="le-btn le-btn-card"
@@ -175,20 +292,22 @@
                                 Explore tool →
                             </a>
                         </div>
+
                     </article>
                 @endforeach
-            </div>
-
-            <div class="le-pagination">
-                {{ $tools->links() }}
             </div>
         @else
             <div class="le-empty">
                 <span>⌕</span>
                 <h3>No tools found</h3>
-                <p>Try another search or clear the selected filters.</p>
+                <p>
+                    Try another search or clear the selected filters.
+                </p>
 
-                <a class="le-btn le-btn-primary" href="{{ route('user.tools.index') }}">
+                <a
+                    class="le-btn le-btn-primary"
+                    href="{{ route('user.tools.index') }}"
+                >
                     View all tools
                 </a>
             </div>

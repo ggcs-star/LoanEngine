@@ -1,7 +1,25 @@
+
 /vendor
 /node_modules
 /public/build
 /public/hot
 /storage/*.key
+
+# Environment
 .env
+.env.*
+
+# PHPUnit
 .phpunit.result.cache
+
+# Log files
+*.log
+/storage/logs/*
+!/storage/logs/.gitignore
+
+# Laravel runtime files
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/framework/testing/*
+/bootstrap/cache/*.php

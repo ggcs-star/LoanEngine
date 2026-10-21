@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="{{ asset('css/user-dashboard.css') }}">
     <link rel="stylesheet" href="{{ asset('css/user-education.css') }}">
     <link rel="stylesheet" href="{{ asset('css/user-tools.css') }}">
-
+    <link rel="stylesheet" href="{{ asset('css/calculators/home-affordability.css') }}">
     @stack('styles')
 </head>
 <body>
