@@ -11,7 +11,8 @@ use App\Http\Controllers\Admin\Tools\ToolJourneyController;
 use App\Http\Controllers\Admin\Tools\JourneyStepController;
 use App\Http\Controllers\User\EducationController as UserEducationController;
 use App\Http\Controllers\User\ToolController as UserToolController;
-
+use App\Http\Controllers\User\ToolJourneyController as UserToolJourneyController;
+use App\Http\Controllers\User\CalculatorController as UserCalculatorController;
 /*
 |--------------------------------------------------------------------------
 | Home
@@ -144,10 +145,31 @@ Route::middleware(['auth', 'role:user'])
 Route::middleware(['auth', 'role:user'])
     ->prefix('user/tools')
     ->name('user.tools.')
-    ->group(function (): void {
+    ->group(function () {
         Route::get('/', [UserToolController::class, 'index'])
             ->name('index');
+
+        Route::get('/journeys', [UserToolJourneyController::class, 'index'])
+            ->name('journeys.index');
+
+        Route::get('/journeys/{journey:slug}', [
+            UserToolJourneyController::class, 'show',
+        ])->name('journeys.show');
+
+        Route::get('/journeys/{journey:slug}/steps/{step}', [
+            UserToolJourneyController::class, 'step',
+        ])->name('journeys.steps.show');
 
         Route::get('/{tool:slug}', [UserToolController::class, 'show'])
             ->name('show');
     });
+
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/tools/{tool:slug}', [
+        UserCalculatorController::class, 'show',
+    ])->name('calculators.show');
+
+    Route::post('/tools/{tool:slug}', [
+        UserCalculatorController::class, 'calculate',
+    ])->name('calculators.calculate');
+});
