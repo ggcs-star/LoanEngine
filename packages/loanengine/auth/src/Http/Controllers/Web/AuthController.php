@@ -36,24 +36,34 @@ class AuthController extends Controller
         return redirect()->intended(config('loanengine-auth.redirect_after_login', '/dashboard'));
     }
 
+    
     public function register(RegisterRequest $request): RedirectResponse
     {
         abort_unless(config('loanengine-auth.registration_enabled'), 404);
+
         $model = config('auth.providers.users.model');
 
         $user = $model::query()->create([
             'name' => $request->string('name')->trim()->toString(),
-            'email' => mb_strtolower($request->string('email')->trim()->toString()),
-            'password' => Hash::make($request->string('password')->toString()),
-            'role' => 'customer',
+            'email' => mb_strtolower(
+                $request->string('email')->trim()->toString()
+            ),
+            'password' => Hash::make(
+                $request->string('password')->toString()
+            ),
+            'role' => 'user',
         ]);
 
         event(new Registered($user));
+
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect(config('loanengine-auth.redirect_after_register', '/dashboard'));
+        return redirect(
+            config('loanengine-auth.redirect_after_register', '/dashboard')
+        );
     }
+
 
     public function logout(): RedirectResponse
     {

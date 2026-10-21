@@ -21,7 +21,7 @@ class AuthController extends Controller
             'name' => $request->string('name')->trim()->toString(),
             'email' => mb_strtolower($request->string('email')->trim()->toString()),
             'password' => Hash::make($request->string('password')->toString()),
-            'role' => 'customer',
+            'role' => 'user',
         ]);
 
         event(new Registered($user));
