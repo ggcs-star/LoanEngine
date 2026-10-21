@@ -47,7 +47,7 @@ class AuthController extends Controller
             'mobile' => $validated['mobile'],
             'address' => trim($validated['address']),
             'password' => Hash::make($validated['password']),
-            'role' => 'customer',
+            'role' => 'user',
         ]);
 
         return redirect()->route('auth.login')
