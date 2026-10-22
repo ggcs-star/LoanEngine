@@ -9,6 +9,7 @@ use App\Services\Calculators\HomeLoanEmiCalculator;
 use App\Services\Calculators\HomeLoanEligibilityCalculator;
 use App\Services\Calculators\StampDutyCalculator;
 use App\Services\Calculators\InterestRateCalculator;
+use App\Services\Calculators\EmiVsTenureCalculator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -49,7 +50,10 @@ class CalculatorController extends Controller
     
     public function show(
         Tool $tool,
-        HomeLoanEmiCalculator $emiCalculator
+        HomeLoanEmiCalculator $emiCalculator,
+            EmiVsTenureCalculator $emiVsTenureCalculator
+
+
     ): View|RedirectResponse {
         abort_unless($tool->isActive(), 404);
 
@@ -86,6 +90,18 @@ class CalculatorController extends Controller
                 'result' => null,
             ]);
         }
+
+      // New EMI vs Tenure Calculator
+    if ($tool->slug === 'emi-vs-tenure-calculator') {
+        $inputs = $emiVsTenureCalculator->defaults();
+
+        return view('user.calculators.emi-vs-tenure', [
+            'tool' => $tool,
+            'inputs' => $inputs,
+            'result' => $emiVsTenureCalculator->calculate($inputs),
+        ]);
+    }
+
         if ($tool->slug === 'stamp-duty-calculator') {
             return view('user.calculators.stamp-duty', [
                 'tool' => $tool,
@@ -132,6 +148,7 @@ class CalculatorController extends Controller
         HomeLoanEmiCalculator $emiCalculator,
         HomeLoanEligibilityCalculator $eligibilityCalculator,
         StampDutyCalculator $stampDutyCalculator,
+        EmiVsTenureCalculator $emiVsTenureCalculator,
         InterestRateCalculator $interestRateCalculator
     ): View|RedirectResponse {
         abort_unless($tool->isActive(), 404);
