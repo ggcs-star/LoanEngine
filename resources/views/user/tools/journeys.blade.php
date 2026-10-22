@@ -9,41 +9,48 @@
 
 @section('content')
 <div class="le-tools">
-    <a class="le-back" href="{{ route('user.tools.index') }}">
-        ← Back to Tools
-    </a>
+    <a class="le-back" href="{{ route('user.tools.index') }}">← Back to Tools</a>
 
     <section class="le-section-head">
         <div>
-            <span class="le-eyebrow">MORTGAGE MASTER</span>
-            <h1>Choose Your Journey</h1>
-            <p>Select your situation to see the step-by-step path built for it.</p>
+            <span class="le-eyebrow">YOUR FINANCIAL TOOLKIT</span>
+            @if (request('for') === 'calculators')
+                <h1>What Are You Trying to Do?</h1>
+                <p>Select an option to see recommended calculators.</p>
+            @else
+                <h1>Choose Your Journey</h1>
+                <p>Select your situation to see the step-by-step path built for it.</p>
+            @endif
         </div>
+        <span class="le-count">{{ $journeys->count() }} journeys</span>
     </section>
 
     <div class="le-grid">
         @forelse ($journeys as $journey)
-            <a class="le-card"
-               href="{{ route('user.tools.journeys.show', $journey->slug) }}">
+            <a class="le-card" href="{{ route('user.tools.journeys.show', [
+                    'journey' => $journey->slug,
+                    'for' => request('for'),
+                ]) }}">
                 <div class="le-card-top">
-                    <span class="le-icon">↗</span>
-                    <span class="le-chip">
-                        {{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}
-                    </span>
+                    <span class="le-icon">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                    <span class="le-chip">Journey {{ $loop->iteration }}</span>
                 </div>
-
                 <div class="le-card-body">
                     <h3>{{ $journey->name }}</h3>
-                    <p>{{ $journey->description ?: $journey->short_label }}</p>
-                    <small>{{ $journey->steps_count ?? $journey->steps()->where('status', 'active')->count() }} steps</small>
+                    <p>{{ $journey->description ?: ($journey->short_label ?: 'A guided path for your next financial step.') }}</p>
+                    @if (request('for') === 'calculators')
+                        <small>View recommended calculators</small>
+                    @else
+                        <small>{{ $journey->steps_count }} {{ $journey->steps_count === 1 ? 'step' : 'steps' }}</small>
+                    @endif
                 </div>
-
-                <div class="le-card-foot">
-                    <span>Explore journey →</span>
-                </div>
+                <div class="le-card-foot"><span>Explore journey →</span></div>
             </a>
         @empty
-            <p>No active journeys are available right now.</p>
+            <div class="le-empty">
+                <h3>No active journeys yet</h3>
+                <p>Journeys added and activated by your administrator will appear here.</p>
+            </div>
         @endforelse
     </div>
 </div>

@@ -65,53 +65,36 @@
 
     <div class="tools-field">
         <label for="category">Category <span class="tools-required">*</span></label>
-        <input
-            id="category"
-            type="text"
-            name="category"
-            value="{{ old('category', $tool->category) }}"
-            maxlength="40"
-            required
-            placeholder="Enter category"
-        >
-        @error('category')
-            <p class="tools-field-error">{{ $message }}</p>
-        @enderror
+        <select id="category" name="category" required>
+            <option value="">Choose a category</option>
+            @foreach (['Resources', 'Planning', 'Calculators'] as $category)
+                <option value="{{ $category }}" @selected(old('category', $tool->category) === $category)>{{ $category }}</option>
+            @endforeach
+        </select>
+        <p class="tools-field-help">Choose where users will find this tool.</p>
+        @error('category')<p class="tools-field-error">{{ $message }}</p>@enderror
     </div>
 
     <div class="tools-field">
-        <label for="type">Type <span class="tools-required">*</span></label>
-        <input
-            id="type"
-            type="text"
-            name="type"
-            value="{{ old('type', $tool->type) }}"
-            maxlength="30"
-            required
-            placeholder="Enter tool type"
-        >
-        @error('type')
-            <p class="tools-field-error">{{ $message }}</p>
-        @enderror
+        <label for="type">Tool Type <span class="tools-required">*</span></label>
+        <select id="type" name="type" required>
+            <option value="">Choose a type</option>
+            @foreach (['Resource', 'Planning Tool', 'Calculator'] as $type)
+                <option value="{{ $type }}" @selected(old('type', $tool->type) === $type)>{{ $type }}</option>
+            @endforeach
+        </select>
+        <p class="tools-field-help">Use Resource for Resources, Planning Tool for Planning, and Calculator for Calculators.</p>
+        @error('type')<p class="tools-field-error">{{ $message }}</p>@enderror
     </div>
 
     <div class="tools-field">
-        <label for="icon">Icon Identifier <span class="tools-required">*</span></label>
-        <input
-            id="icon"
-            type="text"
-            name="icon"
-            value="{{ old('icon', $tool->icon) }}"
-            maxlength="60"
-            required
-            placeholder="Enter icon identifier"
-        >
-        <p class="tools-field-help">
-            Enter the identifier supported by your frontend icon library.
-        </p>
-        @error('icon')
-            <p class="tools-field-error">{{ $message }}</p>
-        @enderror
+        <label for="icon">Icon</label>
+        <select id="icon" name="icon">
+            @foreach (['house', 'home', 'calendar', 'book', 'chart', 'calculator'] as $icon)
+                <option value="{{ $icon }}" @selected(old('icon', $tool->icon ?: 'book') === $icon)>{{ ucfirst($icon) }}</option>
+            @endforeach
+        </select>
+        @error('icon')<p class="tools-field-error">{{ $message }}</p>@enderror
     </div>
 
     <div class="tools-field">
@@ -136,22 +119,8 @@
     </div>
 
     <div class="tools-field">
-        <label for="page_route">Page Route <span class="tools-required">*</span></label>
-        <input
-            id="page_route"
-            type="text"
-            name="page_route"
-            value="{{ old('page_route', $tool->page_route) }}"
-            maxlength="255"
-            required
-            placeholder="Enter route name or path"
-        >
-        <p class="tools-field-help">
-            Use the format expected by your frontend.
-        </p>
-        @error('page_route')
-            <p class="tools-field-error">{{ $message }}</p>
-        @enderror
+        <label>Page Link</label>
+        <p class="tools-field-help">LoanEngine opens the correct page automatically based on the category. You do not need to enter a URL.</p>
     </div>
 
     <div class="tools-field">
@@ -231,3 +200,18 @@
         </label>
     </div>
 </div>
+
+@push('scripts')
+<script>
+(() => {
+    const category = document.getElementById('category');
+    const type = document.getElementById('type');
+    if (!category || !type) return;
+    const mapping = { Resources: 'Resource', Planning: 'Planning Tool', Calculators: 'Calculator' };
+    category.addEventListener('change', () => {
+        const expected = mapping[category.value];
+        if (expected) type.value = expected;
+    });
+})();
+</script>
+@endpush

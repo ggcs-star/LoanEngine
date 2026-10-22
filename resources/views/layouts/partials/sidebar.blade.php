@@ -121,7 +121,14 @@
             </a>
 
         @endif
-
+{{-- Calculator Management --}}
+<a
+    href="{{ route('admin.calculators.index') }}"
+    class="nav-item {{ request()->routeIs('admin.calculators.*') ? 'active' : '' }}"
+>
+    <span class="nav-icon">▦</span>
+    <span>Calculator Management</span>
+</a>
         {{-- Other Modules --}}
         <a href="#" class="nav-item">
             <span class="nav-icon">▷</span>

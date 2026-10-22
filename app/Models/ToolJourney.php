@@ -72,4 +72,14 @@ class ToolJourney extends Model
                 ->orWhere('short_label', 'like', "%{$term}%");
         });
     }
+    public function calculators(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+{
+    return $this->belongsToMany(
+        \App\Models\Calculator::class,
+        'calculator_journey',
+        'journey_id',
+        'calculator_id'
+    )->withTimestamps();
+}
+
 }

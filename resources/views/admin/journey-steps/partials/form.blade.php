@@ -145,7 +145,7 @@
         <div class="journey-step-field journey-step-field-full">
             <div class="journey-step-section-heading">
                 <h3>Relevant Tools</h3>
-                <p>Only tools mapped to the selected journey can be assigned to this step.</p>
+                <p>Choose tools already linked to this journey. To add more choices, edit the Tool first and link it to this journey.</p>
             </div>
 
             <input type="hidden" name="tool_ids_present" value="1">

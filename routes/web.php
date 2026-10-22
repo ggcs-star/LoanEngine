@@ -13,6 +13,10 @@ use App\Http\Controllers\User\EducationController as UserEducationController;
 use App\Http\Controllers\User\ToolController as UserToolController;
 use App\Http\Controllers\User\ToolJourneyController as UserToolJourneyController;
 use App\Http\Controllers\User\CalculatorController as UserCalculatorController;
+use App\Http\Controllers\User\FinancialFlowCalendarController;
+use App\Http\Controllers\Admin\Calculators\CalculatorController as AdminCalculatorController;
+use App\Http\Controllers\User\RecommendedCalculatorController;
+
 /*
 |--------------------------------------------------------------------------
 | Home
@@ -172,4 +176,55 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::post('/tools/{tool:slug}', [
         UserCalculatorController::class, 'calculate',
     ])->name('calculators.calculate');
+});
+/*
+|--------------------------------------------------------------------------
+| Financial Flow Calendar
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:user'])
+    ->prefix('user/financial-flow-calendar')
+    ->name('user.financial-flow.')
+    ->controller(FinancialFlowCalendarController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/events', 'eventsJson')->name('events');
+        Route::post('/events', 'store')->name('events.store');
+        Route::patch('/events/{event}', 'update')->name('events.update');
+        Route::patch('/events/{event}/status', 'updateStatus')->name('events.status');
+        Route::delete('/events/{event}', 'destroy')->name('events.destroy');
+    });
+
+
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin/calculators')
+    ->name('admin.calculators.')
+    ->group(function (): void {
+        Route::get('/', [AdminCalculatorController::class, 'index'])
+            ->name('index');
+
+        Route::get('/create', [AdminCalculatorController::class, 'create'])
+            ->name('create');
+
+        Route::post('/', [AdminCalculatorController::class, 'store'])
+            ->name('store');
+
+        // Bulk delete must be registered before the {calculator} route.
+        Route::delete('/bulk-destroy', [AdminCalculatorController::class, 'bulkDestroy'])
+            ->name('bulk-destroy');
+
+        Route::get('/{calculator}/edit', [AdminCalculatorController::class, 'edit'])
+            ->name('edit');
+
+        Route::put('/{calculator}', [AdminCalculatorController::class, 'update'])
+            ->name('update');
+
+        Route::delete('/{calculator}', [AdminCalculatorController::class, 'destroy'])
+            ->name('destroy');
+    });
+
+
+Route::middleware(['auth', 'role:user'])->prefix('user/home-loan-calculators')->name('user.calculators.')->group(function (): void {
+    Route::get('/', [RecommendedCalculatorController::class, 'index'])->name('journeys.index');
+    Route::get('/journeys/{journey:slug}', [RecommendedCalculatorController::class, 'show'])->name('journeys.show');
 });

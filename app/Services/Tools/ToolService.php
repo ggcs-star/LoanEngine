@@ -125,7 +125,7 @@ class ToolService
             'type' => $data['type'],
             'status' => $data['status'],
             'display_order' => (int) ($data['display_order'] ?? 1),
-            'page_route' => trim($data['page_route']),
+            'page_route' => trim((string) ($data['page_route'] ?? ('user/tools/' . ($data['slug'] ?? Str::slug($data['name']))))),
             'show_on_toolkit_home' => (bool) (
                 $data['show_on_toolkit_home'] ?? false
             ),
