@@ -255,7 +255,9 @@
                             <small>{{ $tool->type ?: 'Tool' }}</small>
 
                             <h3>
-                                <a href="{{ route('user.tools.show', $tool->slug) }}">
+                                <a href="{{ $tool->slug === 'home-loan-calculators'
+                                    ? route('user.tools.journeys.index', ['for' => 'calculators'])
+                                    : route('user.tools.show', ['tool' => $tool->slug]) }}">
                                     {{ $tool->name }}
                                 </a>
                             </h3>
@@ -282,16 +284,20 @@
                             </div>
                         @endif
 
-                        <div class="le-card-foot">
-                            <span>● Available to explore</span>
+                       <div class="le-card-foot">
+    <span>● Available to explore</span>
 
-                            <a
-                                class="le-btn le-btn-card"
-                                href="{{ route('user.tools.show', $tool->slug) }}"
-                            >
-                                Explore tool →
-                            </a>
-                        </div>
+    @php
+        $journey = $tool->journeys->first();
+    @endphp
+
+   <a class="le-btn le-btn-card"
+   href="{{ $tool->slug === 'home-loan-calculators'
+       ? route('user.tools.journeys.index', ['for' => 'calculators'])
+       : route('user.tools.show', ['tool' => $tool->slug]) }}">
+    Explore tool →
+</a>
+</div>
 
                     </article>
                 @endforeach

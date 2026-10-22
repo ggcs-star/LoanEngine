@@ -22,10 +22,27 @@ class ToolJourneyController extends Controller
         return view('user.tools.journeys', compact('journeys'));
     }
 
+    
     public function show(ToolJourney $journey): View
     {
         abort_unless($journey->status === 'active', 404);
 
+        // Calculator flow: show recommended tools directly.
+        if (request()->query('for') === 'calculators') {
+            $tools = $journey->tools()
+                ->where('tools.status', 'active')
+                ->where('tools.type', 'Calculator')
+                ->orderBy('tools.display_order')
+                ->orderBy('tools.name')
+                ->get();
+
+            return view('user.tools.journey-calculators', compact(
+                'journey',
+                'tools'
+            ));
+        }
+
+        // Keep the existing Resources / Planning flow unchanged.
         $steps = $journey->steps()
             ->where('status', 'active')
             ->with([
@@ -38,6 +55,7 @@ class ToolJourneyController extends Controller
 
         return view('user.tools.journey', compact('journey', 'steps'));
     }
+
 
     public function step(
         ToolJourney $journey,

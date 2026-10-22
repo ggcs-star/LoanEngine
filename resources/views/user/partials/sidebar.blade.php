@@ -42,6 +42,20 @@
                 <span>Loan Tools</span>
             </a>
         @endif
+        @if (Route::has('user.financial-flow.index'))
+            <a href="{{ route('user.financial-flow.index') }}"
+               class="user-nav-link {{ request()->routeIs('user.financial-flow.*') ? 'is-active' : '' }}"
+               title="Financial Flow Calendar">
+                <span class="nav-icon">▦</span>
+                <span>Financial Flow Calendar</span>
+            </a>
+        @endif
+        <a href="{{ route('user.calculators.journeys.index') }}"
+   class="user-nav-link {{ request()->routeIs('user.calculators.journeys.*') ? 'is-active' : '' }}"
+   title="Loan Calculators">
+    <span class="nav-icon">⌘</span>
+    <span>Loan Calculators</span>
+</a>
 
         @if (Route::has('user.media.index'))
             <a href="{{ route('user.media.index') }}"

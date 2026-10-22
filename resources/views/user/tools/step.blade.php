@@ -48,12 +48,12 @@
 
                 @foreach ($step->tools as $tool)
                     <a class="le-related-card"
-                       href="{{ filled($tool->page_route)
-                           ? url($tool->page_route)
-                           : route('user.tools.show', $tool->slug) }}">
+                       href="{{ $tool->category === 'Calculators'
+                           ? route('calculators.show', ['tool' => $tool->slug])
+                           : route('user.tools.show', ['tool' => $tool->slug]) }}">
                         <strong>{{ $tool->name }}</strong>
                         <small>{{ $tool->short_description }}</small>
-                        <span>Open tool →</span>
+                        <span>{{ $tool->category === 'Calculators' ? 'Open calculator →' : 'Open tool →' }}</span>
                     </a>
                 @endforeach
             </section>

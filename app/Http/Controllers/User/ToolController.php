@@ -45,16 +45,6 @@ class ToolController extends Controller
                 ->orderBy('tool_journeys.display_order'),
         ]);
 
-        if ($tool->slug === 'home-affordability-calculator') {
-            $journey = $tool->journeys->first();
-
-            if ($journey) {
-                return redirect()->route(
-                    'user.tools.journeys.show',
-                    ['journey' => $journey->slug]
-                );
-            }
-        }
 
         $relatedTools = Tool::query()
             ->active()
