@@ -8,6 +8,7 @@ use App\Services\Calculators\HomeAffordabilityCalculator;
 use App\Services\Calculators\HomeLoanEmiCalculator;
 use App\Services\Calculators\HomeLoanEligibilityCalculator;
 use App\Services\Calculators\StampDutyCalculator;
+use App\Services\Calculators\LoanPrepaymentCalculator;
 use App\Services\Calculators\InterestRateCalculator;
 use App\Services\Calculators\EmiVsTenureCalculator;
 use Illuminate\Contracts\View\View;
@@ -127,6 +128,23 @@ class CalculatorController extends Controller
                     'loan_amount' => 400000,
                     'tenure_value' => 2,
                     'tenure_unit' => 'years',
+                ],
+                'result' => null,
+            ]);
+        }
+        if (in_array($tool->slug, [
+            'prepayment-calculator',
+            'loan-prepayment-calculator',
+        ], true)) {
+            return view('user.calculators.prepayment', [
+                'tool' => $tool,
+                'inputs' => [
+                    'outstanding_loan' => 22500000,
+                    'interest_rate' => 8.55,
+                    'remaining_tenure' => 215,
+                    'prepayment_strategy' => 'one_time',
+                    'prepayment_amount' => 500000,
+                    'strategy_goal' => 'reduce_tenure',
                 ],
                 'result' => null,
             ]);
@@ -421,6 +439,43 @@ class CalculatorController extends Controller
                 'result'
             ));
         }
+        
+        if (in_array($tool->slug, [
+            'prepayment-calculator',
+            'loan-prepayment-calculator',
+        ], true)) {
+            $validated = $request->validate([
+                'outstanding_loan' => [
+                    'required', 'numeric', 'min:10000', 'max:500000000',
+                ],
+                'interest_rate' => [
+                    'required', 'numeric', 'min:0', 'max:35',
+                ],
+                'remaining_tenure' => [
+                    'required', 'integer', 'min:1', 'max:600',
+                ],
+                'prepayment_strategy' => [
+                    'required', 'in:one_time,monthly',
+                ],
+                'prepayment_amount' => [
+                    'required', 'numeric', 'min:1', 'max:500000000',
+                ],
+                'strategy_goal' => [
+                    'required', 'in:reduce_tenure,reduce_emi',
+                ],
+            ]);
+
+    $inputs = $validated;
+
+    $result = $prepaymentCalculator->calculate($inputs);
+
+    return view('user.calculators.prepayment', compact(
+        'tool',
+        'inputs',
+        'result'
+    ));
+}
+
 
 
 

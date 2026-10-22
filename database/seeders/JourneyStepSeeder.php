@@ -54,7 +54,7 @@ class JourneyStepSeeder extends Seeder
                     'Compare interest rates, repayment terms and overall costs.',
                     'Loan amount, tenure and lender offers.',
                     'Compare total cost, not only the interest rate.',
-                    ['interest-rate-finder', 'home-loan-emi-calculator'],
+                    ['interest-rate-calculator', 'home-loan-emi-calculator'],
                 ],
                 [
                     'Choose Your Loan Tenure',
@@ -113,7 +113,7 @@ class JourneyStepSeeder extends Seeder
                     'Review your rate against available lender offers.',
                     'Current loan terms and comparable offers.',
                     'Check fees before making a decision.',
-                    ['interest-rate-finder'],
+                    ['interest-rate-calculator'],
                 ],
                 [
                     'Explore Tenure Options',
@@ -175,7 +175,7 @@ class JourneyStepSeeder extends Seeder
                     'Review offers from other lenders.',
                     'Existing loan details and new lender terms.',
                     'A lower rate does not guarantee net savings.',
-                    ['interest-rate-finder'],
+                    ['interest-rate-calculator'],
                 ],
                 [
                     'Estimate Potential Savings',
