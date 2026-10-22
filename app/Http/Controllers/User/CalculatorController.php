@@ -7,6 +7,8 @@ use App\Models\Tool;
 use App\Services\Calculators\HomeAffordabilityCalculator;
 use App\Services\Calculators\HomeLoanEmiCalculator;
 use App\Services\Calculators\HomeLoanEligibilityCalculator;
+use App\Services\Calculators\StampDutyCalculator;
+use App\Services\Calculators\InterestRateCalculator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -84,6 +86,35 @@ class CalculatorController extends Controller
                 'result' => null,
             ]);
         }
+        if ($tool->slug === 'stamp-duty-calculator') {
+            return view('user.calculators.stamp-duty', [
+                'tool' => $tool,
+                'inputs' => [
+                    'property_value' => 5000000,
+                    'state' => 'Gujarat',
+                    'property_type' => 'residential_flat',
+                    'buyer_category' => 'male',
+                    'stamp_duty_method' => 'percentage',
+                    'stamp_duty_rate' => 5,
+                    'registration_type' => 'fixed',
+                    'registration_value' => 30000,
+                    'other_charges' => 15000,
+                ],
+                'result' => null,
+            ]);
+        }
+        if ($tool->slug === 'interest-rate-calculator') {
+            return view('user.calculators.interest-rate', [
+                'tool' => $tool,
+                'inputs' => [
+                    'monthly_emi' => 20000,
+                    'loan_amount' => 400000,
+                    'tenure_value' => 2,
+                    'tenure_unit' => 'years',
+                ],
+                'result' => null,
+            ]);
+        }
 
         return redirect()
             ->route('user.tools.show', $tool->slug)
@@ -99,7 +130,9 @@ class CalculatorController extends Controller
         Tool $tool,
         HomeAffordabilityCalculator $calculator,
         HomeLoanEmiCalculator $emiCalculator,
-        HomeLoanEligibilityCalculator $eligibilityCalculator
+        HomeLoanEligibilityCalculator $eligibilityCalculator,
+        StampDutyCalculator $stampDutyCalculator,
+        InterestRateCalculator $interestRateCalculator
     ): View|RedirectResponse {
         abort_unless($tool->isActive(), 404);
 
@@ -278,9 +311,11 @@ class CalculatorController extends Controller
             // UI mein Down Payment field nahi hai.
             $validated['down_payment'] = 0;
 
+            
             $inputs = $validated;
 
             $result = $eligibilityCalculator->calculate($inputs);
+
 
             return view('user.calculators.eligibility', compact(
                 'tool',
@@ -288,6 +323,88 @@ class CalculatorController extends Controller
                 'result'
             ));
         }
+
+        if ($tool->slug === 'stamp-duty-calculator') {
+            $validated = $request->validate([
+                'property_value' => [
+                    'required', 'numeric', 'min:100000', 'max:1000000000',
+                ],
+                'state' => [
+                    'required', 'in:Andhra Pradesh,Arunachal Pradesh,Assam,Bihar,Chhattisgarh,Goa,Gujarat,Haryana,Himachal Pradesh,Jharkhand,Karnataka,Kerala,Madhya Pradesh,Maharashtra,Manipur,Meghalaya,Mizoram,Nagaland,Odisha,Punjab,Rajasthan,Sikkim,Tamil Nadu,Telangana,Tripura,Uttar Pradesh,Uttarakhand,West Bengal,Andaman and Nicobar Islands,Chandigarh,Dadra and Nagar Haveli and Daman and Diu,Delhi,Jammu and Kashmir,Ladakh,Lakshadweep,Puducherry',
+                ],
+                'property_type' => [
+                    'required', 'in:residential_flat,own_land,pent_house',
+                ],
+                'buyer_category' => [
+                    'required', 'in:male,female,joint,senior,first_time',
+                ],
+                'stamp_duty_method' => [
+                    'required', 'in:percentage,slab',
+                ],
+                
+                'stamp_duty_rate' => [
+                    'required_if:stamp_duty_method,percentage', 'nullable', 'numeric', 'min:0', 'max:20',
+                ],
+
+                'registration_type' => [
+                    'required', 'in:fixed,percentage',
+                ],
+                'registration_value' => [
+                    'required', 'numeric', 'min:0', 'max:100000000',
+                ],
+                'other_charges' => [
+                    'required', 'numeric', 'min:0', 'max:100000000',
+                ],
+            ]);
+
+            $inputs = $validated;
+
+            $result = $stampDutyCalculator->calculate($inputs);
+
+            return view('user.calculators.stamp-duty', compact(
+                'tool',
+                'inputs',
+                'result'
+            ));
+        }
+        
+        if ($tool->slug === 'interest-rate-calculator') {
+            $validated = $request->validate([
+                'monthly_emi' => [
+                    'required', 'numeric', 'min:1000', 'max:1000000',
+                ],
+                'loan_amount' => [
+                    'required', 'numeric', 'min:50000', 'max:100000000',
+                ],
+                'tenure_value' => [
+                    'required', 'integer', 'min:1',
+                ],
+                'tenure_unit' => [
+                    'required', 'in:years,months',
+                ],
+            ]);
+
+            $maxTenure = $validated['tenure_unit'] === 'months' ? 360 : 30;
+
+            if ($validated['tenure_value'] > $maxTenure) {
+                return back()
+                    ->withErrors([
+                        'tenure_value' => 'Please select a valid loan tenure.',
+                    ])
+                    ->withInput();
+            }
+
+            $inputs = $validated;
+
+            $result = $interestRateCalculator->calculate($inputs);
+
+            return view('user.calculators.interest-rate', compact(
+                'tool',
+                'inputs',
+                'result'
+            ));
+        }
+
 
 
         return redirect()

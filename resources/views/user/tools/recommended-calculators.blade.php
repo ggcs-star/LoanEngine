@@ -41,19 +41,21 @@
                     <p>{{ $calculator->short_description }}</p>
                 </div>
 
+                
                 <div class="le-card-foot">
                     @if(
                         in_array($calculator->slug, [
                             'home-affordability-calculator',
                             'home-loan-emi-calculator',
                             'home-loan-eligibility-calculator',
+                            'stamp-duty-calculator',
                         ], true)
                         && \Illuminate\Support\Facades\Route::has('calculators.show')
                     )
                         <a href="{{ route('calculators.show', ['tool' => $calculator->slug]) }}">
                             Open calculator →
                         </a>
-                       
+
                     @elseif(
                         $calculator->route_name
                         && \Illuminate\Support\Facades\Route::has($calculator->route_name)
@@ -61,10 +63,12 @@
                         <a href="{{ route($calculator->route_name, ['tool' => $calculator->slug]) }}">
                             Open calculator →
                         </a>
+
                     @else
                         <span>Calculator page not connected yet</span>
                     @endif
                 </div>
+
 
             </article>
 
