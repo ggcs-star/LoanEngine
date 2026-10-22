@@ -1,128 +1,349 @@
-/* LoanEngine - loan eligibility calculator. Scoped to avoid affecting other pages. */
-.le-eligibility {
-    --le-ink: #17191f;
-    --le-muted: #6f7785;
-    --le-line: #e1e5eb;
+
+/* =========================================================
+   LoanEngine — Home Loan Eligibility Calculator
+   Single-column layout | Responsive | Print-ready
+   File: public/css/calculators/home-loan-eligibility.css
+   ========================================================= */
+
+.le-eligibility-page {
+    --le-ink: #171a20;
+    --le-muted: #707989;
+    --le-line: #e0e4eb;
     --le-panel: #ffffff;
-    --le-page: #f4f5f7;
-    --le-soft: #f8f9fb;
+    --le-soft: #f5f6f8;
     --le-accent: #20242c;
-    --le-focus: #aeb8c8;
-    max-width: 1280px;
+    --le-gold: #d49a00;
+    --le-gold-soft: #fffdf5;
+    --le-green: #159b72;
+    --le-radius: 18px;
+
+    width: 100%;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 30px clamp(18px, 3vw, 42px) 44px;
+    padding: 28px 30px 60px;
     color: var(--le-ink);
     font-family: inherit;
-}
-.le-eligibility * { box-sizing: border-box; }
-.le-eligibility [hidden] { display: none !important; }
-.le-eligibility__topline { display:flex; flex-direction:column; gap:22px; margin-bottom:20px; }
-.le-eligibility__back { color:#3d4653; font-size:13px; font-weight:650; text-decoration:none; width:fit-content; }
-.le-eligibility__back:hover { color:#000; text-decoration:underline; }
-.le-eligibility__back span { font-size:18px; margin-right:7px; }
-.le-eligibility__eyebrow { color:#8b93a1; font-size:10px; font-weight:800; letter-spacing:.16em; }
-.le-eligibility__hero { display:flex; justify-content:space-between; align-items:flex-end; gap:22px; margin-bottom:30px; }
-.le-eligibility__hero h1 { margin:0 0 9px; font-size:clamp(28px, 3vw, 38px); line-height:1.15; letter-spacing:-.045em; font-weight:760; }
-.le-eligibility__hero p { margin:0; color:var(--le-muted); font-size:14px; line-height:1.7; max-width:680px; }
-.le-eligibility__hero-note { display:flex; align-items:center; gap:11px; padding:12px 15px; border:1px solid var(--le-line); border-radius:14px; background:#fff; flex-shrink:0; }
-.le-eligibility__hero-mark { display:grid; place-items:center; width:38px; height:38px; border-radius:11px; color:#fff; background:#1c2027; font-weight:800; }
-.le-eligibility__hero-note strong,.le-eligibility__hero-note small { display:block; }
-.le-eligibility__hero-note strong { font-size:12px; }
-.le-eligibility__hero-note small { margin-top:4px; color:var(--le-muted); font-size:10px; }
-.le-eligibility__type-section,.le-eligibility__panel,.le-eligibility__result-panel { background:var(--le-panel); border:1px solid var(--le-line); border-radius:18px; box-shadow:0 8px 26px rgba(20,27,39,.035); }
-.le-eligibility__type-section { padding:23px; margin-bottom:20px; }
-.le-eligibility__section-heading { margin-bottom:20px; }
-.le-eligibility__section-heading > div { display:flex; align-items:flex-start; gap:12px; }
-.le-eligibility__step { display:grid; place-items:center; width:32px; height:32px; flex:0 0 32px; border-radius:10px; border:1px solid var(--le-line); background:var(--le-soft); color:#555e6b; font-size:11px; font-weight:800; }
-.le-eligibility__section-heading h2 { margin:0 0 5px; font-size:17px; letter-spacing:-.02em; font-weight:750; }
-.le-eligibility__section-heading p { margin:0; color:var(--le-muted); font-size:12px; line-height:1.5; }
-.le-eligibility__type-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-.le-loan-type { display:flex; align-items:center; gap:12px; min-width:0; text-align:left; border:1px solid var(--le-line); border-radius:14px; padding:15px; background:#fff; cursor:pointer; color:var(--le-ink); transition:border-color .15s,background .15s,box-shadow .15s; }
-.le-loan-type:hover { border-color:#aeb6c2; background:#fbfcfd; }
-.le-loan-type.is-active { border-color:#242933; background:#f4f5f7; box-shadow:inset 0 0 0 1px #242933; }
-.le-loan-type__icon { display:grid; place-items:center; width:43px; height:43px; flex:0 0 43px; border:1px solid var(--le-line); border-radius:12px; background:#fff; font-size:23px; color:#252a33; }
-.le-loan-type__copy { display:block; min-width:0; flex:1; }
-.le-loan-type__copy strong,.le-loan-type__copy small { display:block; }
-.le-loan-type__copy strong { font-size:13px; font-weight:750; }
-.le-loan-type__copy small { margin-top:5px; color:var(--le-muted); font-size:11px; }
-.le-loan-type__check { display:grid; place-items:center; width:20px; height:20px; border-radius:50%; border:1px solid #cdd2da; color:transparent; font-size:11px; }
-.le-loan-type.is-active .le-loan-type__check { color:white; background:#20242c; border-color:#20242c; }
-.le-eligibility__layout { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(300px,.85fr); align-items:start; gap:20px; }
-.le-eligibility__panel { padding:24px; }
-.le-eligibility__fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px 17px; }
-.le-field { display:flex; flex-direction:column; gap:8px; min-width:0; }
-.le-field__label { display:flex; justify-content:space-between; gap:10px; align-items:center; font-size:12px; font-weight:750; }
-.le-field__label small { color:#7e8794; font-size:10px; font-weight:700; }
-.le-field input { width:100%; min-height:46px; border:1px solid #dfe3e9; border-radius:10px; padding:0 13px; color:#1c2027; background:#fff; outline:none; font:inherit; font-size:14px; font-weight:650; transition:border-color .15s,box-shadow .15s; }
-.le-field input:focus { border-color:#7c8797; box-shadow:0 0 0 3px rgba(124,135,151,.13); }
-.le-field input:disabled { background:#f2f3f5; color:#9097a2; cursor:not-allowed; }
-.le-field__hint { color:#828a97; font-size:10px; line-height:1.5; }
-.le-eligibility__actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:25px; }
-.le-button { display:inline-flex; justify-content:center; align-items:center; gap:10px; min-height:45px; border-radius:10px; padding:0 17px; cursor:pointer; font:inherit; font-size:12px; font-weight:750; transition:transform .12s,background .12s,border-color .12s; }
-.le-button:active { transform:translateY(1px); }
-.le-button--primary { border:1px solid #20242c; background:#20242c; color:#fff; }
-.le-button--primary:hover { background:#090b0f; }
-.le-button--secondary { border:1px solid #dce1e8; background:#fff; color:#303743; }
-.le-button--secondary:hover { background:#f7f8fa; border-color:#bfc6d0; }
-.le-button--full { width:100%; margin-top:18px; }
-.le-eligibility__fineprint { margin:14px 0 0; color:#8a919c; font-size:10px; line-height:1.65; }
-.le-eligibility__result-panel { padding:23px; position:sticky; top:18px; }
-.le-eligibility__result-heading { display:flex; align-items:center; gap:11px; padding-bottom:18px; border-bottom:1px solid var(--le-line); }
-.le-eligibility__result-icon { display:grid; place-items:center; width:39px; height:39px; border-radius:12px; background:#20242c; color:white; font-size:20px; }
-.le-eligibility__result-heading span:not(.le-eligibility__result-icon) { display:block; color:#8b93a1; font-size:9px; letter-spacing:.14em; font-weight:800; }
-.le-eligibility__result-heading h2 { margin:4px 0 0; font-size:17px; font-weight:760; }
-.le-eligibility__result-main { margin:18px 0; padding:18px; border-radius:13px; background:#f4f5f7; border:1px solid #e9ebef; }
-.le-eligibility__result-main span,.le-eligibility__result-main small { display:block; color:#6f7785; font-size:11px; }
-.le-eligibility__result-main strong { display:block; margin:8px 0; font-size:clamp(25px,2.5vw,32px); letter-spacing:-.04em; line-height:1.1; overflow-wrap:anywhere; }
-.le-eligibility__result-main small { font-size:10px; }
-.le-eligibility__result-stats { display:grid; gap:0; }
-.le-eligibility__result-stats > div { display:flex; justify-content:space-between; gap:15px; padding:13px 0; border-bottom:1px solid #edf0f3; }
-.le-eligibility__result-stats span { color:#747d8a; font-size:11px; line-height:1.5; }
-.le-eligibility__result-stats strong { text-align:right; font-size:12px; font-weight:750; white-space:nowrap; }
-.le-eligibility__result-notes { display:grid; gap:8px; margin-top:16px; }
-.le-eligibility__result-notes p { display:flex; gap:8px; margin:0; color:#68717e; font-size:10px; line-height:1.6; }
-.le-eligibility__result-notes p span { display:grid; place-items:center; flex:0 0 17px; width:17px; height:17px; border:1px solid #d7dce4; border-radius:50%; color:#555e6b; font-size:10px; font-weight:800; }
-.le-eligibility__empty-result { padding-top:25px; }
-.le-eligibility__empty-art { display:grid; place-items:center; width:64px; height:64px; margin-bottom:18px; border-radius:18px; background:#f1f3f6; border:1px solid #e2e6ec; color:#3b424d; font-size:27px; font-weight:750; }
-.le-eligibility__empty-result h3 { margin:0 0 8px; font-size:16px; }
-.le-eligibility__empty-result p { margin:0; color:var(--le-muted); font-size:12px; line-height:1.7; }
-.le-eligibility__empty-result ul { display:grid; gap:10px; margin:19px 0 0; padding:0; list-style:none; }
-.le-eligibility__empty-result li { position:relative; padding-left:22px; color:#535c69; font-size:11px; }
-.le-eligibility__empty-result li:before { content:"✓"; position:absolute; left:0; color:#353c47; font-weight:800; }
-.le-eligibility__disclaimer { display:flex; align-items:flex-start; gap:11px; margin-top:20px; padding:16px; border:1px solid #e1e5eb; border-radius:13px; background:#f9fafb; }
-.le-eligibility__disclaimer-icon { display:grid; place-items:center; flex:0 0 22px; width:22px; height:22px; border:1px solid #cdd3dc; border-radius:50%; color:#626c79; font-size:11px; font-weight:800; }
-.le-eligibility__disclaimer p { margin:0; color:#707987; font-size:10px; line-height:1.7; }
-.le-eligibility__disclaimer strong { color:#303743; }
-.le-eligibility__alert { margin:0 0 18px; padding:14px 16px; border:1px solid #e1caca; border-radius:12px; background:#fffafa; color:#7e3030; font-size:12px; }
-.le-eligibility__alert ul { margin:8px 0 0; padding-left:18px; }
-@media (max-width: 1050px) {
-    .le-eligibility__layout { grid-template-columns:minmax(0,1fr); }
-    .le-eligibility__result-panel { position:static; }
-}
-@media (max-width: 700px) {
-    .le-eligibility { padding:20px 14px 30px; }
-    .le-eligibility__hero { align-items:flex-start; flex-direction:column; }
-    .le-eligibility__hero-note { width:100%; }
-    .le-eligibility__type-section,.le-eligibility__panel,.le-eligibility__result-panel { padding:17px; border-radius:14px; }
-    .le-eligibility__type-grid { grid-template-columns:1fr; gap:9px; }
-    .le-loan-type { padding:12px; }
-    .le-eligibility__fields { grid-template-columns:1fr; gap:17px; }
-    .le-eligibility__actions { flex-direction:column; }
-    .le-button { width:100%; }
-}
-@media print {
-    body * { visibility:hidden !important; }
-    .le-eligibility, .le-eligibility * { visibility:visible !important; }
-    .le-eligibility { max-width:none; padding:0; }
-    .le-eligibility__topline,.le-eligibility__type-section,.le-eligibility__panel,.le-eligibility__disclaimer,.le-eligibility__fineprint,.le-eligibility__actions { display:none !important; }
-    .le-eligibility__layout { display:block; }
-    .le-eligibility__result-panel { position:static; box-shadow:none; }
+    line-height: 1.5;
 }
 
-.le-eligibility__fields {
+.le-eligibility-page *,
+.le-eligibility-page *::before,
+.le-eligibility-page *::after {
+    box-sizing: border-box;
+}
+
+.le-eligibility-page [hidden] {
+    display: none !important;
+}
+
+.le-eligibility-page button,
+.le-eligibility-page input,
+.le-eligibility-page select {
+    font: inherit;
+}
+
+.le-eligibility-page button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- Back navigation ---------- */
+
+.le-eligibility-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    color: #343b47;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.le-eligibility-back:hover {
+    color: #000;
+    text-decoration: underline;
+}
+
+/* ---------- Page heading ---------- */
+
+.le-eligibility-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 26px;
+}
+
+.le-eligibility-eyebrow {
+    display: block;
+    color: #87909e;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+}
+
+.le-eligibility-heading h1 {
+    margin: 9px 0;
+    font-size: clamp(28px, 3vw, 40px);
+    line-height: 1.2;
+    letter-spacing: -1px;
+    font-weight: 800;
+}
+
+.le-eligibility-heading p {
+    max-width: 700px;
+    margin: 0;
+    color: var(--le-muted);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.le-eligibility-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    padding: 13px 15px;
+    border: 1px solid var(--le-line);
+    border-radius: 14px;
+    background: #fff;
+}
+
+.le-eligibility-brand > span {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 30px;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 11px;
+    background: var(--le-accent);
+    color: #fff;
+    font-weight: 800;
+}
+
+.le-eligibility-brand strong,
+.le-eligibility-brand small {
+    display: block;
+}
+
+.le-eligibility-brand strong {
+    font-size: 12px;
+}
+
+.le-eligibility-brand small {
+    margin-top: 4px;
+    color: #87909e;
+    font-size: 10px;
+}
+
+/* ---------- Validation errors ---------- */
+
+.le-eligibility-errors {
+    margin: 0 0 20px;
+    padding: 15px 18px;
+    border: 1px solid #f0caca;
+    border-radius: 12px;
+    background: #fff7f7;
+    color: #a52626;
+    font-size: 13px;
+}
+
+.le-eligibility-errors ul {
+    margin: 8px 0 0;
+    padding-left: 20px;
+}
+
+.le-eligibility-errors li + li {
+    margin-top: 4px;
+}
+
+/* ---------- Single-column layout ---------- */
+
+/*
+   Form first.
+   Results, recommendations and actions below the form.
+   No right-side result column.
+*/
+
+.le-eligibility-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 24px;
+    width: 100%;
+    min-width: 0;
+}
+
+.le-eligibility-form-card,
+.le-eligibility-result-column,
+.le-result-placeholder,
+.le-result-info,
+.le-result-card,
+.le-result-metrics,
+.le-recommendations {
+    width: 100%;
+    min-width: 0;
+}
+
+.le-eligibility-form-card {
+    padding: 26px;
+    border: 1px solid var(--le-line);
+    border-radius: var(--le-radius);
+    background: var(--le-panel);
+    box-shadow: 0 8px 24px rgba(20, 30, 45, .035);
+}
+
+/* ---------- Section heading ---------- */
+
+.le-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 19px;
+}
+
+.le-section-heading > span {
+    display: grid;
+    place-items: center;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--le-line);
+    border-radius: 10px;
+    background: var(--le-soft);
+    color: #536072;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.le-section-heading h2 {
+    margin: 0 0 4px;
+    font-size: 17px;
+    line-height: 1.35;
+    font-weight: 750;
+}
+
+.le-section-heading p {
+    margin: 0;
+    color: #7a8492;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* ---------- Loan type selector ---------- */
+
+.le-loan-types {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 27px;
+}
+
+.le-loan-type {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+    min-height: 72px;
+    padding: 13px;
+    border: 1px solid #dfe4ec;
+    border-radius: 13px;
+    background: #fff;
+    color: var(--le-ink);
+    text-align: left;
+    cursor: pointer;
+    transition:
+        border-color .18s ease,
+        background-color .18s ease,
+        box-shadow .18s ease;
+}
+
+.le-loan-type:hover {
+    border-color: #a5adba;
+    background: #fafbfc;
+}
+
+.le-loan-type:focus-visible {
+    outline: 3px solid #bdc6d3;
+    outline-offset: 3px;
+}
+
+.le-loan-type.is-active {
+    border-color: #303641;
+    background: #f3f4f6;
+    box-shadow: inset 0 0 0 1px #303641;
+}
+
+.le-loan-type-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--le-line);
+    border-radius: 10px;
+    background: #fff;
+    font-size: 19px;
+}
+
+.le-loan-type-copy {
+    display: block;
+    min-width: 0;
+    flex: 1;
+}
+
+.le-loan-type strong,
+.le-loan-type small {
+    display: block;
+}
+
+.le-loan-type strong {
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.le-loan-type small {
+    margin-top: 5px;
+    color: #7e8795;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+.le-loan-check {
+    display: grid;
+    place-items: center;
+    flex: 0 0 19px;
+    width: 19px;
+    height: 19px;
+    margin-left: auto;
+    border: 1px solid #d4dae3;
+    border-radius: 50%;
+    color: transparent;
+    font-size: 11px;
+}
+
+.le-loan-type.is-active .le-loan-check {
+    border-color: #20242c;
+    background: #20242c;
+    color: #fff;
+}
+
+/* ---------- Financial profile ---------- */
+
+.le-details-heading {
+    padding-top: 24px;
+    border-top: 1px solid #e8ebf0;
+}
+
+/* Keep sliders in one column, like the reference design. */
+
+.le-slider-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 29px;
+    width: 100%;
+    min-width: 0;
 }
 
 .le-slider-field {
@@ -130,26 +351,35 @@
     min-width: 0;
 }
 
-.le-slider-field__head {
+.le-slider-field[hidden] {
+    display: none !important;
+}
+
+.le-slider-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 18px;
+    gap: 16px;
+    margin-bottom: 17px;
 }
 
-.le-slider-field__head label {
+.le-slider-head label {
+    min-width: 0;
+    color: #29313e;
     font-size: 14px;
     font-weight: 650;
-    color: #20242c;
 }
 
-.le-slider-field__head strong {
+.le-slider-head strong {
+    flex-shrink: 0;
+    color: #171a20;
     font-size: 17px;
-    font-weight: 750;
-    color: #111318;
+    font-weight: 800;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
+
+/* ---------- Range sliders ---------- */
 
 .le-slider-field input[type="range"] {
     display: block;
@@ -158,61 +388,868 @@
     margin: 0;
     padding: 0;
     border: 0;
-    border-radius: 10px;
+    border-radius: 20px;
+    outline: none;
     appearance: none;
     -webkit-appearance: none;
     background: linear-gradient(
         to right,
         #242933 0%,
         #242933 var(--progress, 0%),
-        #d9dce2 var(--progress, 0%),
-        #d9dce2 100%
+        #d9dde4 var(--progress, 0%),
+        #d9dde4 100%
     );
     cursor: pointer;
+    touch-action: pan-y;
+}
+
+.le-slider-field input[type="range"]:focus-visible {
+    outline: 2px solid #8d97a6;
+    outline-offset: 6px;
 }
 
 .le-slider-field input[type="range"]::-webkit-slider-thumb {
-    appearance: none;
-    -webkit-appearance: none;
     width: 19px;
     height: 19px;
-    border-radius: 50%;
-    background: #242933;
     border: 3px solid #fff;
+    border-radius: 50%;
+    appearance: none;
+    -webkit-appearance: none;
+    background: #242933;
     box-shadow: 0 0 0 1px #242933;
 }
 
 .le-slider-field input[type="range"]::-moz-range-thumb {
     width: 15px;
     height: 15px;
+    border: 3px solid #fff;
     border-radius: 50%;
     background: #242933;
-    border: 3px solid #fff;
+    box-shadow: 0 0 0 1px #242933;
 }
 
-.le-slider-field__limits {
+.le-slider-limits {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    gap: 12px;
     margin-top: 12px;
-    color: #8a919e;
+    color: #8992a0;
     font-size: 11px;
 }
 
-.le-slider-field--method label {
-    display: block;
-    margin-bottom: 10px;
-    font-size: 13px;
-    font-weight: 650;
+.le-slider-limits span:last-child {
+    text-align: right;
 }
 
-.le-slider-field--method select {
+/* ---------- Calculation method dropdown ---------- */
+
+.le-method-field {
     width: 100%;
-    min-height: 48px;
-    padding: 0 14px;
-    border: 1px solid #d9dce2;
-    border-radius: 10px;
-    background: #fff;
+    margin-top: 30px;
+}
+
+.le-method-field > label {
+    display: block;
+    margin-bottom: 10px;
+    color: #29313e;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.le-method-field select {
+    display: block;
+    width: 100%;
+    min-height: 50px;
+    padding: 0 15px;
+    border: 1px solid #d8dee7;
+    border-radius: 11px;
+    background-color: #fff;
     color: #20242c;
-    font: inherit;
     font-size: 14px;
+    cursor: pointer;
+}
+
+.le-method-field select:hover {
+    border-color: #aeb6c2;
+}
+
+.le-method-field select:focus-visible {
+    outline: 3px solid #c5ccd6;
+    outline-offset: 2px;
+}
+
+.le-method-field small {
+    display: block;
+    margin-top: 8px;
+    color: #8992a0;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+/* ---------- Form buttons ---------- */
+
+.le-eligibility-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    margin-top: 27px;
+    padding-top: 22px;
+    border-top: 1px solid #e8ebf0;
+}
+
+.le-button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    min-height: 47px;
+    padding: 0 19px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.3;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background-color .18s ease,
+        border-color .18s ease,
+        color .18s ease,
+        transform .12s ease;
+}
+
+.le-button:active {
+    transform: translateY(1px);
+}
+
+.le-button:focus-visible {
+    outline: 3px solid #bdc6d3;
+    outline-offset: 3px;
+}
+
+.le-button-primary {
+    background: #20242c;
+    color: #fff;
+}
+
+.le-button-primary:hover {
+    background: #343a46;
+    color: #fff;
+}
+
+.le-button-secondary {
+    border-color: #e1e5eb;
+    background: #f3f4f6;
+    color: #252b35;
+}
+
+.le-button-secondary:hover {
+    border-color: #cbd1da;
+    background: #e9ecf0;
+}
+
+.le-disclaimer {
+    margin: 15px 0 0;
+    color: #8992a0;
+    font-size: 10px;
+    line-height: 1.7;
+}
+
+/* ---------- Result section: below the form ---------- */
+
+.le-eligibility-result-column {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch;
+    gap: 18px;
+    width: 100%;
+    min-width: 0;
+}
+
+.le-result-placeholder,
+.le-result-info {
+    padding: 25px;
+    border: 1px solid var(--le-line);
+    border-radius: var(--le-radius);
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(20, 30, 45, .035);
+}
+
+.le-result-placeholder {
+    padding: 34px 25px;
+    text-align: center;
+}
+
+.le-placeholder-icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 15px;
+    border: 1px solid #e2e6ec;
+    border-radius: 17px;
+    background: #f0f2f5;
+    color: #252b35;
+    font-size: 25px;
+}
+
+.le-result-placeholder h2 {
+    margin: 0 0 10px;
+    font-size: 20px;
+}
+
+.le-result-placeholder p,
+.le-result-info p {
+    margin: 0;
+    color: #77808f;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.le-result-info h3 {
+    margin: 0 0 9px;
+    font-size: 15px;
+}
+
+/* ---------- Main eligible amount card ---------- */
+
+.le-result-card {
+    padding: 29px 24px;
+    border: 1px solid #e5d7a7;
+    border-radius: var(--le-radius);
+    background: var(--le-gold-soft);
+    text-align: center;
+}
+
+.le-result-label {
+    color: #a27a10;
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+}
+
+.le-result-amount {
+    margin: 15px 0;
+    color: var(--le-gold);
+    font-size: clamp(30px, 4vw, 43px);
+    font-weight: 850;
+    line-height: 1.2;
+    letter-spacing: -1px;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+}
+
+.le-result-status {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 750;
+}
+
+.le-result-status span {
+    display: grid;
+    place-items: center;
+    width: 23px;
+    height: 23px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+}
+
+.le-result-status.is-passed {
+    color: var(--le-green);
+}
+
+.le-result-status.is-review {
+    color: #b7791f;
+}
+
+.le-result-card > p {
+    max-width: 620px;
+    margin: 14px auto 0;
+    color: #707987;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* ---------- Result metrics ---------- */
+
+.le-result-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+}
+
+.le-result-metric {
+    min-width: 0;
+    padding: 18px 16px;
+    border: 1px solid #e6e9ef;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(20, 30, 45, .025);
+}
+
+.le-result-metric > span {
+    display: block;
+    color: #7e8795;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .3px;
+    line-height: 1.5;
+    text-transform: uppercase;
+}
+
+.le-result-metric > strong {
+    display: block;
+    margin-top: 11px;
+    color: #20242c;
+    font-size: clamp(15px, 1.5vw, 19px);
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Recommendations ---------- */
+
+.le-recommendations {
+    padding: 24px;
+    border: 1px solid var(--le-line);
+    border-radius: var(--le-radius);
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(20, 30, 45, .035);
+}
+
+.le-recommendations > h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 20px;
+    font-size: 20px;
+    line-height: 1.4;
+}
+
+.le-recommendations > h2 span {
+    color: #c99600;
+    font-size: 26px;
+}
+
+.le-recommendation {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-top: 13px;
+    padding: 19px;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    background: #f5f6f8;
+}
+
+.le-recommendation:first-of-type {
+    margin-top: 0;
+}
+
+.le-recommendation-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 43px;
+    width: 43px;
+    height: 43px;
+    border-radius: 50%;
+    background: #fff0c4;
+    color: #b98600;
+    font-size: 20px;
+}
+
+.le-recommendation > div:last-child {
+    min-width: 0;
+}
+
+.le-recommendation h3 {
+    margin: 2px 0 7px;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.le-recommendation p {
+    margin: 0;
+    color: #78818f;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* ---------- Apply and result actions ---------- */
+
+.le-apply-button {
+    display: flex;
+    width: 100%;
+    min-height: 53px;
+}
+
+.le-result-bottom-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 58px 58px;
+    gap: 10px;
+    width: 100%;
+}
+
+.le-result-bottom-actions .le-button {
+    min-width: 0;
+    padding: 0 12px;
+}
+
+.le-result-bottom-actions .le-button:not(:first-child) {
+    font-size: 18px;
+}
+
+/* ---------- Tablet ---------- */
+
+@media (max-width: 1000px) {
+    .le-eligibility-page {
+        padding-right: 22px;
+        padding-left: 22px;
+    }
+
+    .le-eligibility-layout {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .le-result-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .le-eligibility-brand {
+        display: none;
+    }
+}
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 600px) {
+    .le-eligibility-page {
+        padding: 18px 13px 38px;
+    }
+
+    .le-eligibility-back {
+        margin-bottom: 19px;
+    }
+
+    .le-eligibility-heading {
+        display: block;
+        margin-bottom: 21px;
+    }
+
+    .le-eligibility-heading h1 {
+        font-size: 27px;
+        line-height: 1.25;
+        letter-spacing: -.6px;
+    }
+
+    .le-eligibility-heading p {
+        font-size: 13px;
+    }
+
+    .le-eligibility-form-card {
+        padding: 19px 15px;
+        border-radius: 15px;
+    }
+
+    .le-section-heading {
+        gap: 10px;
+    }
+
+    .le-section-heading h2 {
+        font-size: 16px;
+    }
+
+    .le-loan-types {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 7px;
+        margin-bottom: 24px;
+    }
+
+    .le-loan-type {
+        position: relative;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: 9px;
+        min-height: 105px;
+        padding: 11px 8px;
+    }
+
+    .le-loan-type-icon {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+        font-size: 17px;
+    }
+
+    .le-loan-type strong {
+        font-size: 11px;
+        line-height: 1.4;
+    }
+
+    .le-loan-type small {
+        font-size: 9px;
+        line-height: 1.4;
+    }
+
+    .le-loan-check {
+        position: absolute;
+        top: 8px;
+        right: 7px;
+        width: 17px;
+        height: 17px;
+        flex-basis: 17px;
+    }
+
+    .le-slider-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 26px;
+    }
+
+    .le-slider-head {
+        gap: 10px;
+        margin-bottom: 17px;
+    }
+
+    .le-slider-head label {
+        font-size: 13px;
+    }
+
+    .le-slider-head strong {
+        font-size: 16px;
+    }
+
+    .le-slider-limits {
+        margin-top: 13px;
+        font-size: 11px;
+    }
+
+    .le-method-field {
+        margin-top: 27px;
+    }
+
+    .le-method-field select {
+        min-height: 49px;
+        font-size: 13px;
+    }
+
+    .le-eligibility-actions {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+        margin-top: 24px;
+    }
+
+    .le-button {
+        min-height: 48px;
+    }
+
+    .le-result-placeholder,
+    .le-result-info {
+        padding: 22px 17px;
+    }
+
+    .le-result-card {
+        padding: 25px 15px;
+        border-radius: 15px;
+    }
+
+    .le-result-label {
+        font-size: 11px;
+        letter-spacing: 1.4px;
+    }
+
+    .le-result-amount {
+        margin: 14px 0;
+        font-size: clamp(28px, 8vw, 37px);
+        letter-spacing: -.7px;
+    }
+
+    .le-result-card > p {
+        font-size: 12px;
+    }
+
+    .le-result-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+    }
+
+    .le-result-metric {
+        padding: 14px 11px;
+        border-radius: 12px;
+    }
+
+    .le-result-metric > span {
+        font-size: 9px;
+    }
+
+    .le-result-metric > strong {
+        margin-top: 9px;
+        font-size: 15px;
+    }
+
+    .le-recommendations {
+        padding: 18px 13px;
+        border-radius: 15px;
+    }
+
+    .le-recommendations > h2 {
+        gap: 9px;
+        margin-bottom: 16px;
+        font-size: 17px;
+    }
+
+    .le-recommendations > h2 span {
+        font-size: 23px;
+    }
+
+    .le-recommendation {
+        gap: 11px;
+        padding: 14px 11px;
+    }
+
+    .le-recommendation-icon {
+        width: 36px;
+        height: 36px;
+        flex-basis: 36px;
+        font-size: 17px;
+    }
+
+    .le-recommendation h3 {
+        font-size: 14px;
+    }
+
+    .le-recommendation p {
+        font-size: 12px;
+    }
+
+    .le-result-bottom-actions {
+        grid-template-columns: minmax(0, 1fr) 46px 46px;
+        gap: 8px;
+    }
+
+    .le-result-bottom-actions .le-button {
+        padding: 0 8px;
+        font-size: 12px;
+    }
+
+    .le-result-bottom-actions .le-button:not(:first-child) {
+        font-size: 16px;
+    }
+}
+
+/* ---------- Small phones ---------- */
+
+@media (max-width: 360px) {
+    .le-eligibility-page {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .le-eligibility-form-card {
+        padding: 16px 11px;
+    }
+
+    .le-loan-type {
+        padding: 9px 6px;
+    }
+
+    .le-loan-type strong {
+        font-size: 10px;
+    }
+
+    .le-result-metric {
+        padding: 12px 9px;
+    }
+
+    .le-result-metric > strong {
+        font-size: 14px;
+    }
+
+    .le-result-bottom-actions {
+        grid-template-columns: minmax(0, 1fr) 42px 42px;
+    }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .le-eligibility-page *,
+    .le-eligibility-page *::before,
+    .le-eligibility-page *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
+
+/* ---------- Print / Save PDF ---------- */
+
+@media print {
+    @page {
+        size: A4;
+        margin: 12mm;
+    }
+
+    body * {
+        visibility: hidden !important;
+    }
+
+    .le-eligibility-result-column,
+    .le-eligibility-result-column * {
+        visibility: visible !important;
+    }
+
+    .le-eligibility-result-column {
+        display: flex !important;
+        flex-direction: column !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        gap: 12px;
+        width: 100%;
+        color: #171a20;
+    }
+
+    .le-result-card,
+    .le-result-metric,
+    .le-recommendations {
+        break-inside: avoid;
+        box-shadow: none !important;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .le-result-card {
+        border: 1px solid #d9d9d9;
+        background: #fff;
+    }
+
+    .le-result-amount {
+        color: #222;
+    }
+
+    .le-result-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .le-apply-button,
+    .le-result-bottom-actions {
+        display: none !important;
+    }
+}
+
+/* Apply for Loan — visible text and no hover dependency */
+.le-eligibility-page .le-apply-button,
+.le-eligibility-page a.le-apply-button,
+.le-eligibility-page .le-button.le-apply-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 20px;
+    border: 1px solid #20242c;
+    border-radius: 12px;
+    background: #20242c;
+    color: #ffffff !important;
+    font-size: 15px;
+    font-weight: 750;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+    opacity: 1;
+    visibility: visible;
+    cursor: pointer;
+    transition: background-color .2s ease, border-color .2s ease;
+}
+
+.le-eligibility-page .le-apply-button *,
+.le-eligibility-page a.le-apply-button * {
+    color: #ffffff !important;
+}
+
+.le-eligibility-page .le-apply-button:hover,
+.le-eligibility-page a.le-apply-button:hover {
+    background: #343a46;
+    border-color: #343a46;
+    color: #ffffff !important;
+}
+
+.le-eligibility-page .le-apply-button:focus,
+.le-eligibility-page .le-apply-button:active {
+    color: #ffffff !important;
+    outline-offset: 3px;
+}
+
+/* Fix bottom action buttons layout */
+.le-eligibility-page .le-print-button,
+.le-eligibility-page button.le-print-button {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+
+    width: auto !important;
+    min-width: 150px !important;
+    max-width: none !important;
+    min-height: 48px !important;
+    height: 48px !important;
+
+    padding: 0 18px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+
+    color: #20242c !important;
+    background: #ffffff !important;
+    border: 1px solid #d9dee7 !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    font-weight: 650 !important;
+    line-height: 1 !important;
+}
+
+.le-eligibility-page .le-print-button span {
+    display: inline-block !important;
+    white-space: nowrap !important;
+    color: #20242c !important;
+}
+
+.le-eligibility-page .le-print-button svg {
+    width: 18px !important;
+    height: 18px !important;
+    flex: 0 0 18px !important;
+}
+
+/* Keep View EMI and print buttons in one row */
+.le-eligibility-page .le-result-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+.le-eligibility-page .le-result-actions > * {
+    min-width: 0;
+}
+
+@media (max-width: 600px) {
+    .le-eligibility-page .le-result-actions {
+        flex-wrap: wrap !important;
+    }
+
+    .le-eligibility-page .le-print-button {
+        width: 100% !important;
+    }
 }

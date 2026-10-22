@@ -1,0 +1,427 @@
+
+.ir-page {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 12px 0 32px;
+}
+
+.ir-back {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 8px 0 36px;
+    color: var(--text-primary, #f5f5f5);
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.ir-back span:first-child {
+    color: var(--accent-color, #b8bec9);
+    font-size: 30px;
+}
+
+.ir-card,
+.ir-result {
+    background: var(--card-bg, #fff);
+    color: var(--text-primary, #222);
+    border: 1px solid var(--border-color, #dedede);
+    border-radius: 24px;
+    padding: 30px 24px;
+}
+
+.ir-field {
+    margin-bottom: 52px;
+}
+
+.ir-field-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.ir-field-head label {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.ir-field-head strong {
+    font-size: 22px;
+    white-space: nowrap;
+}
+
+.ir-field input[type="range"] {
+    appearance: none;
+    -webkit-appearance: none;
+    display: block;
+    width: 100%;
+    height: 5px;
+    border-radius: 10px;
+    outline: none;
+    background: linear-gradient(
+        to right,
+        var(--accent-color, #555) 0%,
+        var(--accent-color, #555) var(--progress, 0%),
+        var(--border-color, #dedede) var(--progress, 0%),
+        var(--border-color, #dedede) 100%
+    );
+    cursor: pointer;
+}
+
+.ir-field input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent-color, #555);
+    border: none;
+}
+
+.ir-field input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent-color, #555);
+    border: none;
+}
+
+.ir-limits {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 15px;
+    color: var(--text-muted, #777);
+    font-size: 14px;
+}
+
+.ir-toggle {
+    width: 78px;
+    height: 42px;
+    padding: 5px;
+    border: 1px solid var(--border-color, #dedede);
+    border-radius: 30px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.ir-toggle span {
+    display: block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent-color, #555);
+    transition: transform .2s ease;
+}
+
+.ir-toggle.is-active span {
+    transform: translateX(35px);
+}
+
+.ir-tenure-value {
+    margin: -2px 0 28px;
+    text-align: right;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.ir-actions {
+    display: grid;
+    gap: 24px;
+    margin-top: 76px;
+}
+
+.ir-button-primary,
+.ir-button-secondary {
+    width: 100%;
+    min-height: 58px;
+    border-radius: 40px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ir-button-primary {
+    border: 1px solid var(--accent-color, #333);
+    background: var(--accent-color, #333);
+    color: var(--button-text, #fff);
+}
+
+.ir-button-secondary {
+    border: 1px solid var(--border-color, #777);
+    background: transparent;
+    color: var(--text-primary, #222);
+}
+
+.ir-errors,
+.ir-result {
+    margin-bottom: 22px;
+}
+
+.ir-errors {
+    padding: 16px;
+    border: 1px solid var(--border-color, #ccc);
+    border-radius: 14px;
+}
+
+.ir-errors ul {
+    margin-bottom: 0;
+}
+
+.ir-result {
+    margin-top: 24px;
+}
+
+.ir-result > span {
+    font-size: 12px;
+    color: var(--text-muted, #777);
+}
+
+.ir-result h2 {
+    margin: 10px 0 24px;
+    font-size: 30px;
+}
+
+.ir-result-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-top: 1px solid var(--border-color, #ddd);
+}
+
+.ir-result p {
+    color: var(--text-muted, #777);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+    .ir-page {
+        padding: 8px 0 24px;
+    }
+
+    .ir-back {
+        margin-bottom: 30px;
+        font-size: 18px;
+    }
+
+    .ir-card,
+    .ir-result {
+        padding: 25px 20px;
+        border-radius: 22px;
+    }
+
+    .ir-field-head label {
+        font-size: 14px;
+    }
+
+    .ir-field-head strong {
+        font-size: 20px;
+    }
+
+    .ir-actions {
+        margin-top: 64px;
+        gap: 24px;
+    }
+}
+
+/* Interest Rate Calculator - full-width, left-aligned result */
+
+.ir-page {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    text-align: left;
+}
+
+.ir-card,
+.ir-result {
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.ir-result {
+    margin-top: 24px;
+    padding: 26px 24px;
+    text-align: left;
+}
+
+.ir-result > span {
+    display: block;
+    text-align: left;
+}
+
+.ir-result h2 {
+    text-align: left;
+    margin: 12px 0 28px;
+}
+
+.ir-result-row {
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px 0;
+}
+
+.ir-result-row span {
+    text-align: left;
+}
+
+.ir-result-row strong {
+    text-align: left;
+    font-size: 22px;
+}
+
+.ir-result p {
+    text-align: left;
+}
+
+/* Keep the existing app content width and theme on mobile */
+@media (max-width: 600px) {
+    .ir-page {
+        width: 100%;
+        padding: 8px 0 24px;
+    }
+
+    .ir-card,
+    .ir-result {
+        width: 100%;
+        padding: 24px 20px;
+    }
+
+    .ir-result h2 {
+        font-size: 30px;
+    }
+}
+
+/* Interest Rate Calculator — result UI fix */
+
+.ir-result {
+    display: block;
+    width: 100%;
+    margin: 24px 0 0;
+    padding: 26px 24px;
+    text-align: left;
+    border: 1px solid var(--border-color, #dedede);
+    border-radius: 22px;
+    background: var(--card-bg, #fff);
+    color: var(--text-primary, #222);
+}
+
+.ir-rate-highlight {
+    display: block;
+    width: 100%;
+    padding: 30px 24px;
+    border-radius: 18px;
+    background: var(--result-panel-bg, #f1f3f6);
+    text-align: center;
+}
+
+.ir-rate-title {
+    display: block;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    line-height: 1.6;
+    color: var(--text-muted, #737987);
+}
+
+.ir-rate-highlight h2 {
+    margin: 20px 0 28px;
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 800;
+    line-height: 1.15;
+    text-align: center;
+    color: var(--text-primary, #222);
+}
+
+.ir-rate-progress {
+    width: 100%;
+    height: 11px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: var(--border-color, #d4d7de);
+}
+
+.ir-rate-progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent-color, #555);
+    transition: width .25s ease;
+}
+
+.ir-result-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    margin-top: 38px;
+    padding: 0;
+    border: 0;
+    text-align: left;
+}
+
+.ir-result-metric span {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--text-muted, #737987);
+}
+
+.ir-result-metric strong {
+    display: block;
+    font-size: 21px;
+    font-weight: 750;
+    line-height: 1.4;
+    color: var(--text-primary, #222);
+}
+
+.ir-result-metric .ir-interest-total {
+    color: var(--danger-color, #c94c55);
+}
+
+#resetResult {
+    display: block;
+    width: 100%;
+    margin-top: 42px;
+    min-height: 56px;
+    border-radius: 40px;
+}
+
+@media (max-width: 600px) {
+    .ir-result {
+        padding: 22px 18px;
+        border-radius: 22px;
+    }
+
+    .ir-rate-highlight {
+        padding: 30px 16px;
+    }
+
+    .ir-rate-title {
+        font-size: 12px;
+    }
+
+    .ir-result-metric {
+        margin-top: 34px;
+    }
+
+    .ir-result-metric strong {
+        font-size: 20px;
+    }
+
+    #resetResult {
+        margin-top: 38px;
+    }
+}
