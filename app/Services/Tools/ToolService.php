@@ -106,6 +106,10 @@ class ToolService
         return Tool::query()
             ->active()
             ->where('show_on_toolkit_home', true)
+            ->where(function (Builder $query) {
+                $query->whereIn('category', ['Resources', 'Planning'])
+                    ->orWhereIn('type', ['Resources', 'Planning']);
+            })
             ->with('journeys:id,name,slug')
             ->ordered()
             ->get();

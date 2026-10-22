@@ -1,0 +1,767 @@
+
+/* =====================================================
+   LOANENGINE — LOAN PREPAYMENT CALCULATOR
+   Theme source: shared user theme CSS variables
+===================================================== */
+
+.prepay-page {
+    --pp-bg: var(--u-bg);
+    --pp-card: var(--u-surface);
+    --pp-muted: var(--u-surface-muted);
+    --pp-text: var(--u-text);
+    --pp-secondary: var(--u-text-secondary);
+    --pp-border: var(--u-border);
+    --pp-accent: var(--u-primary);
+    --pp-on-accent: var(--u-primary-text);
+
+    width: 100%;
+    max-width: 1240px;
+    margin: 0;
+    padding: var(--u-space-6) var(--u-page-gutter) var(--u-space-12);
+    color: var(--pp-text);
+    font-family: var(--u-font);
+}
+
+.prepay-page *,
+.prepay-page *::before,
+.prepay-page *::after {
+    box-sizing: border-box;
+}
+
+.prepay-page button,
+.prepay-page input {
+    font: inherit;
+}
+
+.prepay-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 28px;
+    color: var(--pp-text);
+    font-family: var(--u-heading-font);
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.prepay-back span:first-child {
+    font-size: 1.7rem;
+}
+
+.prepay-section {
+    width: 100%;
+    margin: 0 0 32px;
+}
+
+.prepay-heading {
+    margin: 0 0 16px;
+    color: var(--pp-text);
+    font-family: var(--u-heading-font);
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: .035em;
+}
+
+.prepay-subheading {
+    margin: 0 0 14px;
+    color: var(--pp-text);
+    font-size: .95rem;
+    font-weight: 700;
+}
+
+.prepay-card,
+.prepay-result-card,
+.prepay-chart-card {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid var(--pp-border);
+    border-radius: var(--u-radius-xl);
+    background: var(--pp-card);
+    box-shadow: var(--u-shadow-sm);
+}
+
+/* Loan detail fields */
+
+.prepay-card {
+    padding: clamp(20px, 2.4vw, 32px);
+}
+
+.prepay-field {
+    padding: 0 0 24px;
+    margin: 0 0 24px;
+    border-bottom: 1px solid var(--pp-border);
+}
+
+.prepay-field:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: 0;
+}
+
+.prepay-field-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.prepay-field-head label {
+    color: var(--pp-text);
+    font-size: .96rem;
+    font-weight: 600;
+}
+
+.prepay-field-head strong {
+    color: var(--pp-text);
+    font-family: var(--u-heading-font);
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    font-weight: 800;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.prepay-page input[type="range"] {
+    display: block;
+    width: 100%;
+    height: 6px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    border-radius: var(--u-radius-pill);
+    appearance: none;
+    -webkit-appearance: none;
+    background: linear-gradient(
+        to right,
+        var(--pp-accent) 0%,
+        var(--pp-accent) var(--progress, 0%),
+        var(--pp-border) var(--progress, 0%),
+        var(--pp-border) 100%
+    );
+    cursor: pointer;
+}
+
+.prepay-page input[type="range"]::-webkit-slider-thumb {
+    width: 19px;
+    height: 19px;
+    border: 2px solid var(--pp-card);
+    border-radius: 50%;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--pp-accent);
+    box-shadow: 0 0 0 1px var(--pp-accent);
+}
+
+.prepay-page input[type="range"]::-moz-range-thumb {
+    width: 17px;
+    height: 17px;
+    border: 2px solid var(--pp-card);
+    border-radius: 50%;
+    background: var(--pp-accent);
+}
+
+.prepay-page input[type="range"]:focus-visible {
+    outline: none;
+    box-shadow: var(--u-focus-ring);
+}
+
+.prepay-limits {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    color: var(--u-text-muted);
+    font-size: .76rem;
+}
+
+/* Strategy selector */
+
+.prepay-segmented {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 6px;
+    margin-bottom: 16px;
+    border: 1px solid var(--pp-border);
+    border-radius: var(--u-radius-lg);
+    background: var(--pp-muted);
+}
+
+.prepay-segmented button {
+    min-width: 0;
+    min-height: 52px;
+    padding: 12px 16px;
+    border: 1px solid transparent;
+    border-radius: var(--u-radius-md);
+    background: transparent;
+    color: var(--pp-secondary);
+    font-size: .9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background var(--u-transition), color var(--u-transition);
+}
+
+.prepay-segmented button:hover {
+    background: var(--pp-card);
+    color: var(--pp-text);
+}
+
+.prepay-segmented button.is-active {
+    border-color: var(--pp-accent);
+    background: var(--pp-accent);
+    color: var(--pp-on-accent);
+}
+
+/* Amount input */
+
+.prepay-amount-card {
+    display: grid;
+    grid-template-columns: minmax(0, .8fr) minmax(220px, 1fr);
+    align-items: center;
+    gap: 24px;
+    padding: 24px;
+    margin-bottom: 28px;
+    border: 1px solid var(--pp-border);
+    border-radius: var(--u-radius-xl);
+    background: var(--pp-card);
+    box-shadow: var(--u-shadow-sm);
+}
+
+.prepay-amount-card > label {
+    color: var(--pp-secondary);
+    font-size: .95rem;
+    font-weight: 600;
+}
+
+.prepay-money-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 54px;
+    padding: 0 16px;
+    border: 1px solid var(--pp-border);
+    border-radius: var(--u-radius-md);
+    background: var(--pp-muted);
+    color: var(--pp-text);
+}
+
+.prepay-money-input:focus-within {
+    border-color: var(--u-border-strong);
+    box-shadow: var(--u-focus-ring);
+}
+
+.prepay-money-input > span {
+    color: var(--pp-secondary);
+    font-size: 1.1rem;
+}
+
+.prepay-money-input input {
+    width: 100%;
+    min-width: 0;
+    height: 50px;
+    padding: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--pp-text);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.prepay-money-input input:focus-visible {
+    outline: none;
+}
+
+/* Strategy goals */
+
+.prepay-goals {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.prepay-goals button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 58px;
+    padding: 14px;
+    border: 1px solid var(--pp-border);
+    border-radius: var(--u-radius-lg);
+    background: var(--pp-card);
+    color: var(--pp-text);
+    font-size: .9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background var(--u-transition), border-color var(--u-transition);
+}
+
+.prepay-goals button > span {
+    color: var(--pp-secondary);
+    font-size: 1.2rem;
+}
+
+.prepay-goals button:hover {
+    background: var(--pp-muted);
+}
+
+.prepay-goals button.is-active {
+    border-color: var(--pp-accent);
+    background: var(--pp-muted);
+    box-shadow: inset 0 0 0 1px var(--pp-accent);
+}
+
+.prepay-goals button.is-active > span {
+    color: var(--pp-text);
+}
+
+/* Smart insights */
+
+.prepay-insights {
+    padding: clamp(20px, 2.5vw, 30px);
+    margin: 24px 0;
+    border: 1px solid var(--pp-border);
+    border-radius: var(--u-radius-xl);
+    background: var(--pp-muted);
+}
+
+.prepay-insights h3 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 22px;
+    color: var(--pp-text);
+    font-family: var(--u-heading-font);
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.prepay-insights h3 > span {
+    color: var(--pp-secondary);
+    font-size: 1.4rem;
+}
+
+.prepay-insights p {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0 0 18px;
+    color: var(--pp-secondary);
+    font-size: .95rem;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+}
+
+.prepay-insights p > span:first-child {
+    flex: 0 0 auto;
+    color: var(--pp-text);
+    font-weight: 800;
+}
+
+.prepay-insights strong {
+    color: var(--pp-text);
+    font-weight: 800;
+}
+
+.prepay-insights .prepay-note {
+    display: block;
+    padding-top: 14px;
+    margin: 8px 0 0;
+    border-top: 1px solid var(--pp-border);
+    color: var(--u-text-muted);
+    font-size: .8rem;
+}
+
+/* Action buttons */
+
+.prepay-primary-button,
+.prepay-reset-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 54px;
+    padding: 14px 22px;
+    border-radius: var(--u-radius-pill);
+    font-size: .95rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background var(--u-transition), color var(--u-transition);
+}
+
+.prepay-primary-button {
+    border: 1px solid var(--pp-accent);
+    background: var(--pp-accent);
+    color: var(--pp-on-accent);
+}
+
+.prepay-primary-button:hover {
+    border-color: var(--u-primary-hover);
+    background: var(--u-primary-hover);
+}
+
+.prepay-primary-button:disabled {
+    opacity: .65;
+    cursor: wait;
+}
+
+.prepay-reset-button {
+    margin-top: 12px;
+    border: 1px solid var(--u-border-strong);
+    background: transparent;
+    color: var(--pp-text);
+}
+
+.prepay-reset-button:hover {
+    background: var(--pp-muted);
+}
+
+/* Calculation result */
+
+.prepay-result {
+    width: 100%;
+    margin: 0 0 36px;
+    scroll-margin-top: 24px;
+}
+
+.prepay-result-card {
+    padding: clamp(24px, 3vw, 36px);
+    margin-bottom: 30px;
+}
+
+.prepay-muted {
+    display: block;
+    color: var(--pp-secondary);
+    font-size: .95rem;
+}
+
+.prepay-big-number {
+    margin-top: 8px;
+    color: var(--pp-text);
+    font-family: var(--u-heading-font);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.prepay-result-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-top: 30px;
+}
+
+.prepay-result-value {
+    display: block;
+    margin-top: 8px;
+    color: var(--pp-text);
+    font-family: var(--u-heading-font);
+    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+    font-weight: 800;
+}
+
+.prepay-ring {
+    position: relative;
+    display: grid;
+    flex: 0 0 auto;
+    width: 78px;
+    height: 78px;
+    place-items: center;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--pp-accent) var(--saving, 0%),
+        var(--pp-border) var(--saving, 0%)
+    );
+}
+
+.prepay-ring::before {
+    position: absolute;
+    inset: 7px;
+    border-radius: 50%;
+    background: var(--pp-card);
+    content: "";
+}
+
+.prepay-ring span {
+    position: relative;
+    z-index: 1;
+    color: var(--pp-text);
+    font-size: .9rem;
+    font-weight: 800;
+}
+
+/* Repayment timeline */
+
+.prepay-chart-card {
+    padding: clamp(20px, 2.5vw, 30px);
+}
+
+.prepay-chart {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.prepay-chart-column {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 10px;
+    text-align: center;
+}
+
+.prepay-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 5px;
+    height: 160px;
+    border-bottom: 1px solid var(--pp-border);
+}
+
+.prepay-bar {
+    flex: 1 1 0;
+    max-width: 28px;
+    min-height: 3px;
+    border-radius: 5px 5px 0 0;
+}
+
+.prepay-original {
+    background: var(--u-text-muted);
+    opacity: .55;
+}
+
+.prepay-new {
+    background: var(--pp-accent);
+}
+
+.prepay-chart-column > span {
+    color: var(--u-text-muted);
+    font-size: .75rem;
+    overflow-wrap: anywhere;
+}
+
+.prepay-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    margin-top: 22px;
+}
+
+.prepay-legend > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--pp-text);
+    font-size: .85rem;
+}
+
+.prepay-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.prepay-dot-original {
+    background: var(--u-text-muted);
+}
+
+.prepay-dot-new {
+    background: var(--pp-accent);
+}
+
+/* Validation */
+
+.prepay-alert {
+    padding: 16px;
+    margin-bottom: 20px;
+    border: 1px solid var(--pp-border);
+    border-radius: var(--u-radius-md);
+    background: var(--pp-card);
+    color: var(--pp-text);
+    font-size: .9rem;
+}
+
+.prepay-alert ul {
+    padding-left: 22px;
+    margin: 8px 0 0;
+}
+
+/* Responsive */
+
+@media (min-width: 900px) {
+    .prepay-chart {
+        gap: 24px;
+    }
+
+    .prepay-bars {
+        height: 180px;
+    }
+}
+
+@media (max-width: 700px) {
+    .prepay-page {
+        max-width: 100%;
+        padding: 18px 16px 36px;
+    }
+
+    .prepay-back {
+        margin-bottom: 24px;
+        font-size: 1rem;
+    }
+
+    .prepay-section {
+        margin-bottom: 26px;
+    }
+
+    .prepay-heading {
+        font-size: .95rem;
+    }
+
+    .prepay-card {
+        padding: 18px;
+    }
+
+    .prepay-field {
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+
+    .prepay-field-head {
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .prepay-field-head label {
+        max-width: 62%;
+        font-size: .86rem;
+    }
+
+    .prepay-field-head strong {
+        font-size: 1rem;
+    }
+
+    .prepay-segmented button {
+        min-height: 48px;
+        padding: 10px 8px;
+        font-size: .8rem;
+    }
+
+    .prepay-amount-card {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+        padding: 18px;
+        margin-bottom: 22px;
+    }
+
+    .prepay-amount-card > label {
+        font-size: .88rem;
+    }
+
+    .prepay-goals {
+        gap: 10px;
+    }
+
+    .prepay-goals button {
+        min-height: 54px;
+        gap: 7px;
+        padding: 10px 7px;
+        font-size: .8rem;
+    }
+
+    .prepay-insights {
+        padding: 18px;
+        margin: 20px 0;
+    }
+
+    .prepay-insights h3 {
+        font-size: 1rem;
+    }
+
+    .prepay-insights p {
+        gap: 9px;
+        font-size: .88rem;
+    }
+
+    .prepay-primary-button,
+    .prepay-reset-button {
+        min-height: 50px;
+        font-size: .88rem;
+    }
+
+    .prepay-result-card {
+        padding: 22px;
+        margin-bottom: 26px;
+    }
+
+    .prepay-big-number {
+        font-size: clamp(1.8rem, 8vw, 2.5rem);
+    }
+
+    .prepay-result-bottom {
+        gap: 14px;
+        margin-top: 26px;
+    }
+
+    .prepay-ring {
+        width: 68px;
+        height: 68px;
+    }
+
+    .prepay-ring::before {
+        inset: 6px;
+    }
+
+    .prepay-chart {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px 12px;
+    }
+
+    .prepay-bars {
+        height: 125px;
+        gap: 4px;
+    }
+
+    .prepay-chart-column > span {
+        font-size: .7rem;
+    }
+
+    .prepay-legend {
+        gap: 16px;
+    }
+}
+
+@media (max-width: 360px) {
+    .prepay-page {
+        padding-right: 12px;
+        padding-left: 12px;
+    }
+
+    .prepay-goals button {
+        font-size: .74rem;
+    }
+
+    .prepay-result-bottom {
+        align-items: flex-start;
+    }
+
+    .prepay-ring {
+        width: 58px;
+        height: 58px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .prepay-page *,
+    .prepay-page *::before,
+    .prepay-page *::after {
+        transition-duration: .01ms !important;
+    }
+}

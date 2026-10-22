@@ -3,13 +3,37 @@
 namespace Database\Seeders;
 
 use App\Models\ToolJourney;
+use App\Models\JourneyStep;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Seeder;
 
 class ToolJourneySeeder extends Seeder
 {
     public function run(): void
     {
-        $rows = [
+        DB::transaction(function (): void {
+            $seededSlugs = [
+                'first-time-home-buyer',
+                'existing-home-loan',
+                'top-up-loan',
+                'balance-transfer',
+                'prepayment',
+                'loan-closure',
+            ];
+
+            // Remove previously seeded steps and journeys before rebuilding them.
+            $oldJourneys = ToolJourney::query()->whereIn('slug', $seededSlugs)->get();
+            foreach ($oldJourneys as $oldJourney) {
+                $steps = JourneyStep::query()->where('journey_id', $oldJourney->id)->get();
+                foreach ($steps as $step) {
+                    $step->tools()->detach();
+                    $step->delete();
+                }
+                $oldJourney->tools()->detach();
+                $oldJourney->delete();
+            }
+
+            $rows = [
             [
                 'name' => 'First-Time Home Buyer',
                 'slug' => 'first-time-home-buyer',
@@ -54,14 +78,15 @@ class ToolJourneySeeder extends Seeder
             ],
         ];
 
-        foreach ($rows as $row) {
-            ToolJourney::updateOrCreate(
-                ['slug' => $row['slug']],
-                [
-                    ...$row,
-                    'status' => 'active',
-                ]
-            );
-        }
+            foreach ($rows as $row) {
+                ToolJourney::updateOrCreate(
+                    ['slug' => $row['slug']],
+                    [
+                        ...$row,
+                        'status' => 'active',
+                    ]
+                );
+            }
+        });
     }
 }
