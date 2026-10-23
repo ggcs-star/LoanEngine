@@ -159,16 +159,19 @@ class CalculatorController extends Controller
     }
 
 
-    public function calculate(
-        Request $request,
-        Tool $tool,
-        HomeAffordabilityCalculator $calculator,
-        HomeLoanEmiCalculator $emiCalculator,
-        HomeLoanEligibilityCalculator $eligibilityCalculator,
-        StampDutyCalculator $stampDutyCalculator,
-        EmiVsTenureCalculator $emiVsTenureCalculator,
-        InterestRateCalculator $interestRateCalculator
-    ): View|RedirectResponse {
+    
+        public function calculate(
+            Request $request,
+            Tool $tool,
+            HomeAffordabilityCalculator $calculator,
+            HomeLoanEmiCalculator $emiCalculator,
+            HomeLoanEligibilityCalculator $eligibilityCalculator,
+            StampDutyCalculator $stampDutyCalculator,
+            EmiVsTenureCalculator $emiVsTenureCalculator,
+            InterestRateCalculator $interestRateCalculator,
+            LoanPrepaymentCalculator $prepaymentCalculator
+        ): View|RedirectResponse {
+
         abort_unless($tool->isActive(), 404);
 
         if ($tool->slug === self::HOME_LOAN_EMI) {

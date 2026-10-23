@@ -1,17 +1,18 @@
+
 @extends('user.layouts.app')
 
 @section('title', $journey->name . ' | LoanEngine')
 @section('page_heading', $journey->name)
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/user-tools.css') }}">
+<link rel="stylesheet" href="{{ asset('css/user-tools.css') }}">
 @endpush
 
 @section('content')
 <div class="le-tools">
-    <a class="le-back" href="{{ url()->previous() !== url()->current() ? url()->previous() : route('user.tools.index') }}">← Back</a>
+    <a class="le-back" href="{{ route('user.tools.journeys.index') }}"><span aria-hidden="true">←</span> Back to journeys</a>
 
-    <section class="le-hero">
+    <section class="le-detail-hero">
         <div>
             <span class="le-eyebrow">YOUR JOURNEY</span>
             <h1>{{ $journey->name }}</h1>
@@ -36,17 +37,24 @@
                         <div class="le-card-top">
                             <span class="le-icon">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
                             <span class="le-chip">Step {{ $loop->iteration }} of {{ $steps->count() }}</span>
+                            <span class="le-arrow" aria-hidden="true">↗</span>
                         </div>
+
                         <div class="le-card-body">
                             <h3>{{ $step->title }}</h3>
                             <p>{{ $step->description ?: 'Open this step for details and guidance.' }}</p>
                         </div>
-                        <div class="le-card-foot"><span>View step →</span></div>
+
+                        <div class="le-card-foot">
+                            <span>Step {{ $loop->iteration }}</span>
+                            <span>View step <span aria-hidden="true">→</span></span>
+                        </div>
                     </a>
                 @endforeach
             </div>
         @else
             <div class="le-empty">
+                <span aria-hidden="true">▦</span>
                 <h3>No active steps yet</h3>
                 <p>This journey does not have any active steps. Ask an administrator to add steps and set their status to Active.</p>
             </div>
