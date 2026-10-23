@@ -48,14 +48,13 @@
 
     <div class="tools-field tools-field-full">
         <label for="short_description">
-            Short Description <span class="tools-required">*</span>
+            Short Description <span class="tools-field-help">(Optional)</span>
         </label>
         <textarea
             id="short_description"
             name="short_description"
             rows="3"
             maxlength="200"
-            required
             placeholder="Describe what this tool does"
         >{{ old('short_description', $tool->short_description) }}</textarea>
         @error('short_description')

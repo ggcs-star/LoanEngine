@@ -4,7 +4,8 @@
 @section('title', 'Tools Management')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/admin-tools.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tools-admin.css') }}">
+
 <style>
     .tools-select-column {
         width: 44px;

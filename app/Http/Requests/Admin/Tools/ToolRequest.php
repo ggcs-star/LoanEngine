@@ -23,7 +23,7 @@ class ToolRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:120'],
             'slug' => ['nullable', 'string', 'max:140', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('tools', 'slug')->ignore($toolId)],
-            'short_description' => ['required', 'string', 'max:200'],
+            'short_description' => ['nullable', 'string', 'max:200'],
             'icon' => ['nullable', 'string', 'max:60'],
             'category' => ['required', Rule::in(['Resources', 'Planning', 'Calculators'])],
             'type' => ['required', Rule::in(['Resource', 'Planning Tool', 'Calculator'])],

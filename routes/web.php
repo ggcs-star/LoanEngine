@@ -16,6 +16,7 @@ use App\Http\Controllers\User\CalculatorController as UserCalculatorController;
 use App\Http\Controllers\User\FinancialFlowCalendarController;
 use App\Http\Controllers\Admin\Calculators\CalculatorController as AdminCalculatorController;
 use App\Http\Controllers\User\RecommendedCalculatorController;
+use App\Http\Controllers\Admin\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +47,8 @@ Route::middleware(['auth', 'role:admin'])
     ->name('tools.bulk-destroy');
         Route::resource('tools', ToolController::class)
     ->names('tools');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->name('dashboard');
         
 Route::get(
     'tool-journeys/{tool_journey}/tools',

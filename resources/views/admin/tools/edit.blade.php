@@ -4,7 +4,7 @@
 @section('title', 'Edit Tool')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/admin-tools.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tools-admin.css') }}">
 @endpush
 
 @section('content')
