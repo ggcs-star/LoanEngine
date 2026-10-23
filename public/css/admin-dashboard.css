@@ -1,19 +1,38 @@
-
 /* =========================================================
-   LoanEngine Admin Dashboard — Complete Responsive CSS
+   LoanEngine Admin Dashboard — Complete Responsive CSS (Fixed)
    File: public/css/admin-dashboard.css
    Theme source: public/css/admin-theme.css
+
+   Breakpoints
+   - >1600px  : large desktop
+   - <=1350px : laptop
+   - <=1050px : tablet landscape
+   - <=900px  : tablet portrait (KPI 2 columns)
+   - <=680px  : mobile
+   - <=480px  : small mobile
+   - <=390px  : narrow phones
    ========================================================= */
 
 /* ---------- Base ---------- */
 
 .le-dashboard-v2 {
+    --le-chart-categories: var(--text, #222);
+    --le-chart-modules: #666;
+    --le-chart-lessons: #aaa;
+    --le-chart-tools: #888;
+    --le-radius-lg: 16px;
+    --le-radius-md: 14px;
+    --le-radius-sm: 10px;
+
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    padding: 0;
+    overflow-x: clip;
     color: var(--text, #222);
     box-sizing: border-box;
-    padding: 0;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 .le-dashboard-v2 *,
@@ -36,12 +55,19 @@
 
 .le-dashboard-v2 img {
     max-width: 100%;
+    height: auto;
 }
 
 .le-dashboard-v2 button,
 .le-dashboard-v2 input,
 .le-dashboard-v2 select {
     font: inherit;
+}
+
+.le-dashboard-v2 a:focus-visible,
+.le-dashboard-v2 button:focus-visible {
+    outline: 2px solid var(--primary, #222);
+    outline-offset: 2px;
 }
 
 /* ---------- Hero banner ---------- */
@@ -65,7 +91,7 @@
         var(--surface, #fff) 100%
     );
     border: 1px solid var(--border, #e2e2e2);
-    border-radius: 16px;
+    border-radius: var(--le-radius-lg);
     box-shadow: 0 5px 20px rgb(0 0 0 / 4%);
 }
 
@@ -87,7 +113,7 @@
     background: var(--surface-hover, #f7f7f7);
     border: 1px solid var(--border, #e2e2e2);
     border-radius: 999px;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 800;
     letter-spacing: .55px;
 }
@@ -95,9 +121,9 @@
 .le-dashboard-v2 .le-v2-hero h1 {
     margin: 14px 0 12px;
     color: var(--heading, #222);
-    font-size: clamp(28px, 2.3vw, 39px);
+    font-size: clamp(26px, 2.3vw, 39px);
     line-height: 1.15;
-    letter-spacing: -1.15px;
+    letter-spacing: -1px;
     overflow-wrap: anywhere;
 }
 
@@ -113,7 +139,7 @@
 
 .le-dashboard-v2 .le-v2-hero-links {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 9px;
     width: 100%;
     margin-top: 22px;
@@ -134,14 +160,6 @@
         transform .18s ease;
 }
 
-.le-dashboard-v2 .le-v2-hero-link:hover,
-.le-dashboard-v2 .le-v2-quick-action:hover,
-.le-dashboard-v2 .le-v2-resource-list a:hover {
-    background: var(--surface-hover, #f7f7f7);
-    border-color: var(--muted, #777);
-    transform: translateY(-1px);
-}
-
 .le-dashboard-v2 .le-v2-hero-link > span:nth-child(2),
 .le-dashboard-v2 .le-v2-quick-action > span:nth-child(2),
 .le-dashboard-v2 .le-v2-resource-list a > span:nth-child(2) {
@@ -152,7 +170,7 @@
 .le-dashboard-v2 .le-v2-quick-action strong,
 .le-dashboard-v2 .le-v2-resource-list strong {
     display: block;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 750;
     line-height: 1.4;
     overflow-wrap: anywhere;
@@ -164,8 +182,9 @@
     display: block;
     margin-top: 4px;
     color: var(--muted, #777);
-    font-size: 10px;
+    font-size: 11px;
     line-height: 1.45;
+    overflow-wrap: anywhere;
 }
 
 /* ---------- Shared icons ---------- */
@@ -184,7 +203,7 @@
     color: var(--text, #222);
     background: var(--surface-hover, #f7f7f7);
     border: 1px solid var(--border, #e2e2e2);
-    border-radius: 10px;
+    border-radius: var(--le-radius-sm);
     font-size: 17px;
 }
 
@@ -207,7 +226,7 @@
     min-height: 280px;
     overflow: hidden;
     isolation: isolate;
-    border-radius: 14px;
+    border-radius: var(--le-radius-md);
     background: radial-gradient(
         ellipse at center,
         var(--surface-hover, #f7f7f7) 0%,
@@ -215,7 +234,6 @@
     );
 }
 
-/* If the Blade contains a real banner image, show it prominently. */
 .le-dashboard-v2 .le-v2-illustration-image {
     position: relative;
     z-index: 1;
@@ -351,17 +369,23 @@
     min-width: 0;
 }
 
+.le-dashboard-v2 .le-v2-date > div,
+.le-dashboard-v2 .le-v2-date > span:not(.le-v2-date-icon) {
+    min-width: 0;
+}
+
 .le-dashboard-v2 .le-v2-date strong {
     display: block;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.5;
+    overflow-wrap: anywhere;
 }
 
 .le-dashboard-v2 .le-v2-date small {
     display: block;
     margin-top: 4px;
     color: var(--muted, #777);
-    font-size: 10px;
+    font-size: 11px;
     line-height: 1.5;
 }
 
@@ -392,7 +416,7 @@
     display: block;
     margin-top: 5px;
     color: var(--muted, #777);
-    font-size: 10px;
+    font-size: 11px;
 }
 
 .le-dashboard-v2 .le-v2-primary-button {
@@ -401,13 +425,13 @@
     justify-content: center;
     gap: 12px;
     width: 100%;
-    min-height: 42px;
+    min-height: 44px;
     padding: 10px 14px;
     color: var(--button-text, #fff);
     background: var(--button-bg, #222);
     border: 1px solid var(--button-bg, #222);
     border-radius: 9px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 750;
     text-align: center;
     transition: background .18s ease;
@@ -443,26 +467,21 @@
         var(--surface-hover, #f7f7f7) 100%
     );
     border: 1px solid var(--border, #e2e2e2);
-    border-radius: 14px;
+    border-radius: var(--le-radius-md);
     box-shadow: 0 3px 12px rgb(0 0 0 / 3%);
     transition: transform .18s ease, box-shadow .18s ease,
         border-color .18s ease;
-}
-
-.le-dashboard-v2 .le-v2-kpi-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--muted, #777);
-    box-shadow: 0 7px 18px rgb(0 0 0 / 6%);
 }
 
 .le-dashboard-v2 .le-v2-kpi-content {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    padding-right: 28px; /* keep text clear of the mini bars */
 }
 
 .le-dashboard-v2 .le-v2-kpi-content > span {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     line-height: 1.45;
 }
@@ -470,14 +489,15 @@
 .le-dashboard-v2 .le-v2-kpi-content strong {
     margin-top: 4px;
     color: var(--heading, #222);
-    font-size: 29px;
+    font-size: clamp(22px, 2vw, 29px);
     line-height: 1.2;
+    overflow-wrap: anywhere;
 }
 
 .le-dashboard-v2 .le-v2-kpi-content small {
     margin-top: 5px;
     color: var(--muted, #777);
-    font-size: 10px;
+    font-size: 11px;
     line-height: 1.5;
 }
 
@@ -489,7 +509,8 @@
     align-items: flex-end;
     gap: 3px;
     height: 29px;
-    opacity: .45;
+    opacity: .4;
+    pointer-events: none;
 }
 
 .le-dashboard-v2 .le-v2-mini-bars i {
@@ -531,7 +552,7 @@
         var(--surface-hover, #f7f7f7) 100%
     );
     border: 1px solid var(--border, #e2e2e2);
-    border-radius: 14px;
+    border-radius: var(--le-radius-md);
     box-shadow: 0 3px 12px rgb(0 0 0 / 3%);
 }
 
@@ -553,24 +574,26 @@
     color: var(--heading, #222);
     font-size: 15px;
     line-height: 1.4;
+    overflow-wrap: anywhere;
 }
 
 .le-dashboard-v2 .le-v2-panel-header p {
     margin-bottom: 0;
     color: var(--muted, #777);
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.6;
 }
 
 .le-dashboard-v2 .le-v2-chart-period,
 .le-dashboard-v2 .le-v2-panel-caption {
     flex: 0 0 auto;
+    max-width: 100%;
     padding: 7px 9px;
     color: var(--text-secondary, #666);
     background: var(--surface, #fff);
     border: 1px solid var(--border, #e2e2e2);
     border-radius: 8px;
-    font-size: 10px;
+    font-size: 11px;
     white-space: nowrap;
 }
 
@@ -580,13 +603,6 @@
 }
 
 /* ---------- Monthly chart ---------- */
-
-.le-dashboard-v2 {
-    --le-chart-categories: var(--text, #222);
-    --le-chart-modules: #666;
-    --le-chart-lessons: #aaa;
-    --le-chart-tools: #888;
-}
 
 .le-dashboard-v2 .le-v2-chart {
     display: grid;
@@ -681,13 +697,14 @@
     padding-top: 8px;
     color: var(--muted, #777);
     font-size: 10px;
+    white-space: nowrap;
 }
 
 .le-dashboard-v2 .le-v2-chart-legend {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 14px;
+    gap: 8px 14px;
     margin-top: 10px;
 }
 
@@ -696,7 +713,7 @@
     align-items: center;
     gap: 6px;
     color: var(--muted, #777);
-    font-size: 10px;
+    font-size: 11px;
 }
 
 .le-dashboard-v2 .le-v2-chart-legend i {
@@ -716,6 +733,7 @@
     flex-direction: column;
     gap: 9px;
     min-height: 170px;
+    padding: 8px;
     color: var(--muted, #777);
     text-align: center;
 }
@@ -728,21 +746,21 @@
 .le-dashboard-v2 .le-v2-empty-chart strong,
 .le-dashboard-v2 .le-v2-empty-state strong {
     color: var(--text, #222);
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .le-dashboard-v2 .le-v2-empty-chart p,
 .le-dashboard-v2 .le-v2-empty-state p {
     max-width: 400px;
     margin: 0;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.6;
 }
 
 .le-dashboard-v2 .le-v2-empty-state a,
 .le-dashboard-v2 .le-v2-module-content a {
     color: var(--text, #222);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 750;
 }
 
@@ -753,20 +771,21 @@
     min-width: 0;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
 }
 
 .le-dashboard-v2 .le-v2-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .le-dashboard-v2 .le-v2-table th {
     padding: 11px 9px;
     color: var(--muted, #777);
     background: var(--surface-hover, #f7f7f7);
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: .3px;
@@ -797,7 +816,7 @@
     background: var(--surface-hover, #f7f7f7);
     border: 1px solid var(--border, #e2e2e2);
     border-radius: 999px;
-    font-size: 10px;
+    font-size: 11px;
     white-space: nowrap;
 }
 
@@ -825,7 +844,7 @@
     color: var(--text, #222);
     background: var(--surface, #fff);
     border: 1px solid var(--border, #e2e2e2);
-    border-radius: 10px;
+    border-radius: var(--le-radius-sm);
     transition: background .18s ease, border-color .18s ease,
         transform .18s ease;
 }
@@ -837,14 +856,6 @@
     height: 36px;
 }
 
-.le-dashboard-v2 .le-v2-quick-action strong {
-    font-size: 11px;
-}
-
-.le-dashboard-v2 .le-v2-quick-action small {
-    font-size: 10px;
-}
-
 .le-dashboard-v2 .le-v2-resource-list {
     display: grid;
     gap: 9px;
@@ -852,10 +863,6 @@
 
 .le-dashboard-v2 .le-v2-resource-list a {
     min-height: 58px;
-}
-
-.le-dashboard-v2 .le-v2-resource-list strong {
-    font-size: 11px;
 }
 
 /* ---------- Recommended module image ---------- */
@@ -908,7 +915,7 @@
     position: absolute;
     right: 11px;
     bottom: 10px;
-    font-size: 9px;
+    font-size: 10px;
     letter-spacing: .6px;
 }
 
@@ -920,12 +927,13 @@
     margin: 0 0 7px;
     color: var(--heading, #222);
     font-size: 14px;
+    overflow-wrap: anywhere;
 }
 
 .le-dashboard-v2 .le-v2-module-content p {
     margin: 0 0 12px;
     color: var(--muted, #777);
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.7;
 }
 
@@ -944,7 +952,52 @@
     gap: 10px;
     padding: 16px 2px 4px;
     color: var(--muted, #777);
-    font-size: 10px;
+    font-size: 11px;
+}
+
+/* ---------- Hover effects (only on devices that really hover) ---------- */
+
+@media (hover: hover) and (pointer: fine) {
+    .le-dashboard-v2 .le-v2-hero-link:hover,
+    .le-dashboard-v2 .le-v2-quick-action:hover,
+    .le-dashboard-v2 .le-v2-resource-list a:hover {
+        background: var(--surface-hover, #f7f7f7);
+        border-color: var(--muted, #777);
+        transform: translateY(-1px);
+    }
+
+    .le-dashboard-v2 .le-v2-kpi-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--muted, #777);
+        box-shadow: 0 7px 18px rgb(0 0 0 / 6%);
+    }
+}
+
+/* Touch devices: simple pressed state, no jumping layout */
+@media (hover: none) {
+    .le-dashboard-v2 .le-v2-hero-link:active,
+    .le-dashboard-v2 .le-v2-quick-action:active,
+    .le-dashboard-v2 .le-v2-resource-list a:active {
+        background: var(--surface-hover, #f7f7f7);
+        border-color: var(--muted, #777);
+    }
+}
+
+/* ---------- Large desktop ---------- */
+
+@media (min-width: 1601px) {
+    .le-dashboard-v2 .le-v2-hero {
+        min-height: 360px;
+        padding: 34px;
+    }
+
+    .le-dashboard-v2 .le-v2-main-grid {
+        grid-template-columns: minmax(0, 1.9fr) minmax(320px, .95fr);
+    }
+
+    .le-dashboard-v2 .le-v2-chart {
+        height: 250px;
+    }
 }
 
 /* ---------- Laptop and smaller desktop ---------- */
@@ -976,7 +1029,7 @@
     }
 }
 
-/* ---------- Tablet ---------- */
+/* ---------- Tablet landscape ---------- */
 
 @media (max-width: 1050px) {
     .le-dashboard-v2 .le-v2-hero {
@@ -1000,10 +1053,6 @@
         border-left: 0;
     }
 
-    .le-dashboard-v2 .le-v2-hero-links {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
     .le-dashboard-v2 .le-v2-main-grid {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -1018,6 +1067,27 @@
     }
 }
 
+/* ---------- Tablet portrait ---------- */
+
+@media (max-width: 900px) {
+    .le-dashboard-v2 .le-v2-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .le-dashboard-v2 .le-v2-hero {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .le-dashboard-v2 .le-v2-illustration {
+        order: 2;
+    }
+
+    .le-dashboard-v2 .le-v2-hero-summary {
+        order: 3;
+        grid-column: auto;
+    }
+}
+
 /* ---------- Mobile ---------- */
 
 @media (max-width: 680px) {
@@ -1025,16 +1095,17 @@
         grid-template-columns: minmax(0, 1fr);
         gap: 18px;
         padding: 20px 16px;
+        margin-bottom: 14px;
         border-radius: 13px;
     }
 
     .le-dashboard-v2 .le-v2-hero h1 {
-        font-size: clamp(27px, 7vw, 34px);
-        letter-spacing: -.7px;
+        font-size: clamp(25px, 7vw, 32px);
+        letter-spacing: -.6px;
     }
 
     .le-dashboard-v2 .le-v2-hero-description {
-        font-size: 12px;
+        font-size: 13px;
     }
 
     .le-dashboard-v2 .le-v2-hero-links {
@@ -1047,22 +1118,22 @@
     }
 
     .le-dashboard-v2 .le-v2-illustration {
-        min-height: 220px;
+        min-height: 200px;
     }
 
     .le-dashboard-v2 .le-v2-illustration-image {
-        min-height: 220px;
-        max-height: 250px;
+        min-height: 200px;
+        max-height: 240px;
     }
 
     .le-dashboard-v2 .le-v2-hero-summary {
-        grid-column: auto;
         padding: 17px 0 0;
     }
 
     .le-dashboard-v2 .le-v2-kpis {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
+        margin-bottom: 14px;
     }
 
     .le-dashboard-v2 .le-v2-kpi-card {
@@ -1078,12 +1149,23 @@
         font-size: 14px;
     }
 
+    .le-dashboard-v2 .le-v2-kpi-content {
+        padding-right: 0;
+    }
+
     .le-dashboard-v2 .le-v2-kpi-content > span {
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .le-dashboard-v2 .le-v2-kpi-content strong {
-        font-size: 24px;
+        font-size: 22px;
+    }
+
+    .le-dashboard-v2 .le-v2-mini-bars {
+        right: 8px;
+        bottom: 8px;
+        transform: scale(.8);
+        transform-origin: bottom right;
     }
 
     .le-dashboard-v2 .le-v2-main-grid {
@@ -1110,6 +1192,7 @@
     }
 
     .le-dashboard-v2 .le-v2-panel-header {
+        flex-wrap: wrap;
         gap: 8px;
         margin-bottom: 13px;
     }
@@ -1121,6 +1204,11 @@
     .le-dashboard-v2 .le-v2-chart {
         height: 190px;
         grid-template-columns: 23px minmax(0, 1fr);
+        gap: 6px;
+    }
+
+    .le-dashboard-v2 .le-v2-chart-columns {
+        gap: 3px;
     }
 
     .le-dashboard-v2 .le-v2-quick-grid {
@@ -1133,6 +1221,23 @@
 
     .le-dashboard-v2 .le-v2-module-art {
         height: 180px;
+    }
+}
+
+/* ---------- Small mobile ---------- */
+
+@media (max-width: 480px) {
+    .le-dashboard-v2 .le-v2-hero-link small,
+    .le-dashboard-v2 .le-v2-quick-action small {
+        font-size: 10.5px;
+    }
+
+    .le-dashboard-v2 .le-v2-bar {
+        width: min(10px, 24%);
+    }
+
+    .le-dashboard-v2 .le-v2-chart-legend {
+        justify-content: flex-start;
     }
 }
 
@@ -1166,6 +1271,10 @@
     .le-dashboard-v2 .le-v2-panel-caption,
     .le-dashboard-v2 .le-v2-chart-period {
         padding: 6px;
+        font-size: 10px;
+    }
+
+    .le-dashboard-v2 .le-v2-month-label {
         font-size: 9px;
     }
 }
@@ -1179,5 +1288,21 @@
         scroll-behavior: auto !important;
         transition: none !important;
         animation: none !important;
+    }
+}
+
+/* ---------- Print ---------- */
+
+@media print {
+    .le-dashboard-v2 .le-v2-hero,
+    .le-dashboard-v2 .le-v2-kpi-card,
+    .le-dashboard-v2 .le-v2-panel {
+        box-shadow: none;
+        break-inside: avoid;
+    }
+
+    .le-dashboard-v2 .le-v2-hero-links,
+    .le-dashboard-v2 .le-v2-primary-button {
+        display: none;
     }
 }
