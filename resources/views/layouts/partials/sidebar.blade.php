@@ -91,6 +91,19 @@
 
         @endif
 
+{{-- Website Settings --}}
+<a href="{{ route('admin.settings.edit') }}"
+   class="nav-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+
+    <span class="nav-icon">
+        <i class="fas fa-cog"></i>
+    </span>
+
+    <span class="nav-text">
+        Website Settings
+    </span>
+</a>
+
         {{-- Tools & Journeys --}}
         @if(auth()->user()?->role === 'admin')
 
