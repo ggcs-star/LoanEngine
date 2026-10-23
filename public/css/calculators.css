@@ -983,3 +983,152 @@
         text-align: center;
     }
 }
+
+/* LoanEngine - Modern Delete Confirmation Modal */
+
+.calculator-modal {
+    padding: 24px !important;
+    background: transparent;
+}
+
+.calculator-modal-backdrop {
+    background: rgba(17, 19, 23, 0.62) !important;
+    backdrop-filter: blur(3px) !important;
+    -webkit-backdrop-filter: blur(3px) !important;
+}
+
+.calculator-modal-dialog {
+    width: min(100%, 440px) !important;
+    max-width: 440px !important;
+    padding: 32px !important;
+    margin: auto !important;
+    border: 1px solid #e7e9ed !important;
+    border-radius: 18px !important;
+    background: #ffffff !important;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.22) !important;
+    text-align: center !important;
+    animation: calculatorModalIn 0.2s ease-out;
+}
+
+.calculator-modal-icon {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 54px !important;
+    height: 54px !important;
+    margin: 0 auto 20px !important;
+    border: 1px solid #f0dada !important;
+    border-radius: 16px !important;
+    background: #fff3f3 !important;
+    color: #b42332 !important;
+    font-size: 27px !important;
+    font-weight: 600 !important;
+}
+
+.calculator-modal-dialog h2 {
+    margin: 0 0 12px !important;
+    color: #202329 !important;
+    font-size: 22px !important;
+    font-weight: 750 !important;
+    line-height: 1.35;
+    letter-spacing: -0.4px;
+}
+
+.calculator-modal-dialog p {
+    margin: 0 auto 10px !important;
+    color: #626873 !important;
+    font-size: 14px !important;
+    line-height: 1.7 !important;
+    overflow-wrap: anywhere;
+}
+
+.calculator-modal-dialog .calculator-modal-warning {
+    margin-top: 8px !important;
+    color: #9297a0 !important;
+    font-size: 12px !important;
+}
+
+.calculator-modal-actions {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    margin-top: 28px !important;
+}
+
+.calculator-modal-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px !important;
+    padding: 11px 20px !important;
+    border-radius: 9px !important;
+    font-size: 13px !important;
+    font-weight: 650 !important;
+    transition: background 0.18s ease, border-color 0.18s ease,
+        transform 0.18s ease;
+}
+
+.calculator-modal-actions .btn-secondary-light {
+    border: 1px solid #dfe2e7 !important;
+    background: #ffffff !important;
+    color: #343840 !important;
+}
+
+.calculator-modal-actions .btn-secondary-light:hover {
+    border-color: #bfc4cc !important;
+    background: #f5f6f8 !important;
+}
+
+.calculator-modal-actions .btn-danger {
+    border: 1px solid #292c31 !important;
+    background: #292c31 !important;
+    color: #ffffff !important;
+}
+
+.calculator-modal-actions .btn-danger:hover {
+    border-color: #b42332 !important;
+    background: #b42332 !important;
+}
+
+.calculator-modal-actions button:focus-visible {
+    outline: 3px solid rgba(85, 91, 101, 0.25);
+    outline-offset: 3px;
+}
+
+@keyframes calculatorModalIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 480px) {
+    .calculator-modal {
+        padding: 16px !important;
+    }
+
+    .calculator-modal-dialog {
+        padding: 26px 20px !important;
+        border-radius: 15px !important;
+    }
+
+    .calculator-modal-actions {
+        flex-direction: column-reverse !important;
+        gap: 10px !important;
+    }
+
+    .calculator-modal-actions button {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .calculator-modal-dialog {
+        animation: none;
+    }
+}

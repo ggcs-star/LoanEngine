@@ -63,7 +63,7 @@
     {{-- Short Description: required database column --}}
     <div class="form-field full-width">
         <label for="calculator-short-description" class="form-label">
-            Short Description <span class="required-mark">*</span>
+            Short Description <span class="form-help">(Optional)</span>
         </label>
 
         <textarea
@@ -73,7 +73,6 @@
             rows="3"
             maxlength="1000"
             placeholder="Briefly explain what this calculator does..."
-            required
         >{{ old('short_description', $calculator->short_description ?? '') }}</textarea>
 
         @error('short_description')

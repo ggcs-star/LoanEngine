@@ -77,16 +77,16 @@ class JourneyService
 
     public function statistics(): array
     {
-        $counts = ToolJourney::query()
-            ->select('status')
-            ->selectRaw('COUNT(*) as aggregate')
-            ->groupBy('status')
-            ->pluck('aggregate', 'status');
-
         return [
-            'total' => (int) $counts->sum(),
-            'active' => (int) ($counts['active'] ?? 0),
-            'inactive' => (int) ($counts['inactive'] ?? 0),
+            'total' => ToolJourney::query()->count(),
+
+            'active' => ToolJourney::query()
+                ->where('status', 'active')
+                ->count(),
+
+            'inactive' => ToolJourney::query()
+                ->where('status', 'inactive')
+                ->count(),
         ];
     }
 

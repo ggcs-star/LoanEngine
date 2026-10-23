@@ -4,9 +4,8 @@
 @section('title', 'Tool Details')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/admin-tools.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tools-admin.css') }}">
 @endpush
-
 @section('content')
 <div class="tools-page">
     <div class="tools-page-header">

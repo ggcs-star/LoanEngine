@@ -94,16 +94,16 @@ class JourneyStepService
 
     public function statistics(): array
     {
-        $counts = JourneyStep::query()
-            ->select('status')
-            ->selectRaw('COUNT(*) as aggregate')
-            ->groupBy('status')
-            ->pluck('aggregate', 'status');
-
         return [
-            'total' => (int) $counts->sum(),
-            'active' => (int) ($counts['active'] ?? 0),
-            'inactive' => (int) ($counts['inactive'] ?? 0),
+            'total' => JourneyStep::query()->count(),
+
+            'active' => JourneyStep::query()
+                ->where('status', 'active')
+                ->count(),
+
+            'inactive' => JourneyStep::query()
+                ->where('status', 'inactive')
+                ->count(),
         ];
     }
 

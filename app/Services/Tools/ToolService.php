@@ -87,17 +87,20 @@ class ToolService
 
     public function statistics(): array
     {
-        $counts = Tool::query()
-            ->select('status')
-            ->selectRaw('COUNT(*) as aggregate')
-            ->groupBy('status')
-            ->pluck('aggregate', 'status');
-
         return [
-            'total' => (int) $counts->sum(),
-            'active' => (int) ($counts[Tool::STATUS_ACTIVE] ?? 0),
-            'planned' => (int) ($counts[Tool::STATUS_PLANNED] ?? 0),
-            'inactive' => (int) ($counts[Tool::STATUS_INACTIVE] ?? 0),
+            'total' => Tool::query()->count(),
+
+            'active' => Tool::query()
+                ->where('status', Tool::STATUS_ACTIVE)
+                ->count(),
+
+            'planned' => Tool::query()
+                ->where('status', Tool::STATUS_PLANNED)
+                ->count(),
+
+            'inactive' => Tool::query()
+                ->where('status', Tool::STATUS_INACTIVE)
+                ->count(),
         ];
     }
 
@@ -123,7 +126,9 @@ class ToolService
                 $data['slug'] ?? $data['name'],
                 $data['tool_id'] ?? null
             ),
-            'short_description' => trim($data['short_description']),
+            'short_description' => filled($data['short_description'] ?? null)
+                ? trim($data['short_description'])
+                : null,
             'icon' => $data['icon'],
             'category' => $data['category'],
             'type' => $data['type'],

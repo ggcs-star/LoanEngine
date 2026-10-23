@@ -34,7 +34,7 @@ class CalculatorRequest extends FormRequest
             ],
 
             'short_description' => [
-                'required',
+                'nullable',
                 'string',
                 'max:1000',
             ],
