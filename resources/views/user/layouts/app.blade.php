@@ -113,12 +113,12 @@
                     <strong>@yield('page_heading', 'Dashboard')</strong>
                 </nav>
             <div class="topbar-heading">
-                <span class="topbar-eyebrow">
+                <!-- <span class="topbar-eyebrow">
                     {{ strtoupper($siteSettings->site_name ?? 'LoanEngine') }}
                     / USER WORKSPACE
                 </span>
 
-                <h1>@yield('page_heading', 'Dashboard')</h1>
+                <h1>@yield('page_heading', 'Dashboard')</h1> -->
             </div>
 
             {{-- Logged-in user profile --}}
