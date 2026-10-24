@@ -957,17 +957,25 @@
     letter-spacing: -.045em;
 }
 .ffc .ffc-hero p { max-width: 700px; color: #d2d6dd; font-size: 14px; line-height: 1.8; }
+
 .ffc .ffc-hero .ffc-btn-primary {
     flex: 0 0 auto;
     min-height: 48px;
     padding: 13px 19px;
-    border: 1px solid #fff;
+    border: 1px solid var(--primary-color, var(--u-primary));
     border-radius: 12px;
-    background: #fff;
-    color: #111318;
+    background: var(--primary-color, var(--u-primary));
+    color: var(--button-text-color, #ffffff);
     box-shadow: 0 8px 20px rgba(0,0,0,.12);
 }
-.ffc .ffc-hero .ffc-btn-primary:hover { background: #e5e7eb; border-color: #e5e7eb; opacity: 1; }
+
+.ffc .ffc-hero .ffc-btn-primary:hover {
+    background: var(--primary-hover-color, var(--u-primary));
+    border-color: var(--primary-hover-color, var(--u-primary));
+    color: var(--button-text-color, #ffffff);
+    opacity: 1;
+}
+
 .ffc .ffc-tabs { width: 100%; padding: 5px; margin-bottom: 20px; border-radius: 13px; }
 .ffc .ffc-tab { flex: 0 0 auto; padding: 11px 20px; }
 .ffc .ffc-tab.is-active { box-shadow: 0 1px 4px rgba(17,24,39,.1); }

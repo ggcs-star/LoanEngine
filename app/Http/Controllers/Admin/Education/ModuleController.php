@@ -37,98 +37,107 @@ class ModuleController extends Controller
     ) {
     }
 
-    /**
-     * Display all education modules.
-     */
     public function index(Request $request): View
     {
-        $filters = $request->validate([
-            'search' => ['nullable', 'string', 'max:180'],
-            'category' => ['nullable', 'integer', 'min:1'],
-            'status' => [
-                'nullable',
-                Rule::in(self::STATUSES),
-            ],
-            'sort' => [
-                'nullable',
-                Rule::in(self::SORT_OPTIONS),
-            ],
-        ]);
+        try {
+            $filters = $request->validate([
+                'search' => ['nullable', 'string', 'max:180'],
+                'category' => ['nullable', 'integer', 'min:1'],
+                'status' => [
+                    'nullable',
+                    Rule::in(self::STATUSES),
+                ],
+                'sort' => [
+                    'nullable',
+                    Rule::in(self::SORT_OPTIONS),
+                ],
+            ]);
 
-        $modules = EducationModule::query()
-            ->with('category')
-            ->withCount('lessons')
-            ->when(
-                filled($filters['search'] ?? null),
-                function ($query) use ($filters): void {
-                    $search = trim($filters['search']);
+            $modules = EducationModule::query()
+                ->with('category')
+                ->withCount('lessons')
+                ->when(
+                    filled($filters['search'] ?? null),
+                    function ($query) use ($filters): void {
+                        $search = trim($filters['search']);
 
-                    $query->where(function ($subQuery) use ($search): void {
-                        $subQuery
-                            ->where('title', 'like', "%{$search}%")
-                            ->orWhere('slug', 'like', "%{$search}%");
-                    });
-                }
-            )
-            ->when(
-                filled($filters['category'] ?? null),
-                fn ($query) => $query->where(
-                    'education_category_id',
-                    $filters['category']
+                        $query->where(function ($subQuery) use ($search): void {
+                            $subQuery
+                                ->where('title', 'like', "%{$search}%")
+                                ->orWhere('slug', 'like', "%{$search}%");
+                        });
+                    }
                 )
-            )
-            ->when(
-                filled($filters['status'] ?? null),
-                fn ($query) => $query->where(
-                    'status',
-                    $filters['status']
+                ->when(
+                    filled($filters['category'] ?? null),
+                    fn ($query) => $query->where(
+                        'education_category_id',
+                        $filters['category']
+                    )
                 )
-            )
-            ->when(
-                ($filters['sort'] ?? 'default') === 'latest',
-                fn ($query) => $query->orderByDesc('created_at')
-            )
-            ->when(
-                ($filters['sort'] ?? 'default') === 'oldest',
-                fn ($query) => $query->orderBy('created_at')
-            )
-            ->when(
-                ($filters['sort'] ?? 'default') === 'title',
-                fn ($query) => $query->orderBy('title')
-            )
-            ->when(
-                ($filters['sort'] ?? 'default') === 'default',
-                fn ($query) => $query
-                    ->orderBy('sort_order')
-                    ->orderByDesc('id')
-            )
-            ->paginate(self::PER_PAGE)
-            ->withQueryString();
+                ->when(
+                    filled($filters['status'] ?? null),
+                    fn ($query) => $query->where(
+                        'status',
+                        $filters['status']
+                    )
+                )
+                ->when(
+                    ($filters['sort'] ?? 'default') === 'latest',
+                    fn ($query) => $query->orderByDesc('created_at')
+                )
+                ->when(
+                    ($filters['sort'] ?? 'default') === 'oldest',
+                    fn ($query) => $query->orderBy('created_at')
+                )
+                ->when(
+                    ($filters['sort'] ?? 'default') === 'title',
+                    fn ($query) => $query->orderBy('title')
+                )
+                ->when(
+                    ($filters['sort'] ?? 'default') === 'default',
+                    fn ($query) => $query
+                        ->orderBy('sort_order')
+                        ->orderByDesc('id')
+                )
+                ->paginate(self::PER_PAGE)
+                ->withQueryString();
 
-        $categories = $this->getActiveCategories();
+            $categories = $this->getActiveCategories();
 
-        return view(
-            'admin.education.modules.index',
-            compact('modules', 'categories', 'filters')
-        );
+            return view(
+                'admin.education.modules.index',
+                compact('modules', 'categories', 'filters')
+            );
+    
+        } catch (Throwable $exception) {
+            Log::error('Education module listing failed.', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            throw $exception;
+        }
     }
 
-    /**
-     * Show the module creation form.
-     */
     public function create(): View
     {
-        $categories = $this->getActiveCategories();
+        try {
+            $categories = $this->getActiveCategories();
 
-        return view(
-            'admin.education.modules.create',
-            compact('categories')
-        );
+            return view(
+                'admin.education.modules.create',
+                compact('categories')
+            );
+    
+        } catch (Throwable $exception) {
+            Log::error('Education module create form failed.', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            throw $exception;
+        }
     }
 
-    /**
-     * Store a new education module.
-     */
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateModule($request);
@@ -177,36 +186,45 @@ class ModuleController extends Controller
             ->with('success', 'Education module created successfully.');
     }
 
-    /**
-     * Display one education module.
-     */
     public function show(EducationModule $module): View
     {
-        $module->load('category');
-        $module->loadCount('lessons');
+        try {
+            $module->load('category');
+            $module->loadCount('lessons');
 
-        return view(
-            'admin.education.modules.show',
-            compact('module')
-        );
+            return view(
+                'admin.education.modules.show',
+                compact('module')
+            );
+    
+        } catch (Throwable $exception) {
+            Log::error('Education module details failed.', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            throw $exception;
+        }
     }
 
-    /**
-     * Show the module edit form.
-     */
     public function edit(EducationModule $module): View
     {
-        $categories = $this->getActiveCategories();
+        try {
+            $categories = $this->getActiveCategories();
 
-        return view(
-            'admin.education.modules.edit',
-            compact('module', 'categories')
-        );
+            return view(
+                'admin.education.modules.edit',
+                compact('module', 'categories')
+            );
+    
+        } catch (Throwable $exception) {
+            Log::error('Education module edit form failed.', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            throw $exception;
+        }
     }
 
-    /**
-     * Update an existing education module.
-     */
     public function update(
         Request $request,
         EducationModule $module
@@ -280,9 +298,6 @@ class ModuleController extends Controller
             ->with('success', 'Education module updated successfully.');
     }
 
-    /**
-     * Delete one module if it has no lessons.
-     */
     public function destroy(
         EducationModule $module
     ): RedirectResponse {
@@ -335,10 +350,6 @@ class ModuleController extends Controller
             ->with('success', 'Education module deleted successfully.');
     }
 
-    /**
-     * Bulk-delete selected modules that have no lessons.
-     */
-    
     public function bulkDestroy(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -428,10 +439,6 @@ class ModuleController extends Controller
     }
 
 
-    /**
-     * Validate create/update data.
-     */
-    
     private function validateModule(
         Request $request,
         ?EducationModule $module = null
@@ -478,9 +485,6 @@ class ModuleController extends Controller
     }
 
 
-    /**
-     * Get active education categories.
-     */
     private function getActiveCategories()
     {
         return EducationCategory::query()
@@ -489,9 +493,6 @@ class ModuleController extends Controller
             ->get();
     }
 
-    /**
-     * Generate a unique slug.
-     */
     private function generateSlug(
         string $value,
         ?int $ignoreId = null
@@ -521,9 +522,6 @@ class ModuleController extends Controller
         return $slug;
     }
 
-    /**
-     * Store the uploaded thumbnail.
-     */
     private function storeThumbnail(UploadedFile $file): string
     {
         return $this->media->store(
@@ -532,9 +530,6 @@ class ModuleController extends Controller
         );
     }
 
-    /**
-     * Delete a thumbnail from storage.
-     */
     private function deleteThumbnail(?string $path): void
     {
         $this->media->delete($path);

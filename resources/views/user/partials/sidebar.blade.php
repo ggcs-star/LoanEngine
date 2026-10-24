@@ -162,19 +162,20 @@
 
     {{-- Sidebar Bottom --}}
     <div class="sidebar-bottom">
+       
+    <a href="{{ route('user.profile.show') }}" class="sidebar-user sidebar-user-link">
 
-        <div class="sidebar-user">
-
-            <div class="sidebar-avatar">
-                {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
-            </div>
-
-            <div class="sidebar-user-copy">
-                <strong>{{ auth()->user()->name ?? 'User' }}</strong>
-                <small>{{ auth()->user()->email ?? '' }}</small>
-            </div>
-
+        <div class="sidebar-avatar">
+            {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
         </div>
+
+        <div class="sidebar-user-copy">
+            <strong>{{ auth()->user()->name ?? 'User' }}</strong>
+            <small>{{ auth()->user()->email ?? '' }}</small>
+        </div>
+
+    </a>
+
 
         {{-- Logout --}}
         <form method="POST" action="{{ route('auth.logout') }}">

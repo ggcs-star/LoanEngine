@@ -39,23 +39,36 @@
         rel="stylesheet"
     >
 
-    {{-- Dynamic website theme colors --}}
+    
     <style>
         :root {
-            --primary-color: {{ $siteSettings->primary_color ?? '#2563eb' }};
-            --primary-hover-color: {{ $siteSettings->primary_hover_color ?? '#1d4ed8' }};
-            --accent-color: {{ $siteSettings->accent_color ?? '#0ea5e9' }};
-            --button-text-color: {{ $siteSettings->button_text_color ?? '#ffffff' }};
+            --primary-color: {{ $siteSettings->primary_color ?: '#262626' }};
+            --primary-hover-color: {{ $siteSettings->primary_hover_color ?: '#404040' }};
+            --accent-color: {{ $siteSettings->accent_color ?: '#525252' }};
+            --button-text-color: {{ $siteSettings->button_text_color ?: '#ffffff' }};
 
-            --sidebar-color: {{ $siteSettings->sidebar_color ?? '#ffffff' }};
-            --sidebar-text-color: {{ $siteSettings->sidebar_text_color ?? '#1f2937' }};
+            --sidebar-color: {{ $siteSettings->sidebar_color ?: '#262626' }};
+            --sidebar-text-color: {{ $siteSettings->sidebar_text_color ?: '#ffffff' }};
 
-            --page-background-color: {{ $siteSettings->page_background_color ?? '#f3f4f6' }};
-            --card-color: {{ $siteSettings->card_color ?? '#ffffff' }};
-            --text-color: {{ $siteSettings->text_color ?? '#111827' }};
-            --border-color: {{ $siteSettings->border_color ?? '#e5e7eb' }};
+            --page-background-color: {{ $siteSettings->page_background_color ?: '#f5f5f5' }};
+            --card-color: {{ $siteSettings->card_color ?: '#ffffff' }};
+            --text-color: {{ $siteSettings->text_color ?: '#262626' }};
+            --border-color: {{ $siteSettings->border_color ?: '#e5e5e5' }};
+        }
+
+        .user-app {
+            --u-sidebar-bg: var(--sidebar-color);
+            --u-sidebar-text: var(--sidebar-text-color);
+            --u-sidebar-hover: var(--primary-hover-color);
+            --u-sidebar-active: var(--primary-color);
+
+            --u-bg: var(--page-background-color);
+            --u-surface: var(--card-color);
+            --u-text: var(--text-color);
+            --u-border: var(--border-color);
         }
     </style>
+
 
     {{-- Existing user-side CSS --}}
     <link rel="stylesheet" href="{{ asset('css/user-theme.css') }}">

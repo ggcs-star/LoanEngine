@@ -157,7 +157,7 @@
         </div>
 
 
-        <div class="le-v2-hero-summary">
+        <!-- <div class="le-v2-hero-summary">
             <div class="le-v2-date">
                 <span class="le-v2-date-icon">▦</span>
                 <span><strong>{{ now()->format('D, d M Y') }}</strong><small>Your workspace at a glance</small></span>
@@ -170,7 +170,7 @@
             <a href="{{ route('admin.education.categories.index') }}" class="le-v2-primary-button">
                 Manage Education <span>→</span>
             </a>
-        </div>
+        </div> -->
     </section>
 
     <section class="le-v2-kpis" aria-label="Workspace statistics">

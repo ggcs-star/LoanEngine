@@ -5531,3 +5531,75 @@
     }
 }
 
+.le-calculator-home .le-calc-hero-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    min-height: 49px;
+    margin-top: 16px;
+    padding: 0 21px;
+    border: 1px solid var(--u-primary, #191b20);
+    border-radius: 9px;
+    background: var(--u-primary, #191b20);
+    color: var(--u-primary-text, #fff) !important;
+    font-size: 14px;
+    font-weight: 750;
+    text-decoration: none !important;
+    transition: background .2s ease, transform .2s ease;
+}
+
+.le-calculator-home .le-calc-hero-button:hover {
+    transform: translateY(-2px);
+    background: var(--u-primary-hover, #343840);
+    border-color: var(--u-primary-hover, #343840);
+    color: var(--u-primary-text, #fff) !important;
+}
+
+/* Recommended Calculators — dynamic theme buttons */
+.le-calculator-recommendations .le-rec-primary-btn,
+.le-calculator-recommendations .le-rec-card-footer > a,
+.le-calculator-recommendations .le-rec-bottom > a,
+.le-calculator-recommendations .le-rec-empty > a {
+    --rec-primary: var(--u-primary, #191b20);
+    --rec-hover: var(--u-primary-hover, #30343b);
+}
+
+/* Main Explore button */
+.le-calculator-recommendations .le-rec-primary-btn {
+    background: var(--u-primary, #191b20) !important;
+    border-color: var(--u-primary, #191b20) !important;
+    color: var(--u-primary-text, #ffffff) !important;
+    -webkit-text-fill-color: var(--u-primary-text, #ffffff) !important;
+}
+
+.le-calculator-recommendations .le-rec-primary-btn:hover {
+    background: var(--u-primary-hover, #30343b) !important;
+    border-color: var(--u-primary-hover, #30343b) !important;
+}
+
+/* Calculator card links */
+.le-calculator-recommendations .le-rec-card-footer > a {
+    color: var(--u-primary, #191b20) !important;
+}
+
+.le-calculator-recommendations .le-rec-card-footer > a .le-rec-arrow {
+    background: var(--u-primary, #191b20) !important;
+    border-color: var(--u-primary, #191b20) !important;
+    color: var(--u-primary-text, #ffffff) !important;
+}
+
+.le-calculator-recommendations .le-rec-card-footer > a:hover .le-rec-arrow {
+    background: var(--u-primary-hover, #30343b) !important;
+    border-color: var(--u-primary-hover, #30343b) !important;
+}
+
+/* Bottom Get started and empty-state link */
+.le-calculator-recommendations .le-rec-bottom > a,
+.le-calculator-recommendations .le-rec-empty > a {
+    color: var(--u-primary, #191b20) !important;
+}
+
+.le-calculator-recommendations .le-rec-bottom > a:hover {
+    color: var(--u-primary-hover, #30343b) !important;
+}

@@ -21,9 +21,6 @@ class ToolController extends Controller
     ) {
     }
 
-    /**
-     * Display the tools management page.
-     */
     public function index(Request $request): View
     {
         $filters = $request->validate([
@@ -58,9 +55,6 @@ class ToolController extends Controller
         ]);
     }
 
-    /**
-     * Show the create tool form.
-     */
     public function create(): View
     {
         return view('admin.tools.create', [
@@ -69,9 +63,6 @@ class ToolController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created tool.
-     */
     public function store(ToolRequest $request): RedirectResponse
     {
         try {
@@ -96,77 +87,67 @@ class ToolController extends Controller
         }
     }
 
-    
-/**
- * Display the details of a tool.
- */
-public function show(Tool $tool): View
-{
-    $tool->load('journeys');
 
-    return view('admin.tools.show', [
-        'tool' => $tool,
-    ]);
-}
+    public function show(Tool $tool): View
+    {
+        $tool->load('journeys');
 
-/**
- * Delete multiple selected tools.
- */
-public function bulkDestroy(Request $request): RedirectResponse
-{
-    $validated = $request->validate([
-        'ids' => ['required', 'array', 'min:1'],
-        'ids.*' => [
-            'required',
-            'integer',
-            'distinct',
-            'min:1',
-        ],
-    ]);
-
-    $ids = array_map('intval', $validated['ids']);
-
-    $tools = Tool::query()
-        ->whereIn('id', $ids)
-        ->get();
-
-    if ($tools->count() !== count($ids)) {
-        return back()
-            ->withInput()
-            ->with('error', 'One or more selected tools could not be found.');
+        return view('admin.tools.show', [
+            'tool' => $tool,
+        ]);
     }
 
-    try {
-        DB::transaction(function () use ($tools): void {
-            foreach ($tools as $tool) {
-                // Reuse the existing deletion logic.
-                $this->toolService->delete($tool);
-            }
-        });
-
-        return redirect()
-            ->route('admin.tools.index')
-            ->with(
-                'success',
-                $tools->count() . ' tools deleted successfully.'
-            );
-    } catch (Throwable $exception) {
-        Log::error('Failed to bulk delete tools.', [
-            'tool_ids' => $ids,
-            'exception' => $exception,
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => [
+                'required',
+                'integer',
+                'distinct',
+                'min:1',
+            ],
         ]);
 
-        return back()->with(
-            'error',
-            'Unable to delete the selected tools. Please try again.'
-        );
+        $ids = array_map('intval', $validated['ids']);
+
+        $tools = Tool::query()
+            ->whereIn('id', $ids)
+            ->get();
+
+        if ($tools->count() !== count($ids)) {
+            return back()
+                ->withInput()
+                ->with('error', 'One or more selected tools could not be found.');
+        }
+
+        try {
+            DB::transaction(function () use ($tools): void {
+                foreach ($tools as $tool) {
+                    // Reuse the existing deletion logic.
+                    $this->toolService->delete($tool);
+                }
+            });
+
+            return redirect()
+                ->route('admin.tools.index')
+                ->with(
+                    'success',
+                    $tools->count() . ' tools deleted successfully.'
+                );
+        } catch (Throwable $exception) {
+            Log::error('Failed to bulk delete tools.', [
+                'tool_ids' => $ids,
+                'exception' => $exception,
+            ]);
+
+            return back()->with(
+                'error',
+                'Unable to delete the selected tools. Please try again.'
+            );
+        }
     }
-}
 
-
-    /**
-     * Show the edit tool form.
-     */
     public function edit(Tool $tool): View
     {
         $tool->load('journeys:id,name,slug');
@@ -177,9 +158,6 @@ public function bulkDestroy(Request $request): RedirectResponse
         ]);
     }
 
-    /**
-     * Update an existing tool.
-     */
     public function update(
         ToolRequest $request,
         Tool $tool
@@ -208,9 +186,6 @@ public function bulkDestroy(Request $request): RedirectResponse
         }
     }
 
-    /**
-     * Delete a tool.
-     */
     public function destroy(Tool $tool): RedirectResponse
     {
         try {
@@ -232,9 +207,6 @@ public function bulkDestroy(Request $request): RedirectResponse
         }
     }
 
-    /**
-     * Return journeys available for selection.
-     */
     private function availableJourneys()
     {
         return ToolJourney::query()
