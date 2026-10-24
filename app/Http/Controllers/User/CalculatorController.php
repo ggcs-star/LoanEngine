@@ -3,24 +3,31 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Calculator as CalculatorModel;
 use App\Models\Tool;
+use App\Services\Calculators\EmiVsTenureCalculator;
 use App\Services\Calculators\HomeAffordabilityCalculator;
 use App\Services\Calculators\HomeLoanEmiCalculator;
 use App\Services\Calculators\HomeLoanEligibilityCalculator;
-use App\Services\Calculators\StampDutyCalculator;
-use App\Services\Calculators\LoanPrepaymentCalculator;
 use App\Services\Calculators\InterestRateCalculator;
-use App\Services\Calculators\EmiVsTenureCalculator;
+use App\Services\Calculators\LoanPrepaymentCalculator;
+use App\Services\Calculators\StampDutyCalculator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class CalculatorController extends Controller
 {
-    private const HOME_AFFORDABILITY = 'home-affordability-calculator';
-    private const HOME_LOAN_EMI = 'home-loan-emi-calculator';
+    private function resolveCalculator(Tool $tool): CalculatorModel
+    {
+        return CalculatorModel::query()
+            ->where('slug', $tool->slug)
+            ->where('status', 'active')
+            ->whereNotNull('formula_type')
+            ->firstOrFail();
+    }
 
-    private function defaults(): array
+    private function affordabilityDefaults(): array
     {
         return [
             'property_price' => 10000000,
@@ -48,164 +55,161 @@ class CalculatorController extends Controller
         ];
     }
 
-    
+    private function defaultsFor(string $formulaType): array
+    {
+        return match ($formulaType) {
+            'home_affordability' => $this->affordabilityDefaults(),
+
+            'home_loan_emi' => $this->emiDefaults(),
+
+            'home_loan_eligibility' => [
+                'loan_type' => 'home',
+                'monthly_income' => 100000,
+                'existing_emi' => 0,
+                'property_value' => 7500000,
+                'down_payment' => 1500000,
+                'foir_percent' => 50,
+                'ltv_percent' => 80,
+                'interest_rate' => 8.5,
+                'tenure_years' => 20,
+                'calculation_method' => 'standard',
+            ],
+
+            'emi_vs_tenure' => [
+                'loan_amount' => 7000000,
+                'interest_rate' => 8.5,
+                'tenure_years' => 20,
+            ],
+
+            'stamp_duty' => [
+                'property_value' => 5000000,
+                'state' => 'Gujarat',
+                'property_type' => 'residential_flat',
+                'buyer_category' => 'male',
+                'stamp_duty_method' => 'percentage',
+                'stamp_duty_rate' => 5,
+                'registration_type' => 'fixed',
+                'registration_value' => 30000,
+                'other_charges' => 15000,
+            ],
+
+            'interest_rate' => [
+                'monthly_emi' => 20000,
+                'loan_amount' => 400000,
+                'tenure_value' => 2,
+                'tenure_unit' => 'years',
+            ],
+
+            'loan_prepayment' => [
+                'outstanding_loan' => 22500000,
+                'interest_rate' => 8.55,
+                'remaining_tenure' => 215,
+                'prepayment_strategy' => 'one_time',
+                'prepayment_amount' => 500000,
+                'strategy_goal' => 'reduce_tenure',
+            ],
+
+            default => [],
+        };
+    }
+
+    private function viewFor(string $formulaType): string
+    {
+        return match ($formulaType) {
+            'home_affordability' => 'user.calculators.show',
+            'home_loan_emi' => 'user.calculators.emi',
+            'home_loan_eligibility' => 'user.calculators.eligibility',
+            'emi_vs_tenure' => 'user.calculators.emi-vs-tenure',
+            'stamp_duty' => 'user.calculators.stamp-duty',
+            'interest_rate' => 'user.calculators.interest-rate',
+            'loan_prepayment' => 'user.calculators.prepayment',
+            default => abort(404, 'Calculator formula is not supported.'),
+        };
+    }
+
     public function show(
+        Request $request,
         Tool $tool,
-        HomeLoanEmiCalculator $emiCalculator,
-            EmiVsTenureCalculator $emiVsTenureCalculator
-
-
+        EmiVsTenureCalculator $emiVsTenureCalculator
     ): View|RedirectResponse {
         abort_unless($tool->isActive(), 404);
 
-        if ($tool->slug === 'home-loan-emi-calculator') {
-            $inputs = $this->emiDefaults();
+        $calculator = $this->resolveCalculator($tool);
+        $formulaType = $calculator->formula_type;
+        $inputs = $this->defaultsFor($formulaType);
+        $result = null;
 
-            return view('user.calculators.emi', [
-                'tool' => $tool,
-                'inputs' => $inputs,
-                'result' => null,
-            ]);
-        }
-
-        if ($tool->slug === 'home-affordability-calculator') {
-            return view('user.calculators.show', [
-                'tool' => $tool,
-                'inputs' => $this->defaults(),
-                'result' => null,
-            ]);
-        }
-        if ($tool->slug === 'home-loan-eligibility-calculator') {
-            return view('user.calculators.eligibility', [
-                'tool' => $tool,
-                'inputs' => [
-                    'monthly_income' => 100000,
-                    'existing_emi' => 0,
-                    'property_value' => 7500000,
-                    'down_payment' => 1500000,
-                    'foir_percent' => 50,
-                    'ltv_percent' => 80,
-                    'interest_rate' => 8.5,
-                    'tenure_years' => 20,
+        if ($formulaType === 'emi_vs_tenure' && $request->has('calculate')) {
+            $validated = $request->validate([
+                'loan_amount' => [
+                    'required',
+                    'numeric',
+                    'min:1000000',
+                    'max:10000000',
                 ],
-                'result' => null,
+                'interest_rate' => [
+                    'required',
+                    'numeric',
+                    'min:5',
+                    'max:15',
+                ],
+                'tenure_years' => [
+                    'required',
+                    'integer',
+                    'in:10,15,20,25,30',
+                ],
             ]);
+
+            $inputs = array_merge($inputs, $validated);
+            $result = $emiVsTenureCalculator->calculate($inputs);
         }
 
-      // New EMI vs Tenure Calculator
-    if ($tool->slug === 'emi-vs-tenure-calculator') {
-        $inputs = $emiVsTenureCalculator->defaults();
-
-        return view('user.calculators.emi-vs-tenure', [
+        return view($this->viewFor($formulaType), [
             'tool' => $tool,
             'inputs' => $inputs,
-            'result' => $emiVsTenureCalculator->calculate($inputs),
+            'result' => $result,
         ]);
     }
 
-        if ($tool->slug === 'stamp-duty-calculator') {
-            return view('user.calculators.stamp-duty', [
-                'tool' => $tool,
-                'inputs' => [
-                    'property_value' => 5000000,
-                    'state' => 'Gujarat',
-                    'property_type' => 'residential_flat',
-                    'buyer_category' => 'male',
-                    'stamp_duty_method' => 'percentage',
-                    'stamp_duty_rate' => 5,
-                    'registration_type' => 'fixed',
-                    'registration_value' => 30000,
-                    'other_charges' => 15000,
-                ],
-                'result' => null,
-            ]);
-        }
-        if ($tool->slug === 'interest-rate-calculator') {
-            return view('user.calculators.interest-rate', [
-                'tool' => $tool,
-                'inputs' => [
-                    'monthly_emi' => 20000,
-                    'loan_amount' => 400000,
-                    'tenure_value' => 2,
-                    'tenure_unit' => 'years',
-                ],
-                'result' => null,
-            ]);
-        }
-        if (in_array($tool->slug, [
-            'prepayment-calculator',
-            'loan-prepayment-calculator',
-        ], true)) {
-            return view('user.calculators.prepayment', [
-                'tool' => $tool,
-                'inputs' => [
-                    'outstanding_loan' => 22500000,
-                    'interest_rate' => 8.55,
-                    'remaining_tenure' => 215,
-                    'prepayment_strategy' => 'one_time',
-                    'prepayment_amount' => 500000,
-                    'strategy_goal' => 'reduce_tenure',
-                ],
-                'result' => null,
-            ]);
-        }
-
-        return redirect()
-            ->route('user.tools.show', $tool->slug)
-            ->with(
-                'info',
-                'This calculator needs its own calculation logic.'
-            );
-    }
-
-
-    
-        public function calculate(
-            Request $request,
-            Tool $tool,
-            HomeAffordabilityCalculator $calculator,
-            HomeLoanEmiCalculator $emiCalculator,
-            HomeLoanEligibilityCalculator $eligibilityCalculator,
-            StampDutyCalculator $stampDutyCalculator,
-            EmiVsTenureCalculator $emiVsTenureCalculator,
-            InterestRateCalculator $interestRateCalculator,
-            LoanPrepaymentCalculator $prepaymentCalculator
-        ): View|RedirectResponse {
-
+    public function calculate(
+        Request $request,
+        Tool $tool,
+        HomeAffordabilityCalculator $affordabilityCalculator,
+        HomeLoanEmiCalculator $emiCalculator,
+        HomeLoanEligibilityCalculator $eligibilityCalculator,
+        StampDutyCalculator $stampDutyCalculator,
+        InterestRateCalculator $interestRateCalculator,
+        LoanPrepaymentCalculator $prepaymentCalculator,
+        EmiVsTenureCalculator $emiVsTenureCalculator
+    ): View|RedirectResponse {
         abort_unless($tool->isActive(), 404);
 
-        if ($tool->slug === self::HOME_LOAN_EMI) {
+        $calculatorRecord = $this->resolveCalculator($tool);
+        $formulaType = $calculatorRecord->formula_type;
+
+        if ($formulaType === 'home_loan_emi') {
+            $loanType = $request->input('loan_type', 'home');
+
             $validated = $request->validate([
                 'loan_type' => ['required', 'in:home,personal'],
-
                 'loan_amount' => [
                     'required',
                     'numeric',
                     'min:100000',
-                    'max:' . ($request->input('loan_type') === 'personal'
-                        ? 5000000
-                        : 50000000),
+                    'max:' . ($loanType === 'personal' ? 5000000 : 50000000),
                 ],
-
                 'interest_rate' => [
                     'required',
                     'numeric',
                     'min:0',
-                    'max:' . ($request->input('loan_type') === 'personal'
-                        ? 35
-                        : 20),
+                    'max:' . ($loanType === 'personal' ? 35 : 20),
                 ],
-
                 'tenure_months' => [
                     'required',
                     'integer',
                     'min:1',
-                    'max:' . ($request->input('loan_type') === 'personal'
-                        ? 84
-                        : 360),
+                    'max:' . ($loanType === 'personal' ? 84 : 360),
                 ],
-
-                // Processing fee is optional.
                 'processing_fee' => [
                     'nullable',
                     'numeric',
@@ -214,127 +218,52 @@ class CalculatorController extends Controller
                 ],
             ]);
 
-           $inputs = array_merge($this->emiDefaults(), $validated);
-
-            $inputs['processing_fee'] = (float) (
-                $validated['processing_fee'] ?? 0
-            );
+            $inputs = array_merge($this->emiDefaults(), $validated);
+            $inputs['processing_fee'] = (float) ($validated['processing_fee'] ?? 0);
 
             $result = $emiCalculator->calculate($inputs);
 
-            return view('user.calculators.emi', compact(
-                'tool',
-                'inputs',
-                'result'
-            ));
+            return view('user.calculators.emi', compact('tool', 'inputs', 'result'));
         }
 
-        if ($tool->slug === self::HOME_AFFORDABILITY) {
+        if ($formulaType === 'home_affordability') {
             $validated = $request->validate([
-                'property_price' => [
-                    'required', 'numeric', 'min:1000000', 'max:50000000',
-                ],
-                'down_payment_percent' => [
-                    'required', 'numeric', 'min:10', 'max:90',
-                ],
-                'interest_rate' => [
-                    'required', 'numeric', 'min:0', 'max:30',
-                ],
-                'tenure_years' => [
-                    'required', 'integer', 'min:1', 'max:40',
-                ],
-                'monthly_rent' => [
-                    'required', 'numeric', 'min:5000', 'max:150000',
-                ],
-                'appreciation_rate' => [
-                    'required', 'numeric', 'min:-10', 'max:20',
-                ],
-                'rent_increase_rate' => [
-                    'required', 'numeric', 'min:-10', 'max:20',
-                ],
-                'investment_return' => [
-                    'required', 'numeric', 'min:-10', 'max:30',
-                ],
-                'inflation_rate' => [
-                    'required', 'numeric', 'min:-10', 'max:30',
-                ],
-                'maintenance_percent' => [
-                    'required', 'numeric', 'min:0', 'max:10',
-                ],
-                'analysis_years' => [
-                    'required', 'integer', 'min:5', 'max:30',
-                ],
+                'property_price' => ['required', 'numeric', 'min:1000000', 'max:50000000'],
+                'down_payment_percent' => ['required', 'numeric', 'min:10', 'max:90'],
+                'interest_rate' => ['required', 'numeric', 'min:0', 'max:30'],
+                'tenure_years' => ['required', 'integer', 'min:1', 'max:40'],
+                'monthly_rent' => ['required', 'numeric', 'min:5000', 'max:150000'],
+                'appreciation_rate' => ['required', 'numeric', 'min:-10', 'max:20'],
+                'rent_increase_rate' => ['required', 'numeric', 'min:-10', 'max:20'],
+                'investment_return' => ['required', 'numeric', 'min:-10', 'max:30'],
+                'inflation_rate' => ['required', 'numeric', 'min:-10', 'max:30'],
+                'maintenance_percent' => ['required', 'numeric', 'min:0', 'max:10'],
+                'analysis_years' => ['required', 'integer', 'min:5', 'max:30'],
             ]);
-            
 
-            $inputs = array_merge($this->defaults(), $validated);
-            $result = $calculator->calculate($inputs);
+            $inputs = array_merge($this->affordabilityDefaults(), $validated);
+            $result = $affordabilityCalculator->calculate($inputs);
 
-            return view('user.calculators.show', compact(
-                'tool',
-                'inputs',
-                'result'
-            ));
+            return view('user.calculators.show', compact('tool', 'inputs', 'result'));
         }
-        
-        if ($tool->slug === 'home-loan-eligibility-calculator') {
+
+        if ($formulaType === 'home_loan_eligibility') {
             $loanType = $request->input('loan_type', 'home');
 
             $validated = $request->validate([
-                'loan_type' => [
-                    'required',
-                    'in:home,personal,car',
-                ],
-
-                'monthly_income' => [
-                    'required',
-                    'numeric',
-                    'min:10000',
-                    'max:100000000',
-                ],
-
-                'existing_emi' => [
-                    'required',
-                    'numeric',
-                    'min:0',
-                    'max:100000000',
-                ],
-
-                'property_value' => [
-                    'required',
-                    'numeric',
-                    'min:100000',
-                    'max:500000000',
-                ],
-
-                'ltv_percent' => [
-                    'required',
-                    'numeric',
-                    'min:10',
-                    'max:90',
-                ],
-
-                'interest_rate' => [
-                    'required',
-                    'numeric',
-                    'min:0',
-                    'max:35',
-                ],
-
+                'loan_type' => ['required', 'in:home,personal,car'],
+                'monthly_income' => ['required', 'numeric', 'min:10000', 'max:100000000'],
+                'existing_emi' => ['required', 'numeric', 'min:0', 'max:100000000'],
+                'property_value' => ['required', 'numeric', 'min:100000', 'max:500000000'],
+                'ltv_percent' => ['required', 'numeric', 'min:10', 'max:90'],
+                'interest_rate' => ['required', 'numeric', 'min:0', 'max:35'],
                 'tenure_years' => [
                     'required',
                     'integer',
                     'min:1',
-                    'max:' . (
-                        $loanType === 'personal' ? 7 :
-                        ($loanType === 'car' ? 8 : 30)
-                    ),
+                    'max:' . ($loanType === 'personal' ? 7 : ($loanType === 'car' ? 8 : 30)),
                 ],
-
-                'calculation_method' => [
-                    'required',
-                    'in:standard,conservative,aggressive',
-                ],
+                'calculation_method' => ['required', 'in:standard,conservative,aggressive'],
             ]);
 
             $foirOptions = [
@@ -343,147 +272,97 @@ class CalculatorController extends Controller
                 'aggressive' => 60,
             ];
 
-            $validated['foir_percent'] =
-                $foirOptions[$validated['calculation_method']];
-
-            // UI mein Down Payment field nahi hai.
+            $validated['foir_percent'] = $foirOptions[$validated['calculation_method']];
             $validated['down_payment'] = 0;
 
-            
             $inputs = $validated;
-
             $result = $eligibilityCalculator->calculate($inputs);
 
-
-            return view('user.calculators.eligibility', compact(
-                'tool',
-                'inputs',
-                'result'
-            ));
+            return view('user.calculators.eligibility', compact('tool', 'inputs', 'result'));
         }
 
-        if ($tool->slug === 'stamp-duty-calculator') {
+        if ($formulaType === 'emi_vs_tenure') {
             $validated = $request->validate([
-                'property_value' => [
-                    'required', 'numeric', 'min:100000', 'max:1000000000',
-                ],
-                'state' => [
-                    'required', 'in:Andhra Pradesh,Arunachal Pradesh,Assam,Bihar,Chhattisgarh,Goa,Gujarat,Haryana,Himachal Pradesh,Jharkhand,Karnataka,Kerala,Madhya Pradesh,Maharashtra,Manipur,Meghalaya,Mizoram,Nagaland,Odisha,Punjab,Rajasthan,Sikkim,Tamil Nadu,Telangana,Tripura,Uttar Pradesh,Uttarakhand,West Bengal,Andaman and Nicobar Islands,Chandigarh,Dadra and Nagar Haveli and Daman and Diu,Delhi,Jammu and Kashmir,Ladakh,Lakshadweep,Puducherry',
-                ],
-                'property_type' => [
-                    'required', 'in:residential_flat,own_land,pent_house',
-                ],
-                'buyer_category' => [
-                    'required', 'in:male,female,joint,senior,first_time',
-                ],
-                'stamp_duty_method' => [
-                    'required', 'in:percentage,slab',
-                ],
-                
-                'stamp_duty_rate' => [
-                    'required_if:stamp_duty_method,percentage', 'nullable', 'numeric', 'min:0', 'max:20',
-                ],
+                'loan_amount' => ['required', 'numeric', 'min:1000000', 'max:10000000'],
+                'interest_rate' => ['required', 'numeric', 'min:5', 'max:15'],
+                'tenure_years' => ['required', 'integer', 'in:10,15,20,25,30'],
+            ]);
 
-                'registration_type' => [
-                    'required', 'in:fixed,percentage',
-                ],
-                'registration_value' => [
-                    'required', 'numeric', 'min:0', 'max:100000000',
-                ],
-                'other_charges' => [
-                    'required', 'numeric', 'min:0', 'max:100000000',
-                ],
+            $inputs = array_merge($this->defaultsFor($formulaType), $validated);
+            $result = $emiVsTenureCalculator->calculate($inputs);
+
+            return view('user.calculators.emi-vs-tenure', compact('tool', 'inputs', 'result'));
+        }
+
+        if ($formulaType === 'stamp_duty') {
+            $states = [
+                'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar',
+                'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh',
+                'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra',
+                'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+                'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+                'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+                'Andaman and Nicobar Islands', 'Chandigarh',
+                'Dadra and Nagar Haveli and Daman and Diu', 'Delhi',
+                'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
+            ];
+
+            $validated = $request->validate([
+                'property_value' => ['required', 'numeric', 'min:100000', 'max:1000000000'],
+                'state' => ['required', 'string', 'in:' . implode(',', $states)],
+                'property_type' => ['required', 'in:residential_flat,own_land,pent_house'],
+                'buyer_category' => ['required', 'in:male,female,joint,senior,first_time'],
+                'stamp_duty_method' => ['required', 'in:percentage,slab'],
+                'stamp_duty_rate' => ['required_if:stamp_duty_method,percentage', 'nullable', 'numeric', 'min:0', 'max:20'],
+                'registration_type' => ['required', 'in:fixed,percentage'],
+                'registration_value' => ['required', 'numeric', 'min:0', 'max:100000000'],
+                'other_charges' => ['required', 'numeric', 'min:0', 'max:100000000'],
             ]);
 
             $inputs = $validated;
-
             $result = $stampDutyCalculator->calculate($inputs);
 
-            return view('user.calculators.stamp-duty', compact(
-                'tool',
-                'inputs',
-                'result'
-            ));
+            return view('user.calculators.stamp-duty', compact('tool', 'inputs', 'result'));
         }
-        
-        if ($tool->slug === 'interest-rate-calculator') {
+
+        if ($formulaType === 'interest_rate') {
             $validated = $request->validate([
-                'monthly_emi' => [
-                    'required', 'numeric', 'min:1000', 'max:1000000',
-                ],
-                'loan_amount' => [
-                    'required', 'numeric', 'min:50000', 'max:100000000',
-                ],
-                'tenure_value' => [
-                    'required', 'integer', 'min:1',
-                ],
-                'tenure_unit' => [
-                    'required', 'in:years,months',
-                ],
+                'monthly_emi' => ['required', 'numeric', 'min:1000', 'max:1000000'],
+                'loan_amount' => ['required', 'numeric', 'min:50000', 'max:100000000'],
+                'tenure_value' => ['required', 'integer', 'min:1'],
+                'tenure_unit' => ['required', 'in:years,months'],
             ]);
 
             $maxTenure = $validated['tenure_unit'] === 'months' ? 360 : 30;
 
             if ($validated['tenure_value'] > $maxTenure) {
                 return back()
-                    ->withErrors([
-                        'tenure_value' => 'Please select a valid loan tenure.',
-                    ])
+                    ->withErrors(['tenure_value' => 'Please select a valid loan tenure.'])
                     ->withInput();
             }
 
             $inputs = $validated;
-
             $result = $interestRateCalculator->calculate($inputs);
 
-            return view('user.calculators.interest-rate', compact(
-                'tool',
-                'inputs',
-                'result'
-            ));
+            return view('user.calculators.interest-rate', compact('tool', 'inputs', 'result'));
         }
-        
-        if (in_array($tool->slug, [
-            'prepayment-calculator',
-            'loan-prepayment-calculator',
-        ], true)) {
+
+        if ($formulaType === 'loan_prepayment') {
             $validated = $request->validate([
-                'outstanding_loan' => [
-                    'required', 'numeric', 'min:10000', 'max:500000000',
-                ],
-                'interest_rate' => [
-                    'required', 'numeric', 'min:0', 'max:35',
-                ],
-                'remaining_tenure' => [
-                    'required', 'integer', 'min:1', 'max:600',
-                ],
-                'prepayment_strategy' => [
-                    'required', 'in:one_time,monthly',
-                ],
-                'prepayment_amount' => [
-                    'required', 'numeric', 'min:1', 'max:500000000',
-                ],
-                'strategy_goal' => [
-                    'required', 'in:reduce_tenure,reduce_emi',
-                ],
+                'outstanding_loan' => ['required', 'numeric', 'min:10000', 'max:500000000'],
+                'interest_rate' => ['required', 'numeric', 'min:0', 'max:35'],
+                'remaining_tenure' => ['required', 'integer', 'min:1', 'max:600'],
+                'prepayment_strategy' => ['required', 'in:one_time,monthly'],
+                'prepayment_amount' => ['required', 'numeric', 'min:1', 'max:500000000'],
+                'strategy_goal' => ['required', 'in:reduce_tenure,reduce_emi'],
             ]);
 
-    $inputs = $validated;
+            $inputs = $validated;
+            $result = $prepaymentCalculator->calculate($inputs);
 
-    $result = $prepaymentCalculator->calculate($inputs);
+            return view('user.calculators.prepayment', compact('tool', 'inputs', 'result'));
+        }
 
-    return view('user.calculators.prepayment', compact(
-        'tool',
-        'inputs',
-        'result'
-    ));
-}
-
-
-
-
-        return redirect()
-            ->route('user.tools.show', $tool->slug)
-            ->with('info', 'This calculator needs its own calculation logic.');
+        abort(404, 'No calculation handler is registered for this formula type.');
     }
 }

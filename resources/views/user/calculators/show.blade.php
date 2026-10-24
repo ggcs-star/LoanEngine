@@ -39,12 +39,36 @@
         ← Back to all tools
     </a>
 
-    <header class="ha-calculator__header">
-        <span class="ha-calculator__eyebrow">LOANENGINE · CALCULATOR</span>
-        <h1 class="ha-calculator__title">Home Affordability Calculator</h1>
-        <p class="ha-calculator__description">
-            Compare the estimated cost of buying a property against renting and investing.
-        </p>
+    <header class="ha-calculator__header ha-calculator__header--banner">
+        <div class="ha-calculator__header-content">
+            <span class="ha-calculator__eyebrow">LOANENGINE · CALCULATOR</span>
+            <h1 class="ha-calculator__title">{{ $tool->name }}</h1>
+            <p class="ha-calculator__description">
+                Compare the estimated cost of buying a property against renting and investing.
+            </p>
+            <a class="ha-calculator__hero-action" href="#home-affordability-form">
+                Start calculating <span aria-hidden="true">→</span>
+            </a>
+        </div>
+
+        <div class="ha-calculator__hero-note" aria-hidden="true">
+            <span class="ha-calculator__hero-mark">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M3 10.5 12 3l9 7.5M5.5 9v11h13V9M9 20v-6h6v6"
+                          stroke="currentColor" stroke-width="1.7"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            <span class="ha-calculator__hero-note-label">YOUR NEXT FINANCIAL MOVE</span>
+            <strong>Plan with confidence.</strong>
+            <span class="ha-calculator__hero-note-copy">Smarter calculations. Clearer decisions.</span>
+            <span class="ha-calculator__hero-rule"></span>
+        </div>
+
+        <div class="ha-calculator__hero-footer">
+            <span>LOANENGINE</span>
+            <span>PLAN SMARTER · MOVE FORWARD</span>
+        </div>
     </header>
 
     @if ($errors->any())

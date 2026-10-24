@@ -10,7 +10,7 @@
 @section('content')
 <div class="calculator-page">
 
-    {{-- Header --}}
+    
     <div class="page-heading">
         <div>
             <h1>Calculator Management</h1>
@@ -23,7 +23,7 @@
         </a>
     </div>
 
-    {{-- Flash Messages --}}
+    
     @if(session('success'))
         <div class="calculator-alert calculator-alert-success" role="status">
             {{ session('success') }}
@@ -44,7 +44,7 @@
         </div>
     @endif
 
-    {{-- Search and Filters --}}
+    
     <div class="calculator-card calculator-filter-card">
         <form method="GET"
               action="{{ route('admin.calculators.index') }}"
@@ -96,7 +96,7 @@
         </form>
     </div>
 
-    {{-- Calculator Listing --}}
+    
     <div class="calculator-card calculator-table-card">
 
         <div class="calculator-table-heading">
@@ -162,9 +162,9 @@
                                         {{ $calculator->name }}
                                     </div>
 
-                                    @if($calculator->description)
+                                    @if($calculator->short_description)
                                         <div class="calculator-description">
-                                            {{ \Illuminate\Support\Str::limit($calculator->description, 75) }}
+                                            {{ \Illuminate\Support\Str::limit($calculator->short_description, 75) }}
                                         </div>
                                     @endif
                                 </td>
@@ -242,7 +242,7 @@
             </div>
         </form>
 
-        {{-- Pagination --}}
+        
         @if($calculators->hasPages())
             <div class="calculator-pagination">
                 {{ $calculators->withQueryString()->links() }}
@@ -251,13 +251,13 @@
     </div>
 </div>
 
-{{-- Individual Delete Form --}}
+
 <form id="single-delete-form" method="POST" class="d-none">
     @csrf
     @method('DELETE')
 </form>
 
-{{-- Delete Confirmation Modal --}}
+
 <div id="calculator-delete-modal"
      class="calculator-modal"
      aria-hidden="true">
@@ -298,7 +298,7 @@
     </div>
 </div>
 
-{{-- Bulk Delete Confirmation Modal --}}
+
 <div id="calculator-bulk-modal"
      class="calculator-modal"
      aria-hidden="true">

@@ -1,0 +1,837 @@
+
+/* =========================================
+   LOANENGINE USER PROFILE
+   Uses existing shared user theme variables
+========================================= */
+
+.user-app .profile-page {
+    max-width: var(--u-content-max);
+    margin: 0 auto;
+    padding: var(--u-space-8) var(--u-page-gutter) var(--u-space-12);
+    color: var(--u-text);
+    font-family: var(--u-font);
+}
+
+.user-app .profile-page,
+.user-app .profile-page *,
+.user-app .profile-page *::before,
+.user-app .profile-page *::after {
+    box-sizing: border-box;
+}
+
+/* Page heading */
+
+.user-app .profile-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--u-space-6);
+    margin-bottom: var(--u-space-6);
+}
+
+.user-app .profile-eyebrow {
+    display: inline-block;
+    color: var(--u-text-muted);
+    font-size: var(--u-text-xs);
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.user-app .profile-heading h1 {
+    margin: var(--u-space-2) 0;
+    color: var(--u-text);
+    font-family: var(--u-heading-font);
+    font-size: var(--u-text-2xl);
+    font-weight: 800;
+    line-height: var(--u-heading-line-height);
+    letter-spacing: -0.6px;
+}
+
+.user-app .profile-heading p,
+.user-app .profile-card-heading p {
+    margin: 0;
+    color: var(--u-text-secondary);
+    font-size: var(--u-text-sm);
+    line-height: var(--u-line-height);
+}
+
+/* User avatar */
+
+.user-app .profile-avatar {
+    display: flex;
+    flex: 0 0 64px;
+    width: 64px;
+    height: 64px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius-pill);
+    background: var(--u-surface-muted);
+    color: var(--u-text);
+    font-family: var(--u-heading-font);
+    font-size: var(--u-text-xl);
+    font-weight: 800;
+}
+
+/* Profile sections */
+
+.user-app .profile-card {
+    margin-bottom: var(--u-space-5);
+    padding: var(--u-space-6);
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius-lg);
+    background: var(--u-surface);
+    color: var(--u-text);
+    box-shadow: var(--u-shadow-sm);
+}
+
+.user-app .profile-card-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--u-space-4);
+    margin-bottom: var(--u-space-6);
+    padding-bottom: var(--u-space-5);
+    border-bottom: 1px solid var(--u-border);
+}
+
+.user-app .profile-card-heading h2 {
+    margin: 0 0 var(--u-space-2);
+    color: var(--u-text);
+    font-family: var(--u-heading-font);
+    font-size: var(--u-text-lg);
+    font-weight: 800;
+    line-height: var(--u-heading-line-height);
+}
+
+.user-app .profile-card-icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    place-items: center;
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius-md);
+    background: var(--u-surface-muted);
+    color: var(--u-text-secondary);
+    font-size: var(--u-text-xs);
+    font-weight: 700;
+}
+
+/* Form grid */
+
+.user-app .profile-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--u-space-6);
+}
+
+.user-app .profile-field {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--u-space-2);
+}
+
+.user-app .profile-field label {
+    color: var(--u-text);
+    font-size: var(--u-text-sm);
+    font-weight: 700;
+}
+
+.user-app .profile-field label span {
+    color: var(--u-danger);
+}
+
+/* Inputs */
+
+.user-app .profile-field input,
+.user-app .profile-field select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: var(--u-space-3) var(--u-space-4);
+    border: 1px solid var(--u-border-strong);
+    border-radius: var(--u-radius-md);
+    outline: none;
+    background: var(--u-surface);
+    color: var(--u-text);
+    font-family: var(--u-font);
+    font-size: var(--u-text-sm);
+    line-height: 1.5;
+    transition:
+        border-color var(--u-transition),
+        box-shadow var(--u-transition),
+        background var(--u-transition);
+}
+
+.user-app .profile-field input::placeholder {
+    color: var(--u-text-muted);
+    opacity: 1;
+}
+
+.user-app .profile-field input:hover,
+.user-app .profile-field select:hover {
+    border-color: var(--u-text-muted);
+}
+
+.user-app .profile-field input:focus,
+.user-app .profile-field select:focus {
+    border-color: var(--u-text-secondary);
+    box-shadow: var(--u-focus-ring);
+}
+
+.user-app .profile-field input:disabled,
+.user-app .profile-field select:disabled {
+    background: var(--u-surface-muted);
+    color: var(--u-text-muted);
+    cursor: not-allowed;
+}
+
+.user-app .profile-field small {
+    color: var(--u-text-secondary);
+    font-size: var(--u-text-xs);
+    line-height: var(--u-line-height);
+}
+
+/* Form actions */
+
+.user-app .profile-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--u-space-4);
+    padding-top: var(--u-space-2);
+}
+
+.user-app .profile-save-note {
+    color: var(--u-text-secondary);
+    font-size: var(--u-text-xs);
+}
+
+.user-app .profile-save-button {
+    display: inline-flex;
+    min-height: 46px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--u-space-6);
+    border: 1px solid var(--u-primary);
+    border-radius: var(--u-radius-md);
+    background: var(--u-primary);
+    color: var(--u-primary-text);
+    font-family: var(--u-font);
+    font-size: var(--u-text-sm);
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    transition:
+        background var(--u-transition),
+        border-color var(--u-transition),
+        transform var(--u-transition);
+}
+
+.user-app .profile-save-button:hover {
+    border-color: var(--u-primary-hover);
+    background: var(--u-primary-hover);
+}
+
+.user-app .profile-save-button:active {
+    transform: translateY(1px);
+}
+
+.user-app .profile-save-button:focus-visible {
+    outline: 2px solid var(--u-text-secondary);
+    outline-offset: 3px;
+}
+
+/* Success and validation messages */
+
+.user-app .profile-alert {
+    margin-bottom: var(--u-space-4);
+    padding: var(--u-space-3) var(--u-space-4);
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius-md);
+    font-size: var(--u-text-sm);
+    line-height: var(--u-line-height);
+}
+
+.user-app .profile-alert-success {
+    border-color: var(--u-success);
+    background: var(--u-success-bg);
+    color: var(--u-success);
+}
+
+.user-app .profile-alert-error {
+    border-color: var(--u-danger);
+    background: var(--u-danger-bg);
+    color: var(--u-danger);
+}
+
+.user-app .profile-alert ul {
+    margin: var(--u-space-2) 0 0;
+    padding-left: var(--u-space-5);
+}
+
+/* Responsive */
+
+@media (max-width: 720px) {
+    .user-app .profile-page {
+        padding: var(--u-space-6) var(--u-page-gutter) var(--u-space-8);
+    }
+
+    .user-app .profile-heading {
+        gap: var(--u-space-3);
+        margin-bottom: var(--u-space-5);
+    }
+
+    .user-app .profile-avatar {
+        width: 50px;
+        height: 50px;
+        flex-basis: 50px;
+        font-size: var(--u-text-lg);
+    }
+
+    .user-app .profile-card {
+        padding: var(--u-space-5);
+        border-radius: var(--u-radius-lg);
+    }
+
+    .user-app .profile-card-heading {
+        margin-bottom: var(--u-space-5);
+    }
+
+    .user-app .profile-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--u-space-5);
+    }
+
+    .user-app .profile-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .user-app .profile-save-button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 380px) {
+    .user-app .profile-card {
+        padding: var(--u-space-4);
+    }
+
+    .user-app .profile-heading h1 {
+        font-size: var(--u-text-xl);
+    }
+
+    .user-app .profile-card-heading h2 {
+        font-size: var(--u-text-base);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .user-app .profile-page *,
+    .user-app .profile-page *::before,
+    .user-app .profile-page *::after {
+        scroll-behavior: auto;
+        transition-duration: 0.01ms;
+    }
+}
+
+/* Edit profile form */
+
+.user-app .profile-section-number {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    place-items: center;
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius-md);
+    background: var(--u-surface-muted);
+    color: var(--u-text-secondary);
+    font-size: var(--u-text-xs);
+    font-weight: 700;
+}
+
+.user-app .profile-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--u-space-6);
+}
+
+.user-app .profile-field {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--u-space-2);
+}
+
+.user-app .profile-field label,
+.user-app .profile-photo-controls label {
+    color: var(--u-text);
+    font-size: var(--u-text-sm);
+    font-weight: 700;
+}
+
+.user-app .profile-field label span {
+    color: var(--u-danger);
+}
+
+.user-app .profile-field input,
+.user-app .profile-field select {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid var(--u-border-strong);
+    border-radius: var(--u-radius-md);
+    background: var(--u-surface);
+    color: var(--u-text);
+    font: inherit;
+    font-size: var(--u-text-sm);
+}
+
+.user-app .profile-field input:focus,
+.user-app .profile-field select:focus {
+    border-color: var(--u-text-secondary);
+    box-shadow: var(--u-focus-ring);
+}
+
+.user-app .profile-field > small,
+.user-app .profile-photo-controls > small {
+    color: var(--u-text-muted);
+    font-size: var(--u-text-xs);
+}
+
+.user-app .profile-error {
+    color: var(--u-danger) !important;
+}
+
+.user-app .profile-form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--u-space-3);
+    margin-top: var(--u-space-6);
+}
+
+.user-app .profile-button {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--u-space-5);
+    border: 1px solid var(--u-border-strong);
+    border-radius: var(--u-radius-md);
+    font-size: var(--u-text-sm);
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--u-transition);
+}
+
+.user-app .profile-button-primary {
+    border-color: var(--u-primary);
+    background: var(--u-primary);
+    color: var(--u-primary-text);
+}
+
+.user-app .profile-button-primary:hover {
+    border-color: var(--u-primary-hover);
+    background: var(--u-primary-hover);
+}
+
+.user-app .profile-button-secondary {
+    background: var(--u-surface);
+    color: var(--u-text);
+}
+
+.user-app .profile-button-secondary:hover {
+    background: var(--u-surface-muted);
+}
+
+.user-app .profile-photo-editor {
+    display: flex;
+    align-items: center;
+    gap: var(--u-space-5);
+    margin-bottom: var(--u-space-5);
+}
+
+.user-app .profile-photo-controls {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--u-space-2);
+    min-width: 0;
+}
+
+.user-app .profile-photo-controls input[type="file"] {
+    width: 100%;
+    max-width: 420px;
+    color: var(--u-text-secondary);
+    font-size: var(--u-text-sm);
+}
+
+@media (max-width: 600px) {
+    .user-app .profile-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--u-space-5);
+    }
+
+    .user-app .profile-form-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .user-app .profile-form-actions .profile-button {
+        width: 100%;
+    }
+
+    .user-app .profile-photo-editor {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+/* ==========================================
+   PROFILE VIEW — UI FIX
+   Existing LoanEngine theme variables only
+========================================== */
+
+.user-app .profile-page {
+    width: 100%;
+    max-width: var(--u-content-max);
+    margin: 0 auto;
+    padding: var(--u-space-8) var(--u-page-gutter) var(--u-space-12);
+    color: var(--u-text);
+}
+
+.user-app .profile-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--u-space-5);
+    margin-bottom: var(--u-space-8);
+}
+
+.user-app .profile-heading h2 {
+    margin: var(--u-space-2) 0;
+    color: var(--u-text);
+    font-family: var(--u-heading-font);
+    font-size: var(--u-text-2xl);
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    line-height: var(--u-heading-line-height);
+}
+
+.user-app .profile-heading p {
+    margin: 0;
+    color: var(--u-text-secondary);
+    font-size: var(--u-text-sm);
+}
+
+/* Summary profile card */
+
+.user-app .profile-summary {
+    display: flex;
+    align-items: center;
+    gap: var(--u-space-6);
+    min-height: 160px;
+    margin-bottom: var(--u-space-6);
+    padding: var(--u-space-6);
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius-xl);
+    background: var(--u-surface);
+    box-shadow: var(--u-shadow-sm);
+}
+
+.user-app .profile-summary .profile-photo {
+    display: grid;
+    width: 104px;
+    height: 104px;
+    flex: 0 0 104px;
+    overflow: hidden;
+    place-items: center;
+    border: 1px solid var(--u-border);
+    border-radius: 50%;
+    background: var(--u-surface-muted);
+    color: var(--u-text);
+    font-family: var(--u-heading-font);
+    font-size: 36px;
+    font-weight: 800;
+}
+
+.user-app .profile-summary .profile-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-app .profile-summary-details {
+    min-width: 0;
+}
+
+.user-app .profile-summary-details h3 {
+    margin: 0 0 var(--u-space-2);
+    color: var(--u-text);
+    font-family: var(--u-heading-font);
+    font-size: var(--u-text-xl);
+    font-weight: 800;
+    line-height: var(--u-heading-line-height);
+}
+
+.user-app .profile-summary-details p {
+    margin: 0 0 var(--u-space-3);
+    color: var(--u-text-secondary);
+    font-size: var(--u-text-sm);
+    overflow-wrap: anywhere;
+}
+
+.user-app .profile-role {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 11px;
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius-pill);
+    background: var(--u-surface-muted);
+    color: var(--u-text-secondary);
+    font-size: var(--u-text-xs);
+    font-weight: 700;
+}
+
+/* Information cards */
+
+.user-app .profile-card {
+    margin-bottom: var(--u-space-5);
+    padding: var(--u-space-6);
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius-xl);
+    background: var(--u-surface);
+    box-shadow: var(--u-shadow-sm);
+}
+
+.user-app .profile-card-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--u-space-4);
+    margin-bottom: var(--u-space-6);
+    padding-bottom: var(--u-space-5);
+    border-bottom: 1px solid var(--u-border);
+}
+
+.user-app .profile-card-heading h3 {
+    margin: 0 0 var(--u-space-2);
+    color: var(--u-text);
+    font-family: var(--u-heading-font);
+    font-size: var(--u-text-lg);
+    font-weight: 800;
+    line-height: var(--u-heading-line-height);
+}
+
+.user-app .profile-card-heading p {
+    margin: 0;
+    color: var(--u-text-secondary);
+    font-size: var(--u-text-sm);
+}
+
+/* Read-only information grid */
+
+.user-app .profile-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--u-space-5);
+}
+
+.user-app .profile-detail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--u-space-2);
+    min-width: 0;
+    padding: var(--u-space-4);
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius-md);
+    background: var(--u-surface);
+}
+
+.user-app .profile-detail span {
+    color: var(--u-text-muted);
+    font-size: var(--u-text-xs);
+    font-weight: 600;
+}
+
+.user-app .profile-detail strong {
+    color: var(--u-text);
+    font-size: var(--u-text-sm);
+    font-weight: 700;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+/* Responsive */
+
+@media (max-width: 700px) {
+    .user-app .profile-page {
+        padding-top: var(--u-space-6);
+        padding-bottom: var(--u-space-8);
+    }
+
+    .user-app .profile-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: var(--u-space-4);
+        margin-bottom: var(--u-space-5);
+    }
+
+    .user-app .profile-heading .profile-button {
+        width: 100%;
+    }
+
+    .user-app .profile-summary {
+        gap: var(--u-space-4);
+        padding: var(--u-space-5);
+    }
+
+    .user-app .profile-summary .profile-photo {
+        width: 76px;
+        height: 76px;
+        flex-basis: 76px;
+        font-size: 26px;
+    }
+
+    .user-app .profile-card {
+        padding: var(--u-space-5);
+    }
+
+    .user-app .profile-detail-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--u-space-3);
+    }
+}
+
+/* Profile photo upload area */
+
+.user-app .profile-photo-editor {
+    display: flex;
+    align-items: center;
+    gap: var(--u-space-6);
+}
+
+.user-app .profile-photo-preview {
+    display: grid;
+    width: 104px;
+    height: 104px;
+    flex: 0 0 104px;
+    overflow: hidden;
+    place-items: center;
+    border: 1px solid var(--u-border);
+    border-radius: 50%;
+    background: var(--u-surface-muted);
+    color: var(--u-text);
+    font-family: var(--u-heading-font);
+    font-size: 32px;
+    font-weight: 800;
+}
+
+.user-app .profile-photo-preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-app .profile-photo-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--u-space-2);
+    min-width: 0;
+}
+
+.user-app .profile-photo-title {
+    color: var(--u-text);
+    font-size: var(--u-text-base);
+    font-weight: 800;
+}
+
+.user-app .profile-photo-controls p {
+    margin: 0;
+    color: var(--u-text-secondary);
+    font-size: var(--u-text-sm);
+}
+
+.user-app .profile-upload-button {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 var(--u-space-4);
+    border: 1px solid var(--u-border-strong);
+    border-radius: var(--u-radius-md);
+    background: var(--u-surface);
+    color: var(--u-text);
+    font-size: var(--u-text-sm);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background var(--u-transition);
+}
+
+.user-app .profile-upload-button:hover {
+    background: var(--u-surface-muted);
+}
+
+.user-app .profile-upload-button svg {
+    width: 17px;
+    height: 17px;
+}
+
+.user-app .profile-photo-controls small {
+    color: var(--u-text-muted);
+    font-size: var(--u-text-xs);
+}
+
+@media (max-width: 600px) {
+    .user-app .profile-photo-editor {
+        align-items: flex-start;
+        gap: var(--u-space-4);
+    }
+
+    .user-app .profile-photo-preview {
+        width: 76px;
+        height: 76px;
+        flex-basis: 76px;
+        font-size: 25px;
+    }
+}
+
+.user-app .profile-photo-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--u-space-3);
+}
+
+.user-app .profile-remove-button {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--u-space-4);
+    border: 1px solid var(--u-border-strong);
+    border-radius: var(--u-radius-md);
+    background: var(--u-surface);
+    color: var(--u-danger);
+    font: inherit;
+    font-size: var(--u-text-sm);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background var(--u-transition);
+}
+
+.user-app .profile-remove-button:hover {
+    background: var(--u-danger-bg);
+}

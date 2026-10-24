@@ -891,3 +891,206 @@
 .ffc-danger { color: #111827 !important; }
 .ffc-btn-danger,
 .ffc-danger-button { background: #111827 !important; border-color: #111827 !important; color: #fff !important; }
+
+
+/* =========================================================
+   LoanEngine Financial Flow Calendar — UI upgrade
+   Presentation only. Existing Blade, routes, data and JS untouched.
+   ========================================================= */
+.ffc {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    padding: 8px 0 36px;
+    color: var(--u-text, #111827);
+}
+.ffc .ffc-hero {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    min-height: 190px;
+    padding: clamp(26px, 3.2vw, 44px);
+    margin-bottom: 24px;
+    overflow: hidden;
+    border: 1px solid #252a32;
+    border-radius: 24px;
+    color: #fff;
+    background: radial-gradient(circle at 84% 16%, rgba(255,255,255,.12), transparent 25%), linear-gradient(115deg,#111318 0%,#252a32 58%,#3b414b 100%) !important;
+    box-shadow: 0 18px 42px rgba(17,24,39,.13);
+}
+.ffc .ffc-hero::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    right: 10%;
+    top: -110px;
+    width: 330px;
+    height: 330px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 50%;
+    box-shadow: 0 0 0 28px rgba(255,255,255,.025),0 0 0 58px rgba(255,255,255,.02);
+    pointer-events: none;
+}
+.ffc .ffc-hero::after {
+    right: 5%;
+    top: auto;
+    bottom: -155px;
+    width: 260px;
+    height: 260px;
+    border-color: rgba(255,255,255,.08) !important;
+    box-shadow: 0 0 0 24px rgba(255,255,255,.025),0 0 0 48px rgba(255,255,255,.02) !important;
+}
+.ffc .ffc-hero > div,
+.ffc .ffc-hero > button { position: relative; z-index: 1; }
+.ffc .ffc-hero .ffc-eyebrow { color: #cbd0d8; letter-spacing: .16em; }
+.ffc .ffc-hero h1 {
+    max-width: 760px;
+    margin: 10px 0 12px;
+    color: #fff;
+    font-size: clamp(30px,3.2vw,46px);
+    font-weight: 850;
+    line-height: 1.08;
+    letter-spacing: -.045em;
+}
+.ffc .ffc-hero p { max-width: 700px; color: #d2d6dd; font-size: 14px; line-height: 1.8; }
+.ffc .ffc-hero .ffc-btn-primary {
+    flex: 0 0 auto;
+    min-height: 48px;
+    padding: 13px 19px;
+    border: 1px solid #fff;
+    border-radius: 12px;
+    background: #fff;
+    color: #111318;
+    box-shadow: 0 8px 20px rgba(0,0,0,.12);
+}
+.ffc .ffc-hero .ffc-btn-primary:hover { background: #e5e7eb; border-color: #e5e7eb; opacity: 1; }
+.ffc .ffc-tabs { width: 100%; padding: 5px; margin-bottom: 20px; border-radius: 13px; }
+.ffc .ffc-tab { flex: 0 0 auto; padding: 11px 20px; }
+.ffc .ffc-tab.is-active { box-shadow: 0 1px 4px rgba(17,24,39,.1); }
+.ffc .ffc-summary { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; margin-bottom: 22px; }
+.ffc .ffc-card {
+    padding: 22px;
+    border-radius: 17px;
+    box-shadow: 0 4px 16px rgba(15,23,42,.035);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.ffc .ffc-summary .ffc-card { min-height: 142px; }
+.ffc .ffc-summary .ffc-card:hover { transform: translateY(-2px); border-color: #cbd0d8; box-shadow: 0 10px 24px rgba(15,23,42,.06); }
+.ffc .ffc-metric-label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+.ffc .ffc-metric-value { margin: 14px 0 7px; font-size: clamp(22px,2vw,30px); letter-spacing: -.035em; }
+.ffc .ffc-metric-note { font-size: 12px; line-height: 1.5; }
+.ffc .ffc-chart-grid { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; margin-bottom: 26px; }
+.ffc .ffc-chart-card { padding: 22px; border-radius: 18px; box-shadow: 0 5px 20px rgba(15,23,42,.04); }
+.ffc .ffc-chart-head { min-height: 42px; margin-bottom: 22px; }
+.ffc .ffc-chart-head h2 { font-size: 16px; letter-spacing: -.02em; }
+.ffc .ffc-chart-head p { font-size: 12px; }
+.ffc .ffc-chart-pill { border: 1px solid var(--u-border); }
+.ffc .ffc-bar-chart { height: 174px; }
+.ffc .ffc-donut { width: min(100%,174px); }
+.ffc .ffc-donut-hole strong { font-size: clamp(13px,1.2vw,18px); }
+.ffc .ffc-donut-legend { gap: 12px; }
+.ffc .ffc-donut-legend li { font-size: 11px; }
+.ffc .ffc-donut-legend li strong { font-size: 11px; }
+.ffc .ffc-donut-legend li small { font-size: 10px; }
+.ffc .ffc-section { margin-top: 26px; }
+.ffc .ffc-section-head { margin-bottom: 17px; }
+.ffc .ffc-section-head h2 { font-size: 22px; font-weight: 800; letter-spacing: -.035em; }
+.ffc .ffc-subtitle { font-size: 13px; line-height: 1.6; }
+.ffc .ffc-toolbar { gap: 9px; }
+.ffc .ffc-icon-btn { width: 40px; height: 40px; border-radius: 11px; transition: background .18s ease,border-color .18s ease; }
+.ffc .ffc-icon-btn:hover { background: var(--u-surface-muted); border-color: var(--u-border-strong); }
+.ffc .ffc-month { min-width: 155px; font-size: 17px; }
+.ffc .ffc-btn { min-height: 40px; padding: 10px 15px; border-radius: 11px; transition: transform .18s ease,background .18s ease; }
+.ffc .ffc-btn:active,.ffc .ffc-small-btn:active { transform: translateY(1px); }
+.ffc .ffc-select,.ffc .ffc-input,.ffc .ffc-textarea { min-height: 44px; border-radius: 11px; }
+.ffc .ffc-filters { gap: 10px; margin-bottom: 14px; }
+.ffc .ffc-filter { min-width: 175px; }
+.ffc .ffc-calendar { border-radius: 17px; box-shadow: 0 5px 20px rgba(15,23,42,.035); }
+.ffc .ffc-weekdays { background: #f3f4f6; }
+.ffc .ffc-weekdays div { padding: 14px 6px; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+.ffc .ffc-day { min-height: 122px; padding: 10px 7px; transition: background .15s ease,box-shadow .15s ease; }
+.ffc .ffc-day:hover { background: #f9fafb; }
+.ffc .ffc-day.is-outside { background: #f8f9fb; }
+.ffc .ffc-day.is-selected { background: #f3f4f6; box-shadow: inset 0 0 0 2px #111827; }
+.ffc .ffc-day-number { width: 30px; height: 30px; font-size: 12px; }
+.ffc .ffc-day-amount { font-size: 12px; }
+.ffc .ffc-day-count { font-size: 10px; }
+.ffc .ffc-selected-date { margin-top: 20px; padding: 23px; border-radius: 17px; box-shadow: 0 5px 20px rgba(15,23,42,.035); }
+.ffc .ffc-selected-head { padding-bottom: 18px; }
+.ffc .ffc-selected-head h2 { font-size: 24px; }
+.ffc .ffc-event-card { padding: 17px; border-radius: 13px; background: #f8f9fb; }
+.ffc .ffc-event-price { font-size: 17px; }
+.ffc .ffc-small-btn { padding: 8px 11px; border-radius: 9px; font-size: 12px; transition: background .15s ease,border-color .15s ease; }
+.ffc .ffc-small-btn:hover { opacity: 1; background: #f3f4f6; border-color: #9ca3af; }
+.ffc .ffc-table-card { border-radius: 16px; }
+.ffc .ffc-table th { padding: 15px 14px; }
+.ffc .ffc-table td { padding: 15px 14px; }
+.ffc .ffc-table tbody tr:hover { background: #fafafa; }
+.ffc .ffc-health-grid { gap: 16px; }
+.ffc .ffc-health-grid .ffc-card { min-height: 160px; }
+.ffc .ffc-health-value { font-size: clamp(25px,2.2vw,32px); letter-spacing: -.035em; }
+.ffc .ffc-modal { border-radius: 20px; box-shadow: 0 28px 90px rgba(15,23,42,.25); }
+.ffc .ffc-modal-head { padding: 22px 24px; }
+.ffc .ffc-modal-head h2 { font-size: 22px; }
+.ffc .ffc-modal-body { padding: 24px; }
+.ffc .ffc-field { gap: 8px; }
+.ffc .ffc-field label { font-size: 12px; }
+.ffc .ffc-alert { padding: 14px 17px; border-radius: 12px; }
+.ffc .ffc-positive,.ffc .ffc-negative { font-variant-numeric: tabular-nums; }
+@media (max-width: 1280px) {
+    .ffc .ffc-chart-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .ffc .ffc-chart-card:last-child { grid-column: 1/-1; }
+    .ffc .ffc-donut-layout { grid-template-columns: minmax(120px,.8fr) minmax(0,1.2fr); }
+}
+@media (max-width: 1000px) {
+    .ffc .ffc-summary { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .ffc .ffc-day { min-height: 100px; }
+    .ffc .ffc-hero { min-height: 170px; }
+}
+@media (max-width: 720px) {
+    .ffc { padding-top: 2px; }
+    .ffc .ffc-hero { align-items: flex-start; flex-direction: column; gap: 20px; padding: 23px; border-radius: 18px; }
+    .ffc .ffc-hero h1 { font-size: clamp(29px,7vw,38px); }
+    .ffc .ffc-hero p { font-size: 13px; }
+    .ffc .ffc-hero>.ffc-btn { width: 100%; }
+    .ffc .ffc-summary { gap: 10px; }
+    .ffc .ffc-summary .ffc-card { min-height: 126px; padding: 15px; }
+    .ffc .ffc-metric-value { font-size: clamp(18px,4vw,23px); }
+    .ffc .ffc-chart-grid { grid-template-columns: 1fr; }
+    .ffc .ffc-chart-card:last-child { grid-column: auto; }
+    .ffc .ffc-chart-card { padding: 17px; }
+    .ffc .ffc-chart-head { flex-wrap: wrap; }
+    .ffc .ffc-section-head { align-items: flex-start; }
+    .ffc .ffc-toolbar { max-width: 100%; }
+    .ffc .ffc-month { min-width: 120px; font-size: 14px; }
+    .ffc .ffc-filter { flex: 1 1 145px; min-width: 0; }
+    .ffc .ffc-day { min-height: 76px; padding: 4px 2px; }
+    .ffc .ffc-day-number { width: 24px; height: 24px; }
+    .ffc .ffc-event-dots { gap: 3px; margin-top: 4px; }
+    .ffc .ffc-day-amount { margin-top: 4px; font-size: 9px; }
+    .ffc .ffc-day-count { font-size: 8px; }
+    .ffc .ffc-selected-date { padding: 15px; }
+    .ffc .ffc-selected-head { align-items: flex-start; }
+    .ffc .ffc-selected-head>.ffc-btn { width: 100%; }
+    .ffc .ffc-health-grid { grid-template-columns: 1fr; }
+    .ffc .ffc-modal-head,.ffc .ffc-modal-body { padding: 17px; }
+}
+@media (max-width: 420px) {
+    .ffc .ffc-summary { grid-template-columns: 1fr 1fr; }
+    .ffc .ffc-summary .ffc-card { padding: 12px; }
+    .ffc .ffc-metric-label { font-size: 10px; }
+    .ffc .ffc-metric-note { font-size: 10px; }
+    .ffc .ffc-chart-card { padding: 13px; }
+    .ffc .ffc-donut-layout { grid-template-columns: 1fr; }
+    .ffc .ffc-donut { width: 145px; }
+    .ffc .ffc-donut-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .ffc .ffc-day { min-height: 68px; }
+    .ffc .ffc-day-count { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ffc *, .ffc *::before, .ffc *::after { transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

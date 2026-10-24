@@ -21,6 +21,9 @@ class User extends Authenticatable
         'channel_url',
         'mobile',
         'address',
+        'city',
+        'employment_type',
+        'annual_income',
     ];
 
     protected $hidden = [
@@ -33,10 +36,17 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'annual_income' => 'integer',
         ];
     }
+
     public function financialEvents(): HasMany
     {
-        return $this->hasMany(\App\Models\FinancialEvent::class);
+        return $this->hasMany(FinancialEvent::class);
+    }
+
+    public function lessonProgress(): HasMany
+    {
+        return $this->hasMany(UserLessonProgress::class);
     }
 }

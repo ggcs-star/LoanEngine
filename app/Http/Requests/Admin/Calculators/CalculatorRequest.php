@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Calculators;
 
+use App\Support\Calculators\CalculatorFormulaRegistry;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -22,13 +23,13 @@ class CalculatorRequest extends FormRequest
             'name' => [
                 'required',
                 'string',
-                'max:150',
+                'max:120',
             ],
 
             'slug' => [
                 'required',
                 'string',
-                'max:180',
+                'max:140',
                 'alpha_dash',
                 Rule::unique('calculators', 'slug')->ignore($calculatorId),
             ],
@@ -36,13 +37,13 @@ class CalculatorRequest extends FormRequest
             'short_description' => [
                 'nullable',
                 'string',
-                'max:1000',
+                'max:200',
             ],
 
             'icon' => [
                 'nullable',
                 'string',
-                'max:100',
+                'max:60',
             ],
 
             'status' => [
@@ -54,6 +55,7 @@ class CalculatorRequest extends FormRequest
                 'required',
                 'integer',
                 'min:0',
+                'max:4294967295',
             ],
 
             'route_name' => [
@@ -62,12 +64,19 @@ class CalculatorRequest extends FormRequest
                 'max:180',
             ],
 
+            'formula_type' => [
+                'required',
+                'string',
+                Rule::in(array_keys(CalculatorFormulaRegistry::all())),
+            ],
+
             'journey_ids' => [
                 'nullable',
                 'array',
             ],
 
             'journey_ids.*' => [
+                'required',
                 'integer',
                 'distinct',
                 'exists:tool_journeys,id',
@@ -78,14 +87,13 @@ class CalculatorRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'short_description.required' =>
-                'Please enter a short description for the calculator.',
-
-            'slug.unique' =>
-                'This calculator slug is already in use.',
-
-            'journey_ids.*.exists' =>
-                'One of the selected journeys does not exist.',
+            'name.required' => 'Please enter the calculator name.',
+            'slug.required' => 'Please enter a calculator slug.',
+            'slug.unique' => 'This calculator slug is already in use.',
+            'short_description.required' => 'Please enter a short description.',
+            'formula_type.required' => 'Please select a formula type.',
+            'formula_type.in' => 'The selected formula type is not supported.',
+            'journey_ids.*.exists' => 'One of the selected journeys does not exist.',
         ];
     }
 }

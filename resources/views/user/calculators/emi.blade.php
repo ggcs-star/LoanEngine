@@ -35,10 +35,30 @@
         ← Back to calculators
     </a>
 
-    <header class="emi-heading">
-        <span class="emi-eyebrow">LOANENGINE · CALCULATOR</span>
-        <h1>Home Loan EMI Calculator</h1>
-        <p>Calculate your monthly EMI, compare interest costs and view your repayment schedule.</p>
+    <header class="emi-heading emi-hero">
+        <div class="emi-hero-copy">
+            <span class="emi-eyebrow">YOUR NEXT FINANCIAL MOVE</span>
+            <h1>{{ $tool->name }}</h1>
+            <p>Plan your repayments with confidence. Adjust your loan amount, interest rate and tenure to understand your monthly EMI and total borrowing cost.</p>
+            <a class="emi-hero-cta" href="#emi-form">Explore calculator <span aria-hidden="true">→</span></a>
+            <div class="emi-hero-points" aria-label="Calculator features">
+                <span><i aria-hidden="true">✓</i> Flexible loan inputs</span>
+                <span><i aria-hidden="true">✓</i> Repayment breakdown</span>
+                <span><i aria-hidden="true">✓</i> Printable results</span>
+            </div>
+        </div>
+        <div class="emi-hero-art" aria-hidden="true">
+            <div class="emi-art-orbit"></div>
+            <div class="emi-art-building emi-art-building-back"></div>
+            <div class="emi-art-building emi-art-building-front">
+                <span class="emi-art-window window-one"></span>
+                <span class="emi-art-window window-two"></span>
+                <span class="emi-art-window window-three"></span>
+                <span class="emi-art-window window-four"></span>
+                <span class="emi-art-door"></span>
+            </div>
+            <div class="emi-art-note"><span>SMARTER CALCULATIONS</span><strong>Better home-loan decisions</strong><i></i></div>
+        </div>
     </header>
 
     @if ($errors->any())

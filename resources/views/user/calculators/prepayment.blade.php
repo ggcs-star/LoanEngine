@@ -29,6 +29,28 @@
         <span>Loan Prepayment Calculator</span>
     </a>
 
+    <section class="prepay-hero" aria-labelledby="prepay-hero-title">
+        <div class="prepay-hero-content">
+            <span class="prepay-hero-eyebrow">LOAN PLANNING TOOLS</span>
+            <h1 id="prepay-hero-title">Loan Prepayment Calculator</h1>
+            <p>Explore how an extra payment could reduce your interest and help you repay your loan sooner.</p>
+            <div class="prepay-hero-tags">
+                <span><i aria-hidden="true">✓</i> Interest savings</span>
+                <span><i aria-hidden="true">↗</i> Flexible strategies</span>
+            </div>
+        </div>
+        <div class="prepay-hero-art" aria-hidden="true">
+            <div class="prepay-hero-orbit prepay-hero-orbit-one"></div>
+            <div class="prepay-hero-orbit prepay-hero-orbit-two"></div>
+            <div class="prepay-hero-coin">₹</div>
+            <div class="prepay-hero-mini-card">
+                <span>INTEREST SAVED</span>
+                <strong>More control</strong>
+                <div class="prepay-hero-mini-line"><i></i></div>
+            </div>
+        </div>
+    </section>
+
     @if ($errors->any())
         <div class="prepay-alert" role="alert">
             <strong>Please check your inputs.</strong>

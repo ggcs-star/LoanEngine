@@ -57,13 +57,34 @@
             <span>EMI vs Tenure Calculator</span>
         </a>
 
+        <section class="evt-hero" aria-labelledby="evt-hero-title">
+            <div class="evt-hero-content">
+                <span class="evt-hero-eyebrow"><span class="evt-hero-dot"></span> LOAN PLANNING · EMI COMPARISON</span>
+                <h1 id="evt-hero-title">Choose a tenure that works <span>for you.</span></h1>
+                <p>Compare monthly EMIs, total interest and repayment costs across loan tenures — then choose a plan that fits your monthly budget.</p>
+                <div class="evt-hero-points">
+                    <span><i aria-hidden="true">✓</i> Compare 5 loan tenures</span>
+                    <span><i aria-hidden="true">✓</i> See EMI instantly</span>
+                    <span><i aria-hidden="true">✓</i> Understand interest cost</span>
+                </div>
+            </div>
+            <div class="evt-hero-visual" aria-hidden="true">
+                <div class="evt-hero-orbit evt-hero-orbit-one"></div>
+                <div class="evt-hero-orbit evt-hero-orbit-two"></div>
+                <div class="evt-hero-visual-card">
+                    <span class="evt-visual-kicker">LOAN PLAN</span>
+                    <div class="evt-visual-bars"><i></i><i></i><i></i><i></i><i></i></div>
+                    <div class="evt-visual-divider"></div>
+                    <div class="evt-visual-bottom"><span>Monthly EMI</span><b>Plan smarter</b></div>
+                </div>
+                <span class="evt-hero-float evt-hero-float-top">EMI</span>
+                <span class="evt-hero-float evt-hero-float-bottom">TENURE</span>
+            </div>
+        </section>
+
         <header class="evt-header">
-            <h1>Balance Your Loan</h1>
-            <p>
-                Compare monthly costs across different durations to find
-                the perfect middle ground between monthly budget and
-                interest savings.
-            </p>
+            <h2>Balance Your Loan</h2>
+            <p>Adjust the loan amount and interest rate, then compare repayment durations to find the right balance between monthly affordability and total interest.</p>
         </header>
 
         <form method="GET" action="{{ url()->current() }}"
