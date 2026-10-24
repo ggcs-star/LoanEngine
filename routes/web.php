@@ -17,6 +17,11 @@ use App\Http\Controllers\User\FinancialFlowCalendarController;
 use App\Http\Controllers\Admin\Calculators\CalculatorController as AdminCalculatorController;
 use App\Http\Controllers\User\RecommendedCalculatorController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\User\DashboardController as UserDashboardController;
+use App\Http\Controllers\User\LessonProgressController;
+use App\Http\Controllers\User\ProfileController as UserProfileController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +54,20 @@ Route::middleware(['auth', 'role:admin'])
     ->names('tools');
     Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
+
+    // Inside the existing auth + role:admin group:
+    Route::get('/profile', [AdminProfileController::class, 'show'])
+        ->name('profile.show');
+
+    Route::get('/profile/edit', [AdminProfileController::class, 'edit'])
+        ->name('profile.edit');
+
+    Route::put('/profile', [AdminProfileController::class, 'update'])
+        ->name('profile.update');
+
+
+Route::put('/profile', [AdminProfileController::class, 'update'])
+    ->name('profile.update');
         
 Route::get(
     'tool-journeys/{tool_journey}/tools',
@@ -124,7 +143,6 @@ Route::middleware(['auth', 'role:user'])
     ->prefix('user/education')
     ->name('user.education.')
     ->group(function () {
-        
         Route::get('/', [UserEducationController::class, 'index'])
             ->name('index');
 
@@ -142,6 +160,10 @@ Route::middleware(['auth', 'role:user'])
             UserEducationController::class,
             'lesson',
         ])->name('lesson');
+        Route::post('/lessons/{lesson}/complete', [
+            LessonProgressController::class,
+            'complete',
+        ])->name('lesson.complete');
     });
 /*
 |--------------------------------------------------------------------------
@@ -231,3 +253,24 @@ Route::middleware(['auth', 'role:user'])->prefix('user/home-loan-calculators')->
     Route::get('/', [RecommendedCalculatorController::class, 'index'])->name('journeys.index');
     Route::get('/journeys/{journey:slug}', [RecommendedCalculatorController::class, 'show'])->name('journeys.show');
 });
+Route::middleware(['auth', 'role:user'])
+    ->get('/user/dashboard', [UserDashboardController::class, 'index'])
+    ->name('user.dashboard');
+    
+Route::middleware(['auth', 'role:user'])
+    ->prefix('user')
+    ->name('user.')
+    ->group(function () {
+        Route::get('/profile', [UserProfileController::class, 'show'])
+            ->name('profile.show');
+
+        Route::get('/profile/edit', [UserProfileController::class, 'edit'])
+            ->name('profile.edit');
+
+        Route::put('/profile', [UserProfileController::class, 'update'])
+            ->name('profile.update');
+            Route::delete('/profile/photo', [
+                UserProfileController::class,
+                'destroyPhoto',
+            ])->name('profile.photo.destroy');
+    });

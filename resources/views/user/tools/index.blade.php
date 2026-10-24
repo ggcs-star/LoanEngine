@@ -50,9 +50,9 @@
     $visibleTools = $visibleTools->values();
 @endphp
 
-<div class="le-tools">
-    <section class="le-hero">
-        <div>
+<div class="le-tools le-tools-index">
+    <section class="le-hero le-tools-hero">
+        <div class="le-tools-hero-copy">
             <span class="le-eyebrow">YOUR FINANCIAL TOOLKIT</span>
             <h1>Make clearer financial decisions.</h1>
             <p>Explore practical calculators and resources to plan your next financial step with confidence.</p>
@@ -70,17 +70,26 @@
 
                 <button type="submit" class="le-btn le-btn-primary">Search <span aria-hidden="true">→</span></button>
             </form>
+
+            <div class="le-tools-trust-row">
+                <span><i aria-hidden="true">✓</i> Practical financial tools</span>
+                <span><i aria-hidden="true">✓</i> Clear, guided decisions</span>
+            </div>
         </div>
 
-        <div class="le-hero-art" aria-hidden="true">
-            <span>▦</span>
+        <div class="le-hero-art le-tools-hero-art" aria-hidden="true">
+            <div class="le-tools-art-top">
+                <span class="le-tools-art-icon">▦</span>
+                <span class="le-tools-art-status">READY TO PLAN</span>
+            </div>
             <strong>Plan with clarity</strong>
             <small>Simple tools. Better decisions.</small>
             <div class="le-bars"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="le-tools-art-bottom"><span>YOUR NEXT STEP</span><b>Start here ↗</b></div>
         </div>
     </section>
 
-    <section>
+    <section class="le-tools-listing">
         <div class="le-section-head">
             <div>
                 <span class="le-eyebrow">EXPLORE YOUR OPTIONS</span>
@@ -92,6 +101,11 @@
 
         <form class="le-toolbar" method="GET" action="{{ route('user.tools.index') }}">
             <input type="hidden" name="search" value="{{ $search }}">
+
+            <div class="le-filter-heading">
+                <span class="le-filter-icon" aria-hidden="true">☷</span>
+                <div><strong>Find the right tool</strong><small>Filter or sort the available options</small></div>
+            </div>
 
             <div class="le-filter-row">
                 <label>
@@ -115,12 +129,12 @@
             </div>
 
             @if ($search !== '' || $selectedCategory !== '' || $sort !== 'recommended')
-                <a href="{{ route('user.tools.index') }}">Clear filters <span aria-hidden="true">×</span></a>
+                <a class="le-clear-filters" href="{{ route('user.tools.index') }}">Clear filters <span aria-hidden="true">×</span></a>
             @endif
         </form>
 
         @if ($visibleTools->isNotEmpty())
-            <div class="le-grid">
+            <div class="le-grid le-tools-grid">
                 @foreach ($visibleTools as $tool)
                     @php
                         $toolUrl = $tool->slug === 'home-loan-calculators'
@@ -128,7 +142,7 @@
                             : route('user.tools.show', ['tool' => $tool->slug]);
                     @endphp
 
-                    <article class="le-card">
+                    <article class="le-card le-tool-card">
                         <div class="le-card-top">
                             <span class="le-icon" aria-hidden="true">
                                 @switch($tool->icon)
@@ -181,7 +195,7 @@
                 @endforeach
             </div>
         @else
-            <div class="le-empty">
+            <div class="le-empty le-tools-empty">
                 <span aria-hidden="true">⌕</span>
                 <h3>No tools found</h3>
                 <p>Try another search or clear the selected filters.</p>

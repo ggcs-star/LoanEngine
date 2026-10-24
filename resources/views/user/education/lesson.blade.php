@@ -6,6 +6,128 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/user-education.css') }}">
+    <style>
+        .lesson-completion-panel {
+            margin-top: 22px;
+            padding: 22px;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            background: #fff;
+            color: #252525;
+        }
+
+        .lesson-completion-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .lesson-completion-copy h3 {
+            margin: 0 0 7px;
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .lesson-completion-copy p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .lesson-completion-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            min-height: 46px;
+            padding: 12px 20px;
+            border: 1px solid #252525;
+            border-radius: 10px;
+            background: #252525;
+            color: #fff;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s ease, transform .2s ease;
+        }
+
+        .lesson-completion-button:hover {
+            background: #404040;
+            transform: translateY(-1px);
+        }
+
+        .lesson-completion-button:focus-visible {
+            outline: 3px solid #9ca3af;
+            outline-offset: 3px;
+        }
+
+        .lesson-completed-indicator {
+            display: flex;
+            align-items: flex-start;
+            gap: 13px;
+        }
+
+        .lesson-completed-check {
+            display: flex;
+            flex: 0 0 40px;
+            width: 40px;
+            height: 40px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            background: #f3f4f6;
+            color: #252525;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .lesson-completed-indicator h3 {
+            margin: 1px 0 6px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .lesson-completed-indicator p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .lesson-feedback {
+            margin-bottom: 16px;
+            padding: 12px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            background: #f9fafb;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .lesson-playlist-item.is-completed .lesson-playlist-status {
+            color: #374151;
+            font-weight: 700;
+        }
+
+        @media (max-width: 640px) {
+            .lesson-completion-panel {
+                padding: 17px;
+            }
+
+            .lesson-completion-content {
+                align-items: stretch;
+            }
+
+            .lesson-completion-button {
+                width: 100%;
+            }
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -28,33 +150,46 @@
 
     $lessonNumber = $currentIndex === false ? 1 : $currentIndex + 1;
     $lessonTotal = $siblings->count();
-    $progress = $lessonTotal > 0
-        ? (int) round(($lessonNumber / $lessonTotal) * 100)
-        : 0;
 
     $youtubeId = null;
 
     if ($isVideo && $lesson->external_media_url) {
-        $host = strtolower(parse_url($lesson->external_media_url, PHP_URL_HOST) ?? '');
-        $path = trim(parse_url($lesson->external_media_url, PHP_URL_PATH) ?? '', '/');
+        $host = strtolower(
+            parse_url($lesson->external_media_url, PHP_URL_HOST) ?? ''
+        );
+
+        $path = trim(
+            parse_url($lesson->external_media_url, PHP_URL_PATH) ?? '',
+            '/'
+        );
 
         if ($host === 'youtu.be' || str_ends_with($host, '.youtu.be')) {
             $youtubeId = explode('/', $path)[0] ?? null;
-        } elseif (in_array($host, ['youtube.com', 'www.youtube.com', 'm.youtube.com'], true)) {
-            parse_str(parse_url($lesson->external_media_url, PHP_URL_QUERY) ?? '', $youtubeQuery);
+        } elseif (in_array(
+            $host,
+            ['youtube.com', 'www.youtube.com', 'm.youtube.com'],
+            true
+        )) {
+            parse_str(
+                parse_url($lesson->external_media_url, PHP_URL_QUERY) ?? '',
+                $youtubeQuery
+            );
 
             $youtubeId = $youtubeQuery['v'] ?? null;
 
-            if (!$youtubeId && str_starts_with($path, 'embed/')) {
+            if (! $youtubeId && str_starts_with($path, 'embed/')) {
                 $youtubeId = explode('/', substr($path, 6))[0] ?? null;
             }
 
-            if (!$youtubeId && str_starts_with($path, 'shorts/')) {
+            if (! $youtubeId && str_starts_with($path, 'shorts/')) {
                 $youtubeId = explode('/', substr($path, 7))[0] ?? null;
             }
         }
 
-        if ($youtubeId && !preg_match('/^[a-zA-Z0-9_-]{6,20}$/', $youtubeId)) {
+        if (
+            $youtubeId
+            && ! preg_match('/^[a-zA-Z0-9_-]{6,20}$/', $youtubeId)
+        ) {
             $youtubeId = null;
         }
     }
@@ -72,6 +207,7 @@
 
         <main class="lesson-main-column">
 
+            {{-- Lesson heading --}}
             <section class="lesson-heading-panel">
                 <div class="lesson-heading-top">
                     <div class="lesson-heading-copy">
@@ -90,16 +226,23 @@
 
                     <span class="lesson-type-badge">
                         @switch($type)
-                            @case('video') Video lesson @break
-                            @case('reel') Reel @break
-                            @case('audio') Audio lesson @break
-                            @default Article
+                            @case('video')
+                                Video lesson
+                                @break
+                            @case('reel')
+                                Reel
+                                @break
+                            @case('audio')
+                                Audio lesson
+                                @break
+                            @default
+                                Article
                         @endswitch
                     </span>
                 </div>
 
                 <div class="lesson-meta-row">
-                    @if($lesson->duration_seconds > 0)
+                    @if ($lesson->duration_seconds > 0)
                         <span class="lesson-meta-chip">
                             <span aria-hidden="true">◷</span>
                             {{ $lesson->formatted_duration }}
@@ -113,12 +256,17 @@
                     <span class="lesson-meta-chip">
                         {{ ucfirst($type) }}
                     </span>
+
+                    @if ($isCompleted)
+                        <span class="lesson-meta-chip">✓ Completed</span>
+                    @endif
                 </div>
             </section>
 
+            {{-- Media player --}}
             <section class="lesson-player-panel" aria-label="Lesson media player">
 
-                @if($mediaUrl && $isVideo && $youtubeId)
+                @if ($mediaUrl && $isVideo && $youtubeId)
                     <div class="lesson-video-frame">
                         <iframe
                             src="https://www.youtube-nocookie.com/embed/{{ $youtubeId }}"
@@ -129,22 +277,22 @@
                         </iframe>
                     </div>
 
-                @elseif($mediaUrl && $isVideo && !$youtubeId)
+                @elseif ($mediaUrl && $isVideo)
                     <div class="{{ $isReel ? 'lesson-reel-frame' : 'lesson-video-frame' }}">
                         <video
                             controls
                             playsinline
                             preload="metadata"
-                            @if($thumbnailUrl) poster="{{ $thumbnailUrl }}" @endif>
+                            @if ($thumbnailUrl) poster="{{ $thumbnailUrl }}" @endif>
                             <source src="{{ $mediaUrl }}">
                             Your browser does not support video playback.
                         </video>
                     </div>
 
-                @elseif($mediaUrl && $type === 'audio')
+                @elseif ($mediaUrl && $type === 'audio')
                     <div class="lesson-audio-player">
                         <div class="lesson-audio-art">
-                            @if($thumbnailUrl)
+                            @if ($thumbnailUrl)
                                 <img src="{{ $thumbnailUrl }}"
                                      alt="{{ $lesson->title }}"
                                      onerror="this.style.display='none';">
@@ -170,15 +318,17 @@
                         </small>
                     </div>
 
-                @elseif($type === 'article')
+                @elseif ($type === 'article')
                     <div class="lesson-article-cover">
                         <div class="lesson-article-symbol">Aa</div>
                         <span>READING MATERIAL</span>
                         <h3>{{ $lesson->title }}</h3>
-                        <p>{{ $lesson->description ?: 'Read the lesson below.' }}</p>
+                        <p>
+                            {{ $lesson->description ?: 'Read the lesson below.' }}
+                        </p>
                     </div>
 
-                @elseif($thumbnailUrl)
+                @elseif ($thumbnailUrl)
                     <div class="lesson-fallback-cover">
                         <img src="{{ $thumbnailUrl }}" alt="{{ $lesson->title }}">
                         <div class="lesson-fallback-caption">
@@ -199,6 +349,7 @@
 
             </section>
 
+            {{-- Lesson content --}}
             <section class="lesson-overview-panel">
                 <div class="lesson-section-heading">
                     <span class="education-eyebrow">LESSON OVERVIEW</span>
@@ -209,14 +360,14 @@
                     {{ $lesson->description ?: 'Explore the lesson material and learn at your own pace.' }}
                 </p>
 
-                @if($lesson->content)
+                @if ($lesson->content)
                     <div class="lesson-content-text">
                         {!! nl2br(e($lesson->content)) !!}
                     </div>
                 @endif
 
                 <div class="lesson-overview-stats">
-                    @if($lesson->duration_seconds > 0)
+                    @if ($lesson->duration_seconds > 0)
                         <div>
                             <strong>{{ $lesson->formatted_duration }}</strong>
                             <span>Duration</span>
@@ -235,8 +386,64 @@
                 </div>
             </section>
 
+            {{-- Completion status and action --}}
+            <section class="lesson-completion-panel"
+                     aria-labelledby="lesson-completion-heading">
+
+                @if (session('success'))
+                    <div class="lesson-feedback" role="status">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="lesson-feedback" role="alert">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
+                @if ($isCompleted)
+                    <div class="lesson-completed-indicator">
+                        <span class="lesson-completed-check" aria-hidden="true">✓</span>
+
+                        <div>
+                            <h3 id="lesson-completion-heading">
+                                Lesson completed
+                            </h3>
+                            <p>
+                                You have marked this lesson as complete.
+                                You can revisit the lesson whenever you want.
+                            </p>
+                        </div>
+                    </div>
+                @else
+                    <div class="lesson-completion-content">
+                        <div class="lesson-completion-copy">
+                            <h3 id="lesson-completion-heading">
+                                Finished this lesson?
+                            </h3>
+                            <p>
+                                Mark it as complete to update your learning progress.
+                            </p>
+                        </div>
+
+                        <form method="POST"
+                              action="{{ route('user.education.lesson.complete', $lesson) }}">
+                            @csrf
+
+                            <button type="submit" class="lesson-completion-button">
+                                <span aria-hidden="true">✓</span>
+                                Mark as Complete
+                            </button>
+                        </form>
+                    </div>
+                @endif
+            </section>
+
+            {{-- Previous and next lesson navigation --}}
             <nav class="lesson-navigation" aria-label="Lesson navigation">
-                @if($previousLesson)
+
+                @if ($previousLesson)
                     <a class="lesson-nav-button lesson-nav-previous"
                        href="{{ route('user.education.lesson', $previousLesson) }}">
                         <span aria-hidden="true">←</span>
@@ -249,7 +456,7 @@
                     <span></span>
                 @endif
 
-                @if($nextLesson)
+                @if ($nextLesson)
                     <a class="lesson-nav-button lesson-nav-next"
                        href="{{ route('user.education.lesson', $nextLesson) }}">
                         <span>
@@ -259,30 +466,26 @@
                         <span aria-hidden="true">→</span>
                     </a>
                 @else
-                    <span class="lesson-complete-label">You reached the last lesson.</span>
+                    <span class="lesson-complete-label">
+                        You reached the last lesson.
+                    </span>
                 @endif
+
             </nav>
 
         </main>
 
+        {{-- Lesson playlist --}}
         <aside class="lesson-playlist-panel">
             <div class="lesson-playlist-heading">
                 <div>
                     <span class="education-eyebrow">YOUR LEARNING PATH</span>
                     <h3>Lesson contents</h3>
                 </div>
+
                 <span class="lesson-playlist-count">
                     {{ $lessonNumber }}/{{ $lessonTotal }}
                 </span>
-            </div>
-
-            <div class="lesson-progress-track"
-                 role="progressbar"
-                 aria-label="Lesson progress"
-                 aria-valuemin="0"
-                 aria-valuemax="100"
-                 aria-valuenow="{{ $progress }}">
-                <span style="width: {{ $progress }}%"></span>
             </div>
 
             <div class="lesson-playlist-module">
@@ -290,7 +493,7 @@
             </div>
 
             <div class="lesson-playlist-items">
-                @foreach($siblings as $index => $item)
+                @foreach ($siblings as $index => $item)
                     @php
                         $itemType = strtolower($item->content_type ?? 'article');
 
@@ -300,11 +503,13 @@
                             'audio' => '♫',
                             default => 'Aa',
                         };
+
+                        $itemIsCurrent = (int) $item->id === (int) $lesson->id;
                     @endphp
 
-                    <a class="lesson-playlist-item {{ (int) $item->id === (int) $lesson->id ? 'is-current' : '' }}"
+                    <a class="lesson-playlist-item {{ $itemIsCurrent ? 'is-current' : '' }}"
                        href="{{ route('user.education.lesson', $item) }}"
-                       @if((int) $item->id === (int) $lesson->id) aria-current="page" @endif>
+                       @if ($itemIsCurrent) aria-current="page" @endif>
 
                         <span class="lesson-playlist-icon" aria-hidden="true">
                             {{ $itemIcon }}
@@ -312,16 +517,18 @@
 
                         <span class="lesson-playlist-copy">
                             <strong>{{ $item->title }}</strong>
+
                             <small>
                                 {{ ucfirst($itemType) }}
-                                @if($item->duration_seconds > 0)
+
+                                @if ($item->duration_seconds > 0)
                                     · {{ $item->formatted_duration }}
                                 @endif
                             </small>
                         </span>
 
                         <span class="lesson-playlist-status" aria-hidden="true">
-                            {{ (int) $item->id === (int) $lesson->id ? '●' : '→' }}
+                            {{ $itemIsCurrent ? '●' : '→' }}
                         </span>
                     </a>
                 @endforeach
@@ -329,6 +536,7 @@
 
             <div class="lesson-playlist-footer">
                 <span class="lesson-playlist-footer-icon" aria-hidden="true">L</span>
+
                 <div>
                     <strong>Keep learning</strong>
                     <p>One lesson at a time. Continue whenever you are ready.</p>

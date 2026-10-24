@@ -8,12 +8,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Calculator extends Model
 {
-    protected $fillable = ['name', 'slug', 'short_description', 'icon', 'status', 'display_order', 'route_name'];
+    protected $fillable = [
+    'name',
+    'slug',
+    'short_description',
+    'icon',
+    'status',
+    'display_order',
+    'route_name',
+    'formula_type',
+    'input_config',
+    'result_config',
+];
 
-    protected function casts(): array
-    {
-        return ['display_order' => 'integer'];
-    }
+protected function casts(): array
+{
+    return [
+        'display_order' => 'integer',
+        'input_config' => 'array',
+        'result_config' => 'array',
+    ];
+}
 
     public function journeys(): BelongsToMany
     {

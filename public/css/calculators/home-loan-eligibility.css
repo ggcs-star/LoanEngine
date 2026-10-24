@@ -1253,3 +1253,281 @@
         width: 100% !important;
     }
 }
+
+
+/* LoanEngine eligibility page — full-width responsive refresh */
+.le-eligibility-page {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 26px clamp(14px, 2.6vw, 44px) 58px;
+    overflow-wrap: anywhere;
+}
+
+.le-eligibility-page .le-eligibility-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 42px;
+    margin-bottom: 22px;
+    padding: 0 16px;
+    border: 1px solid #dfe3e9;
+    border-radius: 999px;
+    background: #fff;
+    color: #252a33;
+    text-decoration: none;
+    transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+.le-eligibility-page .le-eligibility-back:hover {
+    background: #f1f3f6;
+    border-color: #c8ced7;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.le-eligibility-page .le-eligibility-heading {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    width: 100%;
+    min-height: 270px;
+    margin: 0 0 26px;
+    padding: clamp(28px, 4.2vw, 58px);
+    overflow: hidden;
+    border: 1px solid #dfe3e9;
+    border-radius: 22px;
+    background:
+        radial-gradient(ellipse at 86% 18%, rgba(255,255,255,.98) 0%, rgba(237,239,243,.84) 27%, transparent 57%),
+        linear-gradient(115deg, #fff 0%, #f4f5f7 52%, #e0e3e8 100%);
+    box-shadow: 0 12px 32px rgba(20, 30, 45, .055);
+}
+
+.le-eligibility-page .le-eligibility-heading::after {
+    position: absolute;
+    right: 7%;
+    bottom: -94px;
+    width: 300px;
+    height: 300px;
+    border: 1px solid rgba(87, 96, 110, .12);
+    border-radius: 50%;
+    box-shadow: 0 0 0 26px rgba(87, 96, 110, .035), 0 0 0 54px rgba(87, 96, 110, .025);
+    content: "";
+    pointer-events: none;
+}
+
+.le-eligibility-page .le-eligibility-heading > div:first-child {
+    position: relative;
+    z-index: 1;
+    max-width: 850px;
+}
+
+.le-eligibility-page .le-eligibility-eyebrow {
+    color: #596373;
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: 1.8px;
+}
+
+.le-eligibility-page .le-eligibility-heading h1 {
+    max-width: 800px;
+    margin: 15px 0 12px;
+    color: #171a20;
+    font-size: clamp(34px, 3.4vw, 54px);
+    font-weight: 850;
+    line-height: 1.1;
+    letter-spacing: -1.8px;
+}
+
+.le-eligibility-page .le-eligibility-heading p {
+    max-width: 680px;
+    margin: 0;
+    color: #626c7b;
+    font-size: clamp(14px, 1.1vw, 17px);
+    line-height: 1.8;
+}
+
+.le-eligibility-page .le-eligibility-brand {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    border-color: rgba(255,255,255,.92);
+    border-radius: 16px;
+    background: rgba(255,255,255,.76);
+    box-shadow: 0 10px 28px rgba(20, 30, 45, .055);
+    backdrop-filter: blur(8px);
+}
+
+.le-eligibility-page .le-eligibility-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 24px;
+    width: 100%;
+}
+
+.le-eligibility-page .le-eligibility-form-card {
+    width: 100%;
+    padding: clamp(20px, 2.7vw, 38px);
+    border-color: #dfe3e9;
+    border-radius: 21px;
+    box-shadow: 0 8px 28px rgba(20, 30, 45, .04);
+}
+
+.le-eligibility-page .le-section-heading {
+    gap: 15px;
+    margin-bottom: 23px;
+}
+
+.le-eligibility-page .le-section-heading > span {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+    border-color: #e0e4eb;
+    border-radius: 13px;
+    background: #eff1f4;
+    color: #252a33;
+    font-size: 12px;
+}
+
+.le-eligibility-page .le-section-heading h2 {
+    font-size: 19px;
+    letter-spacing: -.3px;
+}
+
+.le-eligibility-page .le-section-heading p {
+    font-size: 13px;
+}
+
+.le-eligibility-page .le-loan-types {
+    gap: 15px;
+    margin-bottom: 31px;
+}
+
+.le-eligibility-page .le-loan-type {
+    min-height: 88px;
+    padding: 16px;
+    border-color: #dfe3e9;
+    border-radius: 15px;
+}
+
+.le-eligibility-page .le-loan-type-icon {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: #f0f2f5;
+    color: #252a33;
+}
+
+.le-eligibility-page .le-loan-type strong { font-size: 13px; }
+.le-eligibility-page .le-loan-type small { font-size: 11px; }
+
+.le-eligibility-page .le-loan-type.is-active {
+    border-color: #343a46;
+    background: #f0f2f5;
+    box-shadow: inset 0 0 0 1px #343a46;
+}
+
+.le-eligibility-page .le-loan-type.is-active .le-loan-check {
+    border-color: #242933;
+    background: #242933;
+}
+
+.le-eligibility-page .le-details-heading {
+    padding-top: 28px;
+}
+
+.le-eligibility-page .le-slider-grid { gap: 34px; }
+.le-eligibility-page .le-slider-head { margin-bottom: 19px; }
+.le-eligibility-page .le-slider-head label { font-size: 14px; }
+.le-eligibility-page .le-slider-head strong { font-size: 18px; }
+.le-eligibility-page .le-slider-limits { margin-top: 14px; font-size: 11px; }
+
+.le-eligibility-page .le-method-field {
+    margin-top: 32px;
+    padding-top: 25px;
+    border-top: 1px solid #e8ebf0;
+}
+
+.le-eligibility-page .le-eligibility-actions { margin-top: 28px; }
+.le-eligibility-page .le-button { min-height: 51px; border-radius: 12px; }
+.le-eligibility-page .le-button-primary { background: #20242c; color: #fff; }
+.le-eligibility-page .le-button-primary:hover { background: #363c47; }
+
+.le-eligibility-page .le-eligibility-result-column {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 18px;
+    width: 100%;
+}
+
+.le-eligibility-page .le-result-card,
+.le-eligibility-page .le-result-placeholder,
+.le-eligibility-page .le-result-info,
+.le-eligibility-page .le-recommendations {
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(20, 30, 45, .04);
+}
+
+.le-eligibility-page .le-result-card {
+    border-color: #dfe3e9;
+    background: linear-gradient(125deg, #fff 0%, #f0f2f5 100%);
+    text-align: left;
+}
+
+.le-eligibility-page .le-result-label { color: #616b79; }
+.le-eligibility-page .le-result-amount { color: #171a20; }
+.le-eligibility-page .le-result-card > p { margin-left: 0; margin-right: 0; }
+
+.le-eligibility-page .le-result-metrics { gap: 14px; }
+.le-eligibility-page .le-result-metric {
+    padding: 20px;
+    border-color: #e1e5eb;
+    border-radius: 15px;
+    box-shadow: 0 4px 14px rgba(20, 30, 45, .025);
+}
+
+.le-eligibility-page .le-recommendations { padding: clamp(20px, 2.5vw, 32px); }
+.le-eligibility-page .le-recommendations > h2 { font-size: 21px; }
+.le-eligibility-page .le-recommendations > h2 span { color: #343a46; }
+.le-eligibility-page .le-recommendation {
+    border-color: #e3e6ec;
+    border-radius: 14px;
+    background: #f5f6f8;
+}
+.le-eligibility-page .le-recommendation-icon { background: #e5e8ed; color: #252a33; }
+
+@media (min-width: 1500px) {
+    .le-eligibility-page { padding-right: 48px; padding-left: 48px; }
+}
+
+@media (max-width: 900px) {
+    .le-eligibility-page .le-eligibility-heading { min-height: 0; padding: 30px; }
+    .le-eligibility-page .le-eligibility-brand { display: none; }
+    .le-eligibility-page .le-loan-types { grid-template-columns: 1fr; }
+    .le-eligibility-page .le-loan-type { min-height: 76px; }
+}
+
+@media (max-width: 600px) {
+    .le-eligibility-page { padding: 16px 12px 34px; }
+    .le-eligibility-page .le-eligibility-heading { padding: 25px 20px; border-radius: 17px; }
+    .le-eligibility-page .le-eligibility-heading h1 { font-size: 31px; letter-spacing: -.8px; }
+    .le-eligibility-page .le-eligibility-heading p { font-size: 13px; }
+    .le-eligibility-page .le-eligibility-form-card { padding: 20px 15px; border-radius: 16px; }
+    .le-eligibility-page .le-loan-types { gap: 10px; }
+    .le-eligibility-page .le-loan-type { flex-direction: row; align-items: center; min-height: 74px; padding: 12px; }
+    .le-eligibility-page .le-loan-type-icon { flex-basis: 38px; width: 38px; height: 38px; }
+    .le-eligibility-page .le-loan-type strong { font-size: 12px; }
+    .le-eligibility-page .le-loan-type small { font-size: 10px; }
+    .le-eligibility-page .le-slider-grid { gap: 28px; }
+    .le-eligibility-page .le-slider-head label { font-size: 13px; }
+    .le-eligibility-page .le-slider-head strong { font-size: 15px; }
+    .le-eligibility-page .le-result-card { text-align: center; }
+    .le-eligibility-page .le-result-card > p { margin-left: auto; margin-right: auto; }
+    .le-eligibility-page .le-result-metric { padding: 15px 11px; }
+    .le-eligibility-page .le-recommendations > h2 { font-size: 18px; }
+}

@@ -597,3 +597,850 @@
         display: inline-flex !important;
     }
 }
+
+/* ==========================================
+   User Topbar — refined header
+   Uses existing user-theme.css variables
+========================================== */
+
+.user-topbar {
+    justify-content: space-between;
+    gap: 24px;
+    min-height: var(--u-header-height);
+    padding: 14px var(--u-page-gutter);
+    background: var(--u-surface);
+    border-bottom: 1px solid var(--u-border);
+}
+
+.user-topbar-left {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    gap: 16px;
+}
+
+.user-topbar .topbar-heading {
+    flex: 1;
+    min-width: 0;
+}
+
+.user-topbar .topbar-eyebrow {
+    margin-bottom: 5px;
+    color: var(--u-text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+}
+
+.user-topbar .topbar-heading h1 {
+    margin: 0;
+    color: var(--u-text);
+    font-family: var(--u-heading-font);
+    font-size: clamp(19px, 2vw, 24px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.3;
+}
+
+/* Clickable profile area */
+
+.user-topbar .topbar-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 0 0 auto;
+    min-width: 0;
+    max-width: 300px;
+    padding: 8px 12px 8px 8px;
+    border: 1px solid transparent;
+    border-radius: var(--u-radius-lg);
+    background: transparent;
+    color: var(--u-text);
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background var(--u-transition),
+        border-color var(--u-transition);
+}
+
+.user-topbar .topbar-profile:hover {
+    border-color: var(--u-border);
+    background: var(--u-surface-muted);
+}
+
+.user-topbar .topbar-profile:focus-visible {
+    outline: 2px solid var(--u-text-secondary);
+    outline-offset: 3px;
+}
+
+.user-topbar .profile-avatar {
+    display: grid;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid var(--u-border);
+    border-radius: 50%;
+    background: var(--u-surface-muted);
+    color: var(--u-text);
+    font-family: var(--u-heading-font);
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.user-topbar .profile-copy {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.user-topbar .profile-copy strong {
+    overflow: hidden;
+    color: var(--u-text);
+    font-size: 12px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-topbar .profile-copy small {
+    overflow: hidden;
+    color: var(--u-text-muted);
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-topbar .profile-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    border-radius: var(--u-radius-sm);
+    color: var(--u-text-muted);
+    font-size: 15px;
+    transition:
+        background var(--u-transition),
+        color var(--u-transition);
+}
+
+.user-topbar .topbar-profile:hover .profile-chevron {
+    background: var(--u-surface-hover);
+    color: var(--u-text);
+}
+
+/* Responsive header */
+
+@media (max-width: 700px) {
+    .user-topbar {
+        gap: 10px;
+        padding: 11px 14px;
+    }
+
+    .user-topbar-left {
+        gap: 10px;
+    }
+
+    .user-topbar .topbar-eyebrow {
+        font-size: 9px;
+        letter-spacing: 0.7px;
+    }
+
+    .user-topbar .topbar-heading h1 {
+        font-size: 18px;
+    }
+
+    .user-topbar .topbar-profile {
+        gap: 0;
+        padding: 5px;
+        border-radius: var(--u-radius-md);
+    }
+
+    .user-topbar .profile-avatar {
+        width: 38px;
+        height: 38px;
+        flex-basis: 38px;
+    }
+
+    .user-topbar .profile-copy,
+    .user-topbar .profile-chevron {
+        display: none;
+    }
+}
+
+@media (max-width: 380px) {
+    .user-topbar {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .user-topbar-left {
+        gap: 8px;
+    }
+
+    .user-topbar .topbar-heading h1 {
+        font-size: 16px;
+    }
+
+    .user-topbar .profile-avatar {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+    }
+}
+/* Header profile image */
+.user-topbar .profile-avatar {
+    overflow: hidden;
+    padding: 0;
+}
+
+.user-topbar .profile-avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.user-topbar .profile-avatar span {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+}
+
+/* ==========================================
+   LOANENGINE — PREMIUM USER TOPBAR
+   Existing monochrome theme variables
+========================================== */
+
+.user-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: 88px;
+    padding: 14px var(--u-page-gutter);
+    border-bottom: 1px solid var(--u-border);
+    background: var(--u-surface);
+    box-shadow: 0 3px 14px rgb(0 0 0 / 2%);
+}
+
+.user-topbar-left {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    gap: 18px;
+}
+
+.user-topbar .topbar-heading {
+    flex: 1;
+    min-width: 0;
+}
+
+.user-topbar .topbar-breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 5px;
+    color: var(--u-text-muted);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.user-topbar .breadcrumb-divider {
+    color: var(--u-border-strong);
+}
+
+.user-topbar .topbar-heading h1 {
+    margin: 0;
+    color: var(--u-text);
+    font-family: var(--u-heading-font);
+    font-size: clamp(20px, 2vw, 25px);
+    font-weight: 800;
+    letter-spacing: -0.7px;
+    line-height: 1.3;
+}
+
+/* Right side */
+
+.user-topbar .topbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 20px;
+    flex: 0 0 auto;
+}
+
+.user-topbar .topbar-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 13px;
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius-pill);
+    background: var(--u-surface);
+    color: var(--u-text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.user-topbar .status-dot {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    border-radius: 50%;
+    background: var(--u-text-secondary);
+}
+
+.user-topbar .topbar-separator {
+    width: 1px;
+    height: 36px;
+    background: var(--u-border);
+}
+
+/* Clickable account card */
+
+.user-topbar .topbar-profile {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+    max-width: 270px;
+    padding: 7px 10px 7px 7px;
+    border: 1px solid transparent;
+    border-radius: var(--u-radius-lg);
+    background: transparent;
+    color: var(--u-text);
+    text-decoration: none;
+    transition:
+        background var(--u-transition),
+        border-color var(--u-transition),
+        box-shadow var(--u-transition);
+}
+
+.user-topbar .topbar-profile:hover {
+    border-color: var(--u-border);
+    background: var(--u-surface-muted);
+    box-shadow: var(--u-shadow-sm);
+}
+
+.user-topbar .profile-avatar {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    overflow: hidden;
+    place-items: center;
+    border: 1px solid var(--u-border);
+    border-radius: 50%;
+    background: var(--u-surface-muted);
+    color: var(--u-text);
+    font-family: var(--u-heading-font);
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.user-topbar .profile-avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-topbar .profile-avatar span {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+}
+
+.user-topbar .profile-copy {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.user-topbar .profile-copy strong {
+    overflow: hidden;
+    color: var(--u-text);
+    font-size: 12px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-topbar .profile-copy small {
+    overflow: hidden;
+    color: var(--u-text-muted);
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-topbar .profile-chevron {
+    display: grid;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    place-items: center;
+    border: 1px solid var(--u-border);
+    border-radius: 50%;
+    background: var(--u-surface);
+    color: var(--u-text-secondary);
+    transition:
+        transform var(--u-transition),
+        background var(--u-transition);
+}
+
+.user-topbar .profile-chevron svg {
+    display: block;
+    width: 15px;
+    height: 15px;
+}
+
+.user-topbar .topbar-profile:hover .profile-chevron {
+    transform: translateY(1px);
+    background: var(--u-surface-muted);
+}
+
+.user-topbar .topbar-profile:focus-visible {
+    outline: 2px solid var(--u-text-secondary);
+    outline-offset: 3px;
+}
+
+/* Tablet */
+
+@media (max-width: 900px) {
+    .user-topbar {
+        gap: 14px;
+    }
+
+    .user-topbar .topbar-actions {
+        gap: 12px;
+    }
+
+    .user-topbar .topbar-status {
+        padding: 9px 10px;
+    }
+}
+
+/* Mobile */
+
+@media (max-width: 700px) {
+    .user-topbar {
+        min-height: 72px;
+        gap: 10px;
+        padding: 10px 14px;
+    }
+
+    .user-topbar-left {
+        gap: 11px;
+    }
+
+    .user-topbar .topbar-breadcrumb {
+        gap: 5px;
+        margin-bottom: 3px;
+        font-size: 9px;
+    }
+
+    .user-topbar .topbar-heading h1 {
+        font-size: 18px;
+        letter-spacing: -0.4px;
+    }
+
+    .user-topbar .topbar-actions {
+        gap: 0;
+    }
+
+    .user-topbar .topbar-status,
+    .user-topbar .topbar-separator,
+    .user-topbar .profile-copy,
+    .user-topbar .profile-chevron {
+        display: none;
+    }
+
+    .user-topbar .topbar-profile {
+        padding: 3px;
+        border-radius: 50%;
+    }
+
+    .user-topbar .profile-avatar {
+        width: 39px;
+        height: 39px;
+        flex-basis: 39px;
+    }
+}
+
+@media (max-width: 380px) {
+    .user-topbar {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .user-topbar-left {
+        gap: 8px;
+    }
+
+    .user-topbar .topbar-heading h1 {
+        font-size: 16px;
+    }
+
+    .user-topbar .profile-avatar {
+        width: 35px;
+        height: 35px;
+        flex-basis: 35px;
+    }
+}
+
+/* =========================================
+   LOANENGINE — REFINED TOPBAR
+   Theme: Existing grey / white / black
+========================================= */
+
+.user-app .user-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    width: 100%;
+    min-height: 80px;
+    padding: 12px var(--u-page-gutter);
+    border-bottom: 1px solid var(--u-border);
+    background: var(--u-surface);
+    box-shadow: 0 4px 18px rgb(25 27 32 / 3%);
+}
+
+.user-app .user-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    flex: 1;
+    min-width: 0;
+}
+
+.user-app .topbar-home-icon {
+    display: grid;
+    width: 25px;
+    height: 25px;
+    flex: 0 0 25px;
+    place-items: center;
+    color: var(--u-text);
+}
+
+.user-app .topbar-home-icon svg {
+    width: 23px;
+    height: 23px;
+}
+
+.user-app .topbar-breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 11px;
+    min-width: 0;
+    color: var(--u-text-secondary);
+    font-size: var(--u-text-sm);
+}
+
+.user-app .topbar-breadcrumb a {
+    color: var(--u-text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.user-app .topbar-breadcrumb a:hover {
+    color: var(--u-text);
+}
+
+.user-app .topbar-breadcrumb strong {
+    overflow: hidden;
+    color: var(--u-text);
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-app .breadcrumb-chevron {
+    color: var(--u-text-muted);
+    font-size: 22px;
+    line-height: 1;
+}
+
+/* Right-side controls */
+
+.user-app .topbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 24px;
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
+.user-app .topbar-search {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: clamp(200px, 24vw, 330px);
+    height: 48px;
+    padding: 0 15px;
+    border: 1px solid transparent;
+    border-radius: var(--u-radius-lg);
+    background: var(--u-surface-muted);
+    transition: border-color var(--u-transition),
+                background var(--u-transition),
+                box-shadow var(--u-transition);
+}
+
+.user-app .topbar-search:focus-within {
+    border-color: var(--u-border-strong);
+    background: var(--u-surface);
+    box-shadow: var(--u-focus-ring);
+}
+
+.user-app .topbar-search svg {
+    width: 23px;
+    height: 23px;
+    flex: 0 0 23px;
+    color: var(--u-text);
+}
+
+.user-app .topbar-search input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--u-text);
+    font: inherit;
+    font-size: var(--u-text-sm);
+    box-shadow: none;
+}
+
+.user-app .topbar-search input::placeholder {
+    color: var(--u-text-muted);
+}
+
+.user-app .topbar-search input:focus {
+    border: 0;
+    outline: 0;
+    box-shadow: none;
+}
+
+.user-app .topbar-divider {
+    width: 1px;
+    height: 42px;
+    flex: 0 0 1px;
+    background: var(--u-border);
+}
+
+/* Clickable profile */
+
+.user-app .topbar-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 300px;
+    min-width: 0;
+    padding: 4px 0 4px 0;
+    border-radius: var(--u-radius-md);
+    color: var(--u-text);
+    text-decoration: none;
+}
+
+.user-app .topbar-profile .profile-avatar {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    overflow: hidden;
+    place-items: center;
+    border: 1px solid var(--u-border);
+    border-radius: 50%;
+    background: var(--u-surface-muted);
+    color: var(--u-text);
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.user-app .topbar-profile .profile-avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-app .topbar-profile .profile-avatar span {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+}
+
+.user-app .topbar-profile .profile-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.user-app .topbar-profile .profile-copy strong {
+    overflow: hidden;
+    color: var(--u-text);
+    font-size: var(--u-text-sm);
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-app .topbar-profile .profile-copy small {
+    overflow: hidden;
+    color: var(--u-text-muted);
+    font-size: var(--u-text-xs);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-app .profile-dropdown-icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    color: var(--u-text);
+    transition: transform var(--u-transition);
+}
+
+.user-app .topbar-profile:hover .profile-dropdown-icon {
+    transform: translateY(2px);
+}
+
+.user-app .topbar-profile:hover .profile-avatar {
+    border-color: var(--u-border-strong);
+}
+
+.user-app .topbar-profile:focus-visible {
+    outline: 2px solid var(--u-text-secondary);
+    outline-offset: 5px;
+}
+
+/* Tablet */
+
+@media (max-width: 1000px) {
+    .user-app .user-topbar {
+        gap: 15px;
+    }
+
+    .user-app .topbar-actions {
+        gap: 14px;
+    }
+
+    .user-app .topbar-search {
+        width: clamp(160px, 22vw, 250px);
+    }
+
+    .user-app .topbar-breadcrumb {
+        gap: 7px;
+    }
+}
+
+/* Mobile */
+
+@media (max-width: 700px) {
+    .user-app .user-topbar {
+        min-height: 70px;
+        gap: 10px;
+        padding: 10px 14px;
+    }
+
+    .user-app .user-topbar-left {
+        gap: 10px;
+    }
+
+    .user-app .topbar-home-icon {
+        display: none;
+    }
+
+    .user-app .topbar-breadcrumb {
+        gap: 6px;
+        font-size: var(--u-text-xs);
+    }
+
+    .user-app .topbar-actions {
+        gap: 10px;
+    }
+
+    .user-app .topbar-search {
+        width: 42px;
+        height: 42px;
+        justify-content: center;
+        gap: 0;
+        padding: 0;
+        border-radius: var(--u-radius-md);
+    }
+
+    .user-app .topbar-search svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .user-app .topbar-search input {
+        display: none;
+    }
+
+    .user-app .topbar-divider,
+    .user-app .topbar-profile .profile-copy,
+    .user-app .profile-dropdown-icon {
+        display: none;
+    }
+
+    .user-app .topbar-profile {
+        padding: 0;
+    }
+
+    .user-app .topbar-profile .profile-avatar {
+        width: 39px;
+        height: 39px;
+        flex-basis: 39px;
+    }
+}
+
+@media (max-width: 380px) {
+    .user-app .user-topbar {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .user-app .topbar-breadcrumb {
+        max-width: 145px;
+        gap: 5px;
+    }
+
+    .user-app .topbar-breadcrumb a {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .user-app .topbar-actions {
+        gap: 7px;
+    }
+}

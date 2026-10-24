@@ -43,10 +43,10 @@
         </a>
 
         {{-- Loan Applications --}}
-        <a href="#" class="nav-item">
+        <!-- <a href="#" class="nav-item">
             <span class="nav-icon">▤</span>
             <span>Loan Applications</span>
-        </a>
+        </a> -->
 
         {{-- Education --}}
         @if(auth()->user()?->role === 'admin')
@@ -121,16 +121,17 @@
             </a>
 
         @endif
+        <div class="sidebar-caption">Calculator &amp; Management</div>
 {{-- Calculator Management --}}
 <a
     href="{{ route('admin.calculators.index') }}"
     class="nav-item {{ request()->routeIs('admin.calculators.*') ? 'active' : '' }}"
 >
     <span class="nav-icon">▦</span>
-    <span>Calculator Management</span>
+    <span>Calculator </span>
 </a>
         {{-- Other Modules --}}
-        <a href="#" class="nav-item">
+        <!-- <a href="#" class="nav-item">
             <span class="nav-icon">▷</span>
             <span>Media</span>
         </a>
@@ -143,7 +144,7 @@
         <a href="#" class="nav-item">
             <span class="nav-icon">♧</span>
             <span>Community</span>
-        </a>
+        </a> -->
 
     </nav>
 

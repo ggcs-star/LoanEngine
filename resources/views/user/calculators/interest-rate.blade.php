@@ -1,4 +1,4 @@
- @extends('user.layouts.app')
+@extends('user.layouts.app')
 
 @section('title', 'Interest Rate Calculator | LoanEngine')
 @section('page_heading', 'Interest Rate Calculator')
@@ -24,9 +24,23 @@
 @endphp
 
 <div class="ir-page">
+    <section class="ir-hero">
+        <div class="ir-hero-content">
+            <span class="ir-hero-eyebrow">LOANENGINE CALCULATORS</span>
+            <h1>Interest Rate Calculator</h1>
+            <p>Estimate the annual interest rate implied by your EMI, loan amount and repayment tenure.</p>
+        </div>
+        <div class="ir-hero-mark" aria-hidden="true">
+            <span class="ir-mark-percent">%</span>
+            <span class="ir-mark-line ir-mark-line-one"></span>
+            <span class="ir-mark-line ir-mark-line-two"></span>
+            <span class="ir-mark-line ir-mark-line-three"></span>
+        </div>
+    </section>
+
     <a class="ir-back" href="{{ route('user.calculators.journeys.index') }}">
         <span aria-hidden="true">←</span>
-        <span>Interest Rate Calculator</span>
+        <span>Back to Calculators</span>
     </a>
 
     @if ($errors->any())

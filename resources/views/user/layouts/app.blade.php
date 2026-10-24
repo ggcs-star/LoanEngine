@@ -29,38 +29,98 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <div class="user-main">
+       
 
         <header class="user-topbar">
+            <div class="user-topbar-left">
+                <button
+                    type="button"
+                    class="sidebar-toggle"
+                    id="sidebarToggle"
+                    aria-label="Toggle sidebar"
+                    aria-controls="userSidebar"
+                    aria-expanded="false"
+                >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
 
-            <button
-                type="button"
-                class="sidebar-toggle"
-                id="sidebarToggle"
-                aria-label="Toggle sidebar"
-                aria-controls="userSidebar"
-                aria-expanded="true"
-            >
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-
-            <div class="topbar-heading">
-                <span class="topbar-eyebrow">LOANENGINE / USER WORKSPACE</span>
-                <h1>@yield('page_heading', 'Dashboard')</h1>
-            </div>
-
-            <div class="topbar-profile">
-                <div class="profile-avatar">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                <div class="topbar-home-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M3.5 10.5L12 3.5L20.5 10.5V20H14.5V14H9.5V20H3.5V10.5Z"
+                            stroke="currentColor" stroke-width="1.8"
+                            stroke-linejoin="round"/>
+                    </svg>
                 </div>
 
-                <div class="profile-copy">
-                    <strong>{{ auth()->user()->name ?? 'User' }}</strong>
-                    <small>{{ auth()->user()->email ?? '' }}</small>
-                </div>
+                <nav class="topbar-breadcrumb" aria-label="Breadcrumb">
+                    <a href="{{ route('user.dashboard') }}">User Workspace</a>
+                    <span class="breadcrumb-chevron">›</span>
+                    <strong>@yield('page_heading', 'Dashboard')</strong>
+                </nav>
             </div>
 
+            <div class="topbar-actions">
+                <form
+                    class="topbar-search"
+                    action="{{ route('user.dashboard') }}"
+                    method="GET"
+                    role="search"
+                >
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle cx="10.8" cy="10.8" r="6.8"
+                                stroke="currentColor" stroke-width="1.8"/>
+                        <path d="M16 16L21 21"
+                            stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round"/>
+                    </svg>
+
+                    <input
+                        type="search"
+                        name="search"
+                        placeholder="Search anything..."
+                        aria-label="Search"
+                    >
+                </form>
+
+                <div class="topbar-divider"></div>
+
+                <a
+                    href="{{ route('user.profile.show') }}"
+                    class="topbar-profile"
+                    aria-label="Open my profile"
+                >
+                    <div class="profile-avatar">
+                        @if (auth()->user()->profile_photo_path ?? false)
+                            <img
+                                src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url(auth()->user()->profile_photo_path) }}"
+                                alt="Profile photo"
+                            >
+                        @else
+                            <span>
+                                {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                            </span>
+                        @endif
+                    </div>
+
+                    <div class="profile-copy">
+                        <strong>{{ auth()->user()->name ?? 'User' }}</strong>
+                        <small>{{ auth()->user()->email ?? '' }}</small>
+                    </div>
+
+                    <svg class="profile-dropdown-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        aria-hidden="true">
+                        <path d="M7 10L12 15L17 10"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"/>
+                    </svg>
+                </a>
+            </div>
         </header>
 
         <main class="user-content">

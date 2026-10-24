@@ -25,15 +25,34 @@
             <span class="notification-dot"></span>
         </button>
 
-        <div class="profile-chip">
-            <div class="avatar">
+        
+        <a href="{{ route('admin.profile.show') }}"
+        class="profile-chip"
+        aria-label="View admin profile"
+        title="View profile"
+        style="text-decoration: none; color: inherit;">
+
+            
+        <div class="avatar">
+            @if(auth()->user()?->profile_photo_path)
+                <img
+                    src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url(auth()->user()->profile_photo_path) }}"
+                    alt="{{ auth()->user()->name }} profile photo"
+                    class="header-profile-photo"
+                >
+            @else
                 {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
-            </div>
+            @endif
+        </div>
+
+
             <div class="profile-copy">
                 <strong>{{ auth()->user()->name ?? 'Administrator' }}</strong>
                 <span>Administrator</span>
             </div>
-        </div>
+
+        </a>
+
     </div>
 </header>
 

@@ -43,7 +43,6 @@ class EducationController extends Controller
         ));
     }
 
-    
     public function category(EducationCategory $category): View
     {
         abort_unless($category->is_active, 404);
@@ -78,24 +77,32 @@ class EducationController extends Controller
 
         $firstLesson = $module->publishedLessons()
             ->whereHas('module', function ($query) {
-                $query->where('status', 'published');
+                $query->where('status', 'published')
+                    ->whereHas('category', function ($categoryQuery) {
+                        $categoryQuery->where('is_active', true);
+                    });
             })
             ->orderBy('sort_order')
             ->orderBy('id')
             ->first();
 
-        if (!$firstLesson) {
+        if (! $firstLesson) {
             return view('user.education.module', [
                 'module' => $module,
                 'lessons' => collect(),
             ]);
         }
 
-        return redirect()->route('user.education.lesson', $firstLesson);
+        return redirect()->route(
+            'user.education.lesson',
+            $firstLesson
+        );
     }
 
-    public function lesson(EducationLesson $lesson): View
-    {
+    public function lesson(
+        Request $request,
+        EducationLesson $lesson
+    ): View {
         abort_unless($lesson->status === 'published', 404);
 
         $lesson->load('module.category');
@@ -110,6 +117,12 @@ class EducationController extends Controller
         $siblings = EducationLesson::query()
             ->where('education_module_id', $lesson->education_module_id)
             ->published()
+            ->whereHas('module', function ($query) {
+                $query->where('status', 'published')
+                    ->whereHas('category', function ($categoryQuery) {
+                        $categoryQuery->where('is_active', true);
+                    });
+            })
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get([
@@ -117,28 +130,43 @@ class EducationController extends Controller
                 'education_module_id',
                 'title',
                 'description',
+                'content',
                 'content_type',
+                'media_path',
+                'external_media_url',
+                'thumbnail_path',
                 'duration_seconds',
                 'sort_order',
+                'status',
             ]);
+
         $currentIndex = $siblings->search(
             fn ($item) => (int) $item->id === (int) $lesson->id
         );
 
-        $previousLesson = $currentIndex !== false && $currentIndex > 0
+        abort_if($currentIndex === false, 404);
+
+        $previousLesson = $currentIndex > 0
             ? $siblings[$currentIndex - 1]
             : null;
 
-        $nextLesson = $currentIndex !== false
-            && $currentIndex < $siblings->count() - 1
-                ? $siblings[$currentIndex + 1]
-                : null;
+        $nextLesson = $currentIndex < $siblings->count() - 1
+            ? $siblings[$currentIndex + 1]
+            : null;
+
+        // Check completion for this authenticated user only.
+        $isCompleted = $request->user()
+            ->lessonProgress()
+            ->where('lesson_id', $lesson->id)
+            ->whereNotNull('completed_at')
+            ->exists();
 
         return view('user.education.lesson', compact(
             'lesson',
             'siblings',
             'previousLesson',
-            'nextLesson'
+            'nextLesson',
+            'isCompleted'
         ));
     }
 }
