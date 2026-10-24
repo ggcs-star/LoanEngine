@@ -1,75 +1,113 @@
+@php
+    $siteSettings = $siteSettings ?? \App\Models\SiteSetting::current();
+@endphp
 
 <aside class="user-sidebar" id="userSidebar">
 
+    {{-- Dynamic Website Branding --}}
     <a href="{{ route('user.dashboard') }}" class="user-brand">
-        <span class="brand-mark">L</span>
-        <span class="brand-name">Loan<span>Engine</span></span>
+
+        @if (!empty($siteSettings->logo_path))
+            <img
+                src="{{ asset('storage/' . $siteSettings->logo_path) }}"
+                alt="{{ $siteSettings->site_name ?? 'LoanEngine' }}"
+                class="brand-logo"
+            >
+        @else
+            <span class="brand-mark">
+                {{ strtoupper(substr($siteSettings->site_name ?? 'LoanEngine', 0, 1)) }}
+            </span>
+        @endif
+
+        <span class="brand-name">
+            {{ $siteSettings->site_name ?? 'LoanEngine' }}
+        </span>
+
     </a>
 
     <div class="sidebar-section-label">YOUR WORKSPACE</div>
 
     <nav class="user-nav" aria-label="User navigation">
 
+        {{-- Dashboard --}}
         <a href="{{ route('user.dashboard') }}"
            class="user-nav-link {{ request()->routeIs('user.dashboard') ? 'is-active' : '' }}"
            title="Dashboard">
+
             <span class="nav-icon">⌂</span>
             <span>Dashboard</span>
         </a>
-        
 
+        {{-- Education --}}
         @if (Route::has('user.education.index'))
             <a href="{{ route('user.education.index') }}"
                class="user-nav-link {{ request()->routeIs('user.education.*') ? 'is-active' : '' }}"
                title="Education">
+
                 <span class="nav-icon">▤</span>
                 <span>Education</span>
             </a>
         @endif
 
+        {{-- Loan Tools --}}
         @if (Route::has('user.tools.index'))
             <a href="{{ route('user.tools.index') }}"
                class="user-nav-link {{ request()->routeIs('user.tools.*') ? 'is-active' : '' }}"
                title="Loan Tools">
+
                 <span class="nav-icon">⌘</span>
                 <span>Loan Tools</span>
             </a>
+
         @elseif (Route::has('tools.index'))
             <a href="{{ route('tools.index') }}"
                class="user-nav-link {{ request()->routeIs('tools.*') ? 'is-active' : '' }}"
                title="Loan Tools">
+
                 <span class="nav-icon">⌘</span>
                 <span>Loan Tools</span>
             </a>
         @endif
+
+        {{-- Financial Flow Calendar --}}
         @if (Route::has('user.financial-flow.index'))
             <a href="{{ route('user.financial-flow.index') }}"
                class="user-nav-link {{ request()->routeIs('user.financial-flow.*') ? 'is-active' : '' }}"
                title="Financial Flow Calendar">
+
                 <span class="nav-icon">▦</span>
                 <span>Financial Flow Calendar</span>
             </a>
         @endif
-        <a href="{{ route('user.calculators.journeys.index') }}"
-   class="user-nav-link {{ request()->routeIs('user.calculators.journeys.*') ? 'is-active' : '' }}"
-   title="Loan Calculators">
-    <span class="nav-icon">⌘</span>
-    <span>Loan Calculators</span>
-</a>
 
+        {{-- Loan Calculators --}}
+        @if (Route::has('user.calculators.journeys.index'))
+            <a href="{{ route('user.calculators.journeys.index') }}"
+               class="user-nav-link {{ request()->routeIs('user.calculators.journeys.*') ? 'is-active' : '' }}"
+               title="Loan Calculators">
+
+                <span class="nav-icon">⌘</span>
+                <span>Loan Calculators</span>
+            </a>
+        @endif
+
+        {{-- Learning Resources --}}
         @if (Route::has('user.media.index'))
             <a href="{{ route('user.media.index') }}"
                class="user-nav-link {{ request()->routeIs('user.media.*') ? 'is-active' : '' }}"
                title="Learning Resources">
+
                 <span class="nav-icon">▷</span>
                 <span>Learning Resources</span>
             </a>
         @endif
 
+        {{-- News and Updates --}}
         @if (Route::has('user.news.index'))
             <a href="{{ route('user.news.index') }}"
                class="user-nav-link {{ request()->routeIs('user.news.*') ? 'is-active' : '' }}"
                title="News & Updates">
+
                 <span class="nav-icon">▧</span>
                 <span>News & Updates</span>
             </a>
@@ -77,9 +115,11 @@
 
     </nav>
 
+    {{-- Sidebar Bottom --}}
     <div class="sidebar-bottom">
 
         <div class="sidebar-user">
+
             <div class="sidebar-avatar">
                 {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
             </div>
@@ -88,8 +128,10 @@
                 <strong>{{ auth()->user()->name ?? 'User' }}</strong>
                 <small>{{ auth()->user()->email ?? '' }}</small>
             </div>
+
         </div>
 
+        {{-- Logout --}}
         <form method="POST" action="{{ route('auth.logout') }}">
             @csrf
 

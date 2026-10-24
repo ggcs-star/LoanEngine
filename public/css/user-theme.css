@@ -1,41 +1,45 @@
-
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 
-:root {
-    /* ========================================
-       LOANENGINE USER THEME
-       Change shared design values here
-    ======================================== */
+/* ========================================
+   LOANENGINE USER THEME
+   Admin Website Settings integration
+======================================== */
 
-    /* Colors */
-    --u-bg: #f4f5f7;
-    --u-surface: #ffffff;
+:root {
+    /* Dynamic colors from admin settings */
+    --u-bg: var(--page-background-color, #f4f5f7);
+    --u-surface: var(--card-color, #ffffff);
     --u-surface-muted: #f0f1f3;
     --u-surface-hover: #e8eaee;
 
-    --u-sidebar-bg: #111216;
-    --u-sidebar-text: #d9dbe1;
+    --u-sidebar-bg: var(--sidebar-color, #111216);
+    --u-sidebar-text: var(--sidebar-text-color, #d9dbe1);
     --u-sidebar-muted: #969aa4;
     --u-sidebar-hover: #202126;
-    --u-sidebar-active: #292b31;
+    --u-sidebar-active: var(--primary-color, #292b31);
 
-    --u-text: #191b20;
+    --u-text: var(--text-color, #191b20);
     --u-text-secondary: #626772;
     --u-text-muted: #858a94;
 
-    --u-border: #e2e4e8;
+    --u-border: var(--border-color, #e2e4e8);
     --u-border-strong: #cdd0d6;
 
-    --u-primary: #191b20;
-    --u-primary-hover: #303238;
-    --u-primary-text: #ffffff;
+    --u-primary: var(--primary-color, #191b20);
+    --u-primary-hover: var(--primary-hover-color, #303238);
+    --u-primary-text: var(--button-text-color, #ffffff);
+
+    --u-accent: var(--accent-color, #0ea5e9);
 
     --u-success: #24623b;
     --u-success-bg: #edf6ef;
+
     --u-warning: #73591e;
     --u-warning-bg: #f7f2e7;
+
     --u-danger: #9b3030;
     --u-danger-bg: #fff0f0;
+
     --u-info: #374151;
     --u-info-bg: #eef0f3;
 
@@ -87,7 +91,10 @@
     --u-focus-ring: 0 0 0 3px rgb(98 103 114 / 18%);
 }
 
-/* Base reset */
+/* ========================================
+   Base reset
+======================================== */
+
 *,
 *::before,
 *::after {
@@ -110,7 +117,10 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* User application */
+/* ========================================
+   User application
+======================================== */
+
 .user-app {
     min-height: 100vh;
     background: var(--u-bg);
@@ -170,7 +180,10 @@ body {
     color: var(--u-text-muted);
 }
 
-/* Primary buttons */
+/* ========================================
+   Primary buttons
+======================================== */
+
 .user-app .user-button-primary,
 .user-app .user-button-dark {
     display: inline-flex;
@@ -179,18 +192,24 @@ body {
     justify-content: center;
     gap: var(--u-space-2);
     padding: 0 var(--u-space-4);
+
     border: 1px solid var(--u-primary);
     border-radius: var(--u-radius-md);
+
     background: var(--u-primary);
     color: var(--u-primary-text);
+
     font-size: var(--u-text-sm);
     font-weight: 700;
     text-align: center;
     text-decoration: none;
+
     cursor: pointer;
+
     transition:
         background var(--u-transition),
         border-color var(--u-transition),
+        color var(--u-transition),
         transform var(--u-transition);
 }
 
@@ -198,6 +217,7 @@ body {
 .user-app .user-button-dark:hover {
     border-color: var(--u-primary-hover);
     background: var(--u-primary-hover);
+    color: var(--u-primary-text);
 }
 
 .user-app .user-button-primary:active,
@@ -205,7 +225,10 @@ body {
     transform: translateY(1px);
 }
 
-/* Secondary buttons */
+/* ========================================
+   Secondary buttons
+======================================== */
+
 .user-app .user-button-secondary,
 .user-app .user-button-light {
     display: inline-flex;
@@ -214,18 +237,24 @@ body {
     justify-content: center;
     gap: var(--u-space-2);
     padding: 0 var(--u-space-4);
+
     border: 1px solid var(--u-border-strong);
     border-radius: var(--u-radius-md);
+
     background: var(--u-surface);
     color: var(--u-text);
+
     font-size: var(--u-text-sm);
     font-weight: 700;
     text-align: center;
     text-decoration: none;
+
     cursor: pointer;
+
     transition:
         background var(--u-transition),
-        border-color var(--u-transition);
+        border-color var(--u-transition),
+        color var(--u-transition);
 }
 
 .user-app .user-button-secondary:hover,
@@ -234,20 +263,29 @@ body {
     background: var(--u-surface-muted);
 }
 
-/* Common cards */
+/* ========================================
+   Common cards
+======================================== */
+
 .user-app .user-card {
     border: 1px solid var(--u-border);
     border-radius: var(--u-radius-lg);
     background: var(--u-surface);
+    color: var(--u-text);
     box-shadow: var(--u-shadow-sm);
 }
 
-/* Alerts */
+/* ========================================
+   Alerts
+======================================== */
+
 .user-app .user-alert {
     margin-bottom: var(--u-space-4);
     padding: 13px var(--u-space-4);
+
     border: 1px solid var(--u-border);
     border-radius: var(--u-radius-md);
+
     font-size: var(--u-text-sm);
 }
 
@@ -268,7 +306,155 @@ body {
     padding-left: var(--u-space-5);
 }
 
-/* Responsive typography */
+/* ========================================
+   Admin-controlled theme integration
+======================================== */
+
+/* Page background and text */
+.user-app {
+    background-color: var(--page-background-color, var(--u-bg));
+    color: var(--text-color, var(--u-text));
+}
+
+/* Headings */
+.user-app h1,
+.user-app h2,
+.user-app h3,
+.user-app h4,
+.user-app h5,
+.user-app h6 {
+    color: var(--text-color, var(--u-text));
+}
+
+/* Sidebar */
+.user-sidebar {
+    background-color: var(--sidebar-color, var(--u-sidebar-bg));
+    color: var(--sidebar-text-color, var(--u-sidebar-text));
+}
+
+.user-sidebar .brand-name,
+.user-sidebar .sidebar-section-label,
+.user-sidebar .sidebar-user-copy strong,
+.user-sidebar .sidebar-user-copy small {
+    color: var(--sidebar-text-color, var(--u-sidebar-text));
+}
+
+.user-sidebar .user-nav-link {
+    color: var(--sidebar-text-color, var(--u-sidebar-text));
+}
+
+.user-sidebar .user-nav-link:hover {
+    background-color: var(--u-sidebar-hover);
+}
+
+.user-sidebar .user-nav-link.is-active {
+    background-color: var(--primary-color, var(--u-sidebar-active));
+    color: var(--button-text-color, #ffffff);
+}
+
+.user-sidebar .user-nav-link.is-active .nav-icon {
+    color: var(--button-text-color, #ffffff);
+}
+
+/* Sidebar brand mark */
+.user-sidebar .brand-mark {
+    background-color: var(--primary-color, var(--u-primary));
+    color: var(--button-text-color, #ffffff);
+}
+
+/* Sidebar uploaded logo */
+.user-sidebar .brand-logo {
+    display: block;
+    width: 40px;
+    height: 40px;
+    max-width: 100%;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+/* Sidebar logout */
+.user-sidebar .user-logout {
+    color: var(--sidebar-text-color, var(--u-sidebar-text));
+}
+
+.user-sidebar .user-logout:hover {
+    background-color: var(--u-sidebar-hover);
+}
+
+/* Header and footer */
+.user-topbar,
+.user-content,
+.user-footer {
+    color: var(--text-color, var(--u-text));
+}
+
+/* Content surfaces */
+.user-app .user-card,
+.user-app .card,
+.user-app .panel,
+.user-app .dashboard-card,
+.user-app .tool-card,
+.user-app .calculator-card {
+    background-color: var(--card-color, var(--u-surface));
+    color: var(--text-color, var(--u-text));
+    border-color: var(--border-color, var(--u-border));
+}
+
+/* Primary button variants */
+.user-app .user-button-primary,
+.user-app .user-button-dark,
+.user-app .btn-primary,
+.user-app button.btn-primary,
+.user-app .button-primary,
+.user-app input[type="submit"] {
+    background-color: var(--primary-color, var(--u-primary));
+    border-color: var(--primary-color, var(--u-primary));
+    color: var(--button-text-color, #ffffff);
+}
+
+.user-app .user-button-primary:hover,
+.user-app .user-button-dark:hover,
+.user-app .btn-primary:hover,
+.user-app button.btn-primary:hover,
+.user-app .button-primary:hover {
+    background-color: var(--primary-hover-color, var(--u-primary-hover));
+    border-color: var(--primary-hover-color, var(--u-primary-hover));
+    color: var(--button-text-color, #ffffff);
+}
+
+/* Accent colors */
+.user-app .accent,
+.user-app .text-accent {
+    color: var(--accent-color, var(--u-accent));
+}
+
+/* Links */
+.user-app a:not(.user-nav-link):not(.user-brand) {
+    text-decoration-color: currentColor;
+}
+
+/* Form controls */
+.user-app input,
+.user-app select,
+.user-app textarea,
+.user-app .form-control,
+.user-app .form-select {
+    border-color: var(--border-color, var(--u-border));
+}
+
+.user-app input:focus,
+.user-app select:focus,
+.user-app textarea:focus,
+.user-app .form-control:focus,
+.user-app .form-select:focus {
+    border-color: var(--primary-color, var(--u-primary));
+    box-shadow: 0 0 0 3px rgb(37 99 235 / 15%);
+}
+
+/* ========================================
+   Responsive typography
+======================================== */
+
 @media (max-width: 720px) {
     :root {
         --u-text-base: 0.875rem;
@@ -276,7 +462,10 @@ body {
     }
 }
 
-/* Accessibility */
+/* ========================================
+   Accessibility
+======================================== */
+
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

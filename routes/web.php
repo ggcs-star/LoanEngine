@@ -17,6 +17,7 @@ use App\Http\Controllers\User\FinancialFlowCalendarController;
 use App\Http\Controllers\Admin\Calculators\CalculatorController as AdminCalculatorController;
 use App\Http\Controllers\User\RecommendedCalculatorController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\User\LessonProgressController;
 use App\Http\Controllers\User\ProfileController as UserProfileController;
@@ -52,6 +53,12 @@ Route::middleware(['auth', 'role:admin'])
     ->name('tools.bulk-destroy');
         Route::resource('tools', ToolController::class)
     ->names('tools');
+    // Website Settings
+Route::get('/settings', [SiteSettingController::class, 'edit'])
+    ->name('settings.edit');
+
+Route::put('/settings', [SiteSettingController::class, 'update'])
+    ->name('settings.update');
     Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
