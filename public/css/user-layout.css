@@ -1854,3 +1854,32 @@
     color: #ffffff;
 }
 
+
+/* Dynamic sidebar colors from Admin Website Settings */
+.user-app .user-sidebar {
+    background: var(--sidebar-color, #262626) !important;
+    color: var(--sidebar-text-color, #ffffff) !important;
+}
+
+.user-app .user-sidebar .user-nav-link {
+    color: var(--sidebar-text-color, #ffffff) !important;
+}
+
+.user-app .user-sidebar .user-nav-link:hover {
+    background: var(--primary-hover-color, #404040) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+
+.user-app .user-sidebar .user-nav-link.is-active {
+    background: var(--primary-color, #262626) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+
+.user-app .user-sidebar .user-logout {
+    color: var(--sidebar-text-color, #ffffff) !important;
+}
+
+.user-app .user-sidebar .user-logout:hover {
+    background: var(--primary-hover-color, #404040) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}

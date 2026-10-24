@@ -20,62 +20,72 @@ class ToolJourneyController extends Controller
     ) {
     }
 
-    /**
-     * Display all journeys.
-     */
     public function index(Request $request): View
     {
-        $filters = $request->validate([
-            'search' => ['nullable', 'string', 'max:120'],
-            'status' => ['nullable', 'in:active,inactive'],
-            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-        ]);
+        try {
+            $filters = $request->validate([
+                'search' => ['nullable', 'string', 'max:120'],
+                'status' => ['nullable', 'in:active,inactive'],
+                'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            ]);
 
-        return view('admin.tool-journeys.index', [
-            'journeys' => $this->journeyService->paginate($filters),
-            'statistics' => $this->journeyService->statistics(),
-            'filters' => $filters,
-        ]);
+            return view('admin.tool-journeys.index', [
+                'journeys' => $this->journeyService->paginate($filters),
+                'statistics' => $this->journeyService->statistics(),
+                'filters' => $filters,
+            ]);
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            Log::error('Failed to load journeys.', [
+                'exception' => $exception,
+            ]);
+
+            throw $exception;
+        }
     }
 
-    /**
-     * Display a journey's details.
-     */
-    
-/**
- * Display a journey with its steps and linked tools.
-    */
     public function show(ToolJourney $tool_journey): View
     {
-        $tool_journey->load([
-            'steps',
-            'tools',
-        ]);
+        try {
+            $tool_journey->load([
+                'steps',
+                'tools',
+            ]);
 
-        $tool_journey->loadCount([
-            'steps',
-            'tools',
-        ]);
+            $tool_journey->loadCount([
+                'steps',
+                'tools',
+            ]);
 
-        return view('admin.tool-journeys.show', [
-            'journey' => $tool_journey,
-        ]);
+            return view('admin.tool-journeys.show', [
+                'journey' => $tool_journey,
+            ]);
+        } catch (Throwable $exception) {
+            Log::error('Failed to load journey details.', [
+                'journey_id' => $tool_journey->getKey(),
+                'exception' => $exception,
+            ]);
+
+            throw $exception;
+        }
     }
 
-
-    /**
-     * Show the journey creation form.
-     */
     public function create(): View
     {
-        return view('admin.tool-journeys.create', [
-            'journey' => new ToolJourney(),
-        ]);
+        try {
+            return view('admin.tool-journeys.create', [
+                'journey' => new ToolJourney(),
+            ]);
+        } catch (Throwable $exception) {
+            Log::error('Failed to load journey creation form.', [
+                'exception' => $exception,
+            ]);
+
+            throw $exception;
+        }
     }
 
-    /**
-     * Store a new journey.
-     */
     public function store(JourneyRequest $request): RedirectResponse
     {
         try {
@@ -100,19 +110,22 @@ class ToolJourneyController extends Controller
         }
     }
 
-    /**
-     * Show the journey edit form.
-     */
     public function edit(ToolJourney $tool_journey): View
     {
-        return view('admin.tool-journeys.edit', [
-            'journey' => $tool_journey,
-        ]);
+        try {
+            return view('admin.tool-journeys.edit', [
+                'journey' => $tool_journey,
+            ]);
+        } catch (Throwable $exception) {
+            Log::error('Failed to load journey edit form.', [
+                'journey_id' => $tool_journey->getKey(),
+                'exception' => $exception,
+            ]);
+
+            throw $exception;
+        }
     }
 
-    /**
-     * Update an existing journey.
-     */
     public function update(
         JourneyRequest $request,
         ToolJourney $tool_journey
@@ -143,9 +156,6 @@ class ToolJourneyController extends Controller
         }
     }
 
-    /**
-     * Delete a journey.
-     */
     public function destroy(
         ToolJourney $tool_journey
     ): RedirectResponse {
@@ -170,9 +180,6 @@ class ToolJourneyController extends Controller
         }
     }
 
-    /**
-     * Delete multiple journeys using the existing service restrictions.
-     */
     public function bulkDestroy(Request $request): RedirectResponse
     {
         $validated = $request->validate([

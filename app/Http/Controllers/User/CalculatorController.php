@@ -12,6 +12,7 @@ use App\Services\Calculators\HomeLoanEligibilityCalculator;
 use App\Services\Calculators\InterestRateCalculator;
 use App\Services\Calculators\LoanPrepaymentCalculator;
 use App\Services\Calculators\StampDutyCalculator;
+use App\Services\Calculators\CalculatorUsageTracker;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -130,7 +131,8 @@ class CalculatorController extends Controller
     public function show(
         Request $request,
         Tool $tool,
-        EmiVsTenureCalculator $emiVsTenureCalculator
+        EmiVsTenureCalculator $emiVsTenureCalculator,
+        CalculatorUsageTracker $usageTracker
     ): View|RedirectResponse {
         abort_unless($tool->isActive(), 404);
 
@@ -162,6 +164,7 @@ class CalculatorController extends Controller
 
             $inputs = array_merge($inputs, $validated);
             $result = $emiVsTenureCalculator->calculate($inputs);
+            $usageTracker->record($request->user(), $calculator);
         }
 
         return view($this->viewFor($formulaType), [
@@ -180,7 +183,8 @@ class CalculatorController extends Controller
         StampDutyCalculator $stampDutyCalculator,
         InterestRateCalculator $interestRateCalculator,
         LoanPrepaymentCalculator $prepaymentCalculator,
-        EmiVsTenureCalculator $emiVsTenureCalculator
+        EmiVsTenureCalculator $emiVsTenureCalculator,
+        CalculatorUsageTracker $usageTracker
     ): View|RedirectResponse {
         abort_unless($tool->isActive(), 404);
 
@@ -222,6 +226,8 @@ class CalculatorController extends Controller
             $inputs['processing_fee'] = (float) ($validated['processing_fee'] ?? 0);
 
             $result = $emiCalculator->calculate($inputs);
+            $usageTracker->record($request->user(), $calculatorRecord);
+
 
             return view('user.calculators.emi', compact('tool', 'inputs', 'result'));
         }
@@ -243,6 +249,8 @@ class CalculatorController extends Controller
 
             $inputs = array_merge($this->affordabilityDefaults(), $validated);
             $result = $affordabilityCalculator->calculate($inputs);
+            $usageTracker->record($request->user(), $calculatorRecord);
+
 
             return view('user.calculators.show', compact('tool', 'inputs', 'result'));
         }
@@ -277,6 +285,7 @@ class CalculatorController extends Controller
 
             $inputs = $validated;
             $result = $eligibilityCalculator->calculate($inputs);
+            $usageTracker->record($request->user(), $calculatorRecord);
 
             return view('user.calculators.eligibility', compact('tool', 'inputs', 'result'));
         }
@@ -290,6 +299,7 @@ class CalculatorController extends Controller
 
             $inputs = array_merge($this->defaultsFor($formulaType), $validated);
             $result = $emiVsTenureCalculator->calculate($inputs);
+            $usageTracker->record($request->user(), $calculatorRecord);
 
             return view('user.calculators.emi-vs-tenure', compact('tool', 'inputs', 'result'));
         }
@@ -321,6 +331,7 @@ class CalculatorController extends Controller
 
             $inputs = $validated;
             $result = $stampDutyCalculator->calculate($inputs);
+            $usageTracker->record($request->user(), $calculatorRecord);
 
             return view('user.calculators.stamp-duty', compact('tool', 'inputs', 'result'));
         }
@@ -343,6 +354,7 @@ class CalculatorController extends Controller
 
             $inputs = $validated;
             $result = $interestRateCalculator->calculate($inputs);
+            $usageTracker->record($request->user(), $calculatorRecord);
 
             return view('user.calculators.interest-rate', compact('tool', 'inputs', 'result'));
         }
@@ -359,6 +371,7 @@ class CalculatorController extends Controller
 
             $inputs = $validated;
             $result = $prepaymentCalculator->calculate($inputs);
+            $usageTracker->record($request->user(), $calculatorRecord);
 
             return view('user.calculators.prepayment', compact('tool', 'inputs', 'result'));
         }

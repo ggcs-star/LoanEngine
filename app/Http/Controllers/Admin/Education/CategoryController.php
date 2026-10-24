@@ -19,75 +19,93 @@ class CategoryController extends Controller
         private readonly EducationMediaService $media
     ) {}
 
-    
     public function index(Request $request): View
     {
-        $query = EducationCategory::query()
-            ->withCount('modules');
+        try {
+            $query = EducationCategory::query()
+                ->withCount('modules');
 
-        // Search by category name or slug
-        if ($request->filled('search')) {
-            $term = trim((string) $request->input('search'));
+            // Search by category name or slug
+            if ($request->filled('search')) {
+                $term = trim((string) $request->input('search'));
 
-            $query->where(function ($builder) use ($term) {
-                $builder->where('name', 'like', "%{$term}%")
-                    ->orWhere('slug', 'like', "%{$term}%");
-            });
+                $query->where(function ($builder) use ($term) {
+                    $builder->where('name', 'like', "%{$term}%")
+                        ->orWhere('slug', 'like', "%{$term}%");
+                });
+            }
+
+            // Filter by active/inactive status
+            if ($request->input('status') === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->input('status') === 'inactive') {
+                $query->where('is_active', false);
+            }
+
+            // Paginated categories
+            $categories = $query
+                ->orderBy('sort_order')
+                ->orderByDesc('id')
+                ->paginate(10)
+                ->withQueryString();
+
+            // Dashboard statistics
+            $totalCategories = EducationCategory::count();
+
+            $activeCategories = EducationCategory::where(
+                'is_active',
+                true
+            )->count();
+
+            $inactiveCategories = EducationCategory::where(
+                'is_active',
+                false
+            )->count();
+
+            $totalModules = \App\Models\EducationModule::count();
+
+            return view('admin.education.categories.index', compact(
+                'categories',
+                'totalCategories',
+                'totalModules',
+                'activeCategories',
+                'inactiveCategories'
+            ));
+        } catch (Throwable $exception) {
+            report($exception);
+
+            throw $exception;
         }
-
-        // Filter by active/inactive status
-        if ($request->input('status') === 'active') {
-            $query->where('is_active', true);
-        } elseif ($request->input('status') === 'inactive') {
-            $query->where('is_active', false);
-        }
-
-        // Paginated categories
-        $categories = $query
-            ->orderBy('sort_order')
-            ->orderByDesc('id')
-            ->paginate(10)
-            ->withQueryString();
-
-        // Dashboard statistics
-        $totalCategories = EducationCategory::count();
-
-        $activeCategories = EducationCategory::where(
-            'is_active',
-            true
-        )->count();
-
-        $inactiveCategories = EducationCategory::where(
-            'is_active',
-            false
-        )->count();
-
-        $totalModules = \App\Models\EducationModule::count();
-
-        return view('admin.education.categories.index', compact(
-            'categories',
-            'totalCategories',
-            'totalModules',
-            'activeCategories',
-            'inactiveCategories'
-        ));
     }
-
 
     public function create(): View
     {
-        return view('admin.education.categories.create');
+        try {
+            return view('admin.education.categories.create');
+        } catch (Throwable $exception) {
+            report($exception);
+
+            throw $exception;
+        }
     }
+
     public function show(EducationCategory $category): View
     {
-        $category->load([
-            'modules' => fn ($query) => $query->orderBy('sort_order'),
-        ]);
+        try {
+            $category->load([
+                'modules' => fn ($query) => $query->orderBy('sort_order'),
+            ]);
 
-        $category->loadCount('modules');
+            $category->loadCount('modules');
 
-        return view('admin.education.categories.show', compact('category'));
+            return view('admin.education.categories.show', compact('category'));
+        } catch (Throwable $exception) {
+            report($exception);
+
+            throw $exception;
+        }
     }
+
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
@@ -138,7 +156,13 @@ class CategoryController extends Controller
 
     public function edit(EducationCategory $category): View
     {
-        return view('admin.education.categories.edit', compact('category'));
+        try {
+            return view('admin.education.categories.edit', compact('category'));
+        } catch (Throwable $exception) {
+            report($exception);
+
+            throw $exception;
+        }
     }
 
     public function update(
@@ -231,7 +255,7 @@ class CategoryController extends Controller
             );
         }
     }
-    
+
     public function bulkDestroy(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -312,5 +336,4 @@ class CategoryController extends Controller
             );
         }
     }
-
 }

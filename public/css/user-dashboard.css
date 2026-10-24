@@ -140,12 +140,12 @@
 }
 
 .le-user-dashboard .le-ud-button-dark {
-    background: var(--ud-dark);
-    color: #fff;
+    background: var(--primary-color, var(--ud-dark));
+    color: var(--button-text-color, #fff);
 }
 
 .le-user-dashboard .le-ud-button-dark:hover {
-    background: #30343b;
+    background: var(--primary-hover-color, #30343b);
 }
 
 .le-user-dashboard .le-ud-button-light {
@@ -1114,8 +1114,8 @@
     margin-top: 17px;
     padding: 11px 14px;
     border-radius: 9px;
-    background: var(--ud-dark);
-    color: #fff;
+    background: var(--primary-color, var(--ud-dark));
+    color: var(--button-text-color, #fff);
     font-size: 10px;
     font-weight: 800;
 }
@@ -1367,4 +1367,58 @@
         animation-duration: .01ms !important;
         animation-iteration-count: 1 !important;
     }
+}
+
+/* Dashboard buttons - dynamic theme colors */
+.le-user-dashboard .le-ud-button-dark {
+    background: var(--primary-color, var(--ud-dark));
+    color: var(--button-text-color, #ffffff);
+    border-color: var(--primary-color, var(--ud-dark));
+}
+
+.le-user-dashboard .le-ud-button-dark:hover {
+    background: var(--primary-hover-color, #30343b);
+    border-color: var(--primary-hover-color, #30343b);
+    color: var(--button-text-color, #ffffff);
+}
+
+.le-user-dashboard .le-ud-button-light {
+    background: var(--card-color, #ffffff);
+    color: var(--text-color, var(--ud-text));
+    border-color: var(--border-color, var(--ud-border-strong));
+}
+
+.le-user-dashboard .le-ud-button-light:hover {
+    background: var(--page-background-color, var(--ud-soft));
+    border-color: var(--primary-color, var(--ud-border-strong));
+    color: var(--text-color, var(--ud-text));
+}
+
+/* Calendar controls */
+.le-user-dashboard .le-ud-calendar-controls button {
+    background: var(--card-color, #ffffff);
+    color: var(--text-color, var(--ud-text));
+    border-color: var(--border-color, var(--ud-border));
+}
+
+.le-user-dashboard .le-ud-calendar-controls button:hover {
+    background: var(--page-background-color, var(--ud-soft));
+    border-color: var(--primary-color, var(--ud-border-strong));
+}
+
+.le-user-dashboard .le-ud-calendar-day.is-today,
+.le-user-dashboard .le-ud-calendar-day.is-selected {
+    background: var(--primary-color, var(--ud-dark));
+    border-color: var(--primary-color, var(--ud-dark));
+    color: var(--button-text-color, #ffffff);
+}
+
+/* Support button */
+.le-user-dashboard .le-ud-support-card > a {
+    background: var(--primary-color, var(--ud-dark));
+    color: var(--button-text-color, #ffffff);
+}
+
+.le-user-dashboard .le-ud-support-card > a:hover {
+    background: var(--primary-hover-color, #30343b);
 }

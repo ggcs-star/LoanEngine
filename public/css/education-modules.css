@@ -2239,3 +2239,73 @@ body.edu-modules-modal-open {
     background: #000 !important;
     border-color: #000 !important;
 }
+
+/* Fix: Education Modules double search border */
+.edu-modules-page .edu-modules-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1 1 300px;
+    min-width: 220px;
+    height: 44px;
+    padding: 0;
+    border: none !important;
+    border-radius: 0;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.edu-modules-page .edu-modules-search-icon {
+    position: absolute;
+    left: 14px;
+    z-index: 1;
+    color: var(--muted);
+    font-size: 21px;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.edu-modules-page .edu-modules-search input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    margin: 0;
+    padding: 0 14px 0 42px;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px;
+    outline: none;
+    background: var(--surface) !important;
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    box-shadow: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.edu-modules-page .edu-modules-search input:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px
+        color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+@media (max-width: 640px) {
+    .edu-modules-page .edu-modules-search {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+}
+
+/* Success message - Green */
+.edu-modules-page .edu-modules-alert-success {
+    color: #166534 !important;
+    background: #f0fdf4 !important;
+    border: 1px solid #bbf7d0 !important;
+}
+
+/* Error message - Red */
+.edu-modules-page .edu-modules-alert-error {
+    color: #991b1b !important;
+    background: #fef2f2 !important;
+    border: 1px solid #fecaca !important;
+}

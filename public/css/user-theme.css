@@ -476,3 +476,15 @@ body {
         transition-duration: 0.01ms !important;
     }
 }
+.user-sidebar .sidebar-user-link,
+.user-sidebar .sidebar-user-link:hover,
+.user-sidebar .sidebar-user-link:focus,
+.user-sidebar .sidebar-user-link:active {
+    color: inherit;
+    text-decoration: none !important;
+}
+
+.user-sidebar .sidebar-user-link .sidebar-user-copy strong,
+.user-sidebar .sidebar-user-link .sidebar-user-copy small {
+    text-decoration: none !important;
+}

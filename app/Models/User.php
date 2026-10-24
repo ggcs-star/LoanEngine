@@ -49,4 +49,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserLessonProgress::class);
     }
+    public function calculatorUsages(): HasMany
+    {
+        return $this->hasMany(CalculatorUsage::class);
+    }
 }
