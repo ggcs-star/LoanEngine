@@ -43,9 +43,6 @@ class SiteSetting extends Model
         'button_text_color',
     ];
 
-    /**
-     * Get or create the current website settings.
-     */
     public static function current(): self
     {
         return static::query()->firstOrCreate(
@@ -53,17 +50,22 @@ class SiteSetting extends Model
             [
                 'site_name' => config('app.name', 'LoanEngine'),
                 'tagline' => 'Simple. Secure. Reliable.',
-                'primary_color' => '#2563eb',
-                'primary_hover_color' => '#1d4ed8',
-                'accent_color' => '#0ea5e9',
-                'sidebar_color' => '#ffffff',
-                'sidebar_text_color' => '#1f2937',
-                'page_background_color' => '#f3f4f6',
+
+                // Black, white and grey theme defaults
+                'primary_color' => '#262626',
+                'primary_hover_color' => '#404040',
+                'accent_color' => '#525252',
+
+                'sidebar_color' => '#262626',
+                'sidebar_text_color' => '#ffffff',
+
+                'page_background_color' => '#f5f5f5',
                 'card_color' => '#ffffff',
-                'text_color' => '#111827',
-                'border_color' => '#e5e7eb',
+                'text_color' => '#262626',
+                'border_color' => '#e5e5e5',
                 'button_text_color' => '#ffffff',
             ]
         );
     }
+
 }

@@ -6048,8 +6048,9 @@ body.edu-modules-modal-open {
     min-width: 140px;
     min-height: 43px;
     padding: 0 17px;
-    background-color: #222 !important;
-    color: #fff !important;
+    background-color: var(--primary-color, #222222) !important;
+    border-color: var(--primary-color, #222222) !important;
+    color: var(--button-text-color, #ffffff) !important;
     border: 1px solid #222 !important;
     font-size: 13px !important;
     font-weight: 700 !important;
@@ -6063,22 +6064,28 @@ body.edu-modules-modal-open {
     color: #fff !important;
     -webkit-text-fill-color: #fff !important;
 }
-
-/* FIX: Keep Education Modules primary buttons black on hover/focus/active. */
+.education-categories-page .ec-page-header > a.ec-btn.ec-btn-primary:hover,
+.education-categories-page .ec-page-header > a.ec-btn.ec-btn-primary:focus-visible {
+    background-color: var(--primary-hover-color, #000000) !important;
+    border-color: var(--primary-hover-color, #000000) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+/* Education Modules buttons — Website Settings theme colors */
 .edu-modules-page .edu-modules-primary-btn,
 .edu-modules-page .edu-modules-primary-btn:visited {
-    background-color: #111111 !important;
-    border-color: #111111 !important;
-    color: #ffffff !important;
+    background-color: var(--primary-color, #222222) !important;
+    border-color: var(--primary-color, #222222) !important;
+    color: var(--button-text-color, #ffffff) !important;
+    -webkit-text-fill-color: var(--button-text-color, #ffffff) !important;
 }
 
 .edu-modules-page .edu-modules-primary-btn:hover,
 .edu-modules-page .edu-modules-primary-btn:focus,
 .edu-modules-page .edu-modules-primary-btn:focus-visible,
 .edu-modules-page .edu-modules-primary-btn:active {
-    background-color: #111111 !important;
-    border-color: #111111 !important;
-    color: #ffffff !important;
+    background-color: var(--primary-hover-color, #000000) !important;
+    border-color: var(--primary-hover-color, #000000) !important;
+    color: var(--button-text-color, #ffffff) !important;
+    -webkit-text-fill-color: var(--button-text-color, #ffffff) !important;
     box-shadow: none !important;
-    transform: none;
 }

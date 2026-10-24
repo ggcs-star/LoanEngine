@@ -132,15 +132,15 @@
 }
 
 .education-page .education-button-primary {
-    color: var(--button-text);
-    background: var(--primary);
-    border-color: var(--primary);
+    color: var(--button-text-color, #ffffff);
+    background: var(--primary-color, #222222);
+    border-color: var(--primary-color, #222222);
 }
 
 .education-page .education-button-primary:hover {
-    color: var(--button-text);
-    background: var(--primary-hover);
-    border-color: var(--primary-hover);
+    color: var(--button-text-color, #ffffff);
+    background: var(--primary-hover-color, #000000);
+    border-color: var(--primary-hover-color, #000000);
 }
 
 .education-page .education-add-button {
@@ -3411,4 +3411,20 @@ body.education-modal-open {
     color: inherit !important;
     font-weight: 700;
     text-decoration: underline;
+}
+/* Education Categories Index - Website Settings Theme */
+.education-categories-page .ec-btn.ec-btn-primary,
+.education-categories-page .ec-btn.ec-btn-primary:visited {
+    background: var(--primary-color, #222222) !important;
+    background-color: var(--primary-color, #222222) !important;
+    border-color: var(--primary-color, #222222) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+
+.education-categories-page .ec-btn.ec-btn-primary:hover,
+.education-categories-page .ec-btn.ec-btn-primary:focus {
+    background: var(--primary-hover-color, #000000) !important;
+    background-color: var(--primary-hover-color, #000000) !important;
+    border-color: var(--primary-hover-color, #000000) !important;
+    color: var(--button-text-color, #ffffff) !important;
 }

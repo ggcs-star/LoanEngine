@@ -10,7 +10,7 @@
 @section('content')
 @php
     $photoUrl = $user->profile_photo_path
-        ? \Illuminate\Support\Facades\Storage::disk('public')->url($user->profile_photo_path)
+        ? url('storage/' . $user->profile_photo_path)
         : null;
 @endphp
 

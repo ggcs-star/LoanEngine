@@ -7,19 +7,18 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
 {
-    /**
-     * Define the application's command schedule.
-     */
+    
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('financial-flow:process-recurring')
-            ->dailyAt('00:05')
+            ->everyMinute()
+            ->withoutOverlapping();
+
+        $schedule->command('financial-flow:send-reminders')
+            ->everyMinute()
             ->withoutOverlapping();
     }
 
-    /**
-     * Register the commands for the application.
-     */
     protected function commands(): void
     {
         $this->load(__DIR__ . '/Commands');

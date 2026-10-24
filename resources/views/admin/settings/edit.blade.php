@@ -177,15 +177,16 @@
 
                     <div class="le-settings__field">
                         <label class="le-settings__label" for="site_name">
-                            Website Name <span aria-hidden="true">*</span>
+                            Website Name <span>(Optional)</span>
                         </label>
+
                         <input
                             id="site_name"
                             type="text"
                             name="site_name"
                             value="{{ old('site_name', $settings->site_name) }}"
                             maxlength="100"
-                            required
+                            placeholder="Enter website name (optional)"
                         >
                     </div>
 
@@ -357,45 +358,45 @@
                 @php
                     $colors = [
                         'primary_color' => [
-                            'label' => 'Primary / Button',
-                            'default' => '#2563eb',
-                        ],
-                        'primary_hover_color' => [
-                            'label' => 'Button Hover',
-                            'default' => '#1d4ed8',
-                        ],
-                        'accent_color' => [
-                            'label' => 'Accent',
-                            'default' => '#0ea5e9',
-                        ],
-                        'button_text_color' => [
-                            'label' => 'Button Text',
-                            'default' => '#ffffff',
-                        ],
-                        'sidebar_color' => [
-                            'label' => 'Sidebar Background',
-                            'default' => '#ffffff',
-                        ],
-                        'sidebar_text_color' => [
-                            'label' => 'Sidebar Text',
-                            'default' => '#1f2937',
-                        ],
-                        'page_background_color' => [
-                            'label' => 'Page Background',
-                            'default' => '#f3f4f6',
-                        ],
-                        'card_color' => [
-                            'label' => 'Card Background',
-                            'default' => '#ffffff',
-                        ],
-                        'text_color' => [
-                            'label' => 'Main Text',
-                            'default' => '#111827',
-                        ],
-                        'border_color' => [
-                            'label' => 'Borders',
-                            'default' => '#e5e7eb',
-                        ],
+    'label' => 'Primary / Button',
+    'default' => '#262626',
+],
+'primary_hover_color' => [
+    'label' => 'Button Hover',
+    'default' => '#404040',
+],
+'accent_color' => [
+    'label' => 'Accent',
+    'default' => '#525252',
+],
+'button_text_color' => [
+    'label' => 'Button Text',
+    'default' => '#ffffff',
+],
+'sidebar_color' => [
+    'label' => 'Sidebar Background',
+    'default' => '#262626',
+],
+'sidebar_text_color' => [
+    'label' => 'Sidebar Text',
+    'default' => '#ffffff',
+],
+'page_background_color' => [
+    'label' => 'Page Background',
+    'default' => '#f5f5f5',
+],
+'card_color' => [
+    'label' => 'Card Background',
+    'default' => '#ffffff',
+],
+'text_color' => [
+    'label' => 'Main Text',
+    'default' => '#262626',
+],
+'border_color' => [
+    'label' => 'Borders',
+    'default' => '#e5e5e5',
+],
                     ];
                 @endphp
 

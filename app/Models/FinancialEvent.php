@@ -17,6 +17,7 @@ class FinancialEvent extends Model
         'reminder_time',       // Added
         'reminder_sent_at',    // Added
         'payment_status',
+        'source_event_id',
         'notes',
         'is_recurring',
         'recurrence_frequency',

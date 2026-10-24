@@ -24,7 +24,8 @@ class SiteSettingController extends Controller
         $settings = SiteSetting::current();
 
         $validated = $request->validate([
-            'site_name' => ['required', 'string', 'max:100'],
+            
+            'site_name' => ['nullable', 'string', 'max:100'],
             'tagline' => ['nullable', 'string', 'max:200'],
             'meta_description' => ['nullable', 'string', 'max:320'],
             'meta_keywords' => ['nullable', 'string', 'max:500'],
@@ -54,7 +55,9 @@ class SiteSettingController extends Controller
             'apple_icon' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:1024'],
             'android_icon' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:1024'],
         ]);
-
+        $validated['site_name'] = filled($validated['site_name'] ?? null)
+        ? trim($validated['site_name'])
+        : null;
         $uploads = [
             'logo' => 'logo_path',
             'dark_logo' => 'dark_logo_path',
