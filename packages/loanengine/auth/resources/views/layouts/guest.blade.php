@@ -12,7 +12,15 @@
     <main class="auth-layout">
 
         <aside class="auth-visual">
-            <a href="{{ url('/') }}" class="auth-brand">LoanEngine</a>
+            
+        <a href="{{ route('auth.login') }}" class="guest-brand">
+            <img
+                src="{{ asset('images/loanengine-logo.png') }}"
+                alt="LoanEngine"
+                class="guest-brand-logo"
+            >
+        </a>
+
 
             <div class="auth-visual-content">
                 <span class="auth-eyebrow">LOAN MANAGEMENT PLATFORM</span>
