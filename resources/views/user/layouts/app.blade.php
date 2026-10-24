@@ -9,27 +9,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>
-        @yield('title', 'User Dashboard') -
-        {{ $siteSettings->site_name ?? 'LoanEngine' }}
-    </title>
+        <title>@yield('title', 'User Dashboard') - {{ $siteSettings->site_name ?: 'LoanEngine' }}</title>
 
-    @if (!empty($siteSettings->meta_description))
-        <meta name="description" content="{{ $siteSettings->meta_description }}">
-    @endif
+    <meta name="description"
+          content="{{ $siteSettings->meta_description ?: 'LoanEngine helps you explore loan options, calculate EMIs and make informed financial decisions.' }}">
 
     @if (!empty($siteSettings->meta_keywords))
         <meta name="keywords" content="{{ $siteSettings->meta_keywords }}">
     @endif
 
     {{-- Website favicon --}}
-    <link
-        rel="icon"
-        href="{{ !empty($siteSettings->favicon_path)
-            ? asset('storage/' . $siteSettings->favicon_path)
-            : asset('favicon.ico') }}"
-    >
+    <link rel="icon"
+          type="image/png"
+          href="{{ $siteSettings->favicon_path
+                ? asset('storage/' . $siteSettings->favicon_path)
+                : asset('favicon.ico') }}">
 
+    {{-- Apple touch icon --}}
+    @if (!empty($siteSettings->apple_icon_path))
+        <link rel="apple-touch-icon"
+              href="{{ asset('storage/' . $siteSettings->apple_icon_path) }}">
+    @endif
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

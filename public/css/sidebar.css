@@ -1,19 +1,12 @@
-/* =========================================================
-   LoanEngine Admin Sidebar + Shared Layout
-   File: public/css/sidebar.css
-   Clean replacement — single source of truth for layout
-   ========================================================= */
-
 :root {
     --sidebar-width: 280px;
-    --sidebar-bg: #111216;
-    --sidebar-text: #f5f5f6;
-    --sidebar-muted: #a4a6ae;
-    --sidebar-border: #292a2e;
-    --sidebar-active: #292a2f;
-    --sidebar-primary: #ffffff;
+    --sidebar-bg: var(--sidebar-color, #ffffff);
+    --sidebar-text: var(--sidebar-text-color, #333333);
+    --sidebar-muted: var(--sidebar-text-color, #777777);
+    --sidebar-border: var(--border-color, #e2e2e2);
+    --sidebar-active: var(--primary-color, #eeeeee);
+    --sidebar-primary: var(--primary-color, #222222);
 }
-
 /* ---------- Base and page shell ---------- */
 *,
 *::before,
@@ -781,4 +774,90 @@ body {
     .admin-sidebar .sidebar-logout-btn {
         transition: none;
     }
+}
+
+.topbar .profile-chip,
+.topbar .profile-chip:hover,
+.topbar .profile-chip:focus,
+.topbar .profile-chip:active {
+    color: inherit;
+    text-decoration: none;
+}
+
+.topbar .profile-chip .profile-copy strong,
+.topbar .profile-chip .profile-copy span {
+    text-decoration: none;
+}
+
+.topbar .profile-chip:hover .profile-copy strong,
+.topbar .profile-chip:hover .profile-copy span {
+    text-decoration: none;
+}
+.brand .sidebar-brand-logo {
+    display: block;
+    width: 175px;
+    max-width: 100%;
+    height: 44px;
+    object-fit: contain;
+    object-position: left center;
+}
+/* LoanEngine sidebar brand logo */
+.admin-sidebar .brand {
+    min-height: 74px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-sidebar .brand .sidebar-brand-logo {
+    display: block;
+    width: 190px;
+    max-width: 100%;
+    height: 54px;
+    object-fit: contain;
+    object-position: left center;
+}
+.admin-sidebar .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 74px;
+    padding: 12px 20px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.admin-sidebar .sidebar-brand-logo {
+    display: block;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    object-fit: contain;
+}
+
+.admin-sidebar .brand-name {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--sidebar-text-color, #ffffff);
+    font-size: 17px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+}
+
+.admin-sidebar .brand .brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    color: #ffffff;
+}
+
+.admin-sidebar .brand .brand-mark svg {
+    display: block;
+    width: 32px;
+    height: 32px;
 }

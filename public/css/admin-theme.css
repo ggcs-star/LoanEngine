@@ -1,6 +1,8 @@
 
 /* =====================================================
-   LoanEngine Admin Theme — Black, White & Grey
+   LoanEngine Admin Theme
+   Default: Black, White & Grey
+   Dynamic colors: Website Settings
    File: public/css/admin-theme.css
    ===================================================== */
 
@@ -8,63 +10,62 @@
     color-scheme: light;
 
     /* Brand */
-    --primary: #222222;
-    --primary-hover: #000000;
+    --primary: var(--primary-color, #222222);
+    --primary-hover: var(--primary-hover-color, #000000);
     --primary-light: #eeeeee;
 
     /* Backgrounds */
-    --background: #f3f3f3;
-    --page-bg: #f3f3f3;
-    --surface: #ffffff;
-    --card-bg: #ffffff;
+    --background: var(--page-background-color, #f3f3f3);
+    --page-bg: var(--page-background-color, #f3f3f3);
+    --surface: var(--card-color, #ffffff);
+    --card-bg: var(--card-color, #ffffff);
     --surface-hover: #f7f7f7;
 
     /* Text */
-    --text: #222222;
-    --text-primary: #222222;
+    --text: var(--text-color, #222222);
+    --text-primary: var(--text-color, #222222);
     --muted: #777777;
     --text-secondary: #666666;
-    --heading: #222222;
+    --heading: var(--text-color, #222222);
 
     /* Borders */
-    --border: #e2e2e2;
-    --border-color: #e2e2e2;
+    --border: var(--border-color, #e2e2e2);
+    --border-color: var(--border-color, #e2e2e2);
 
     /* Sidebar */
     --sidebar-width: 250px;
-    --sidebar-bg: #ffffff;
-    --sidebar-text: #333333;
-    --sidebar-muted: #777777;
-    --sidebar-border: #e5e5e5;
+    --sidebar-bg: var(--sidebar-color, #ffffff);
+    --sidebar-text: var(--sidebar-text-color, #333333);
+    --sidebar-muted: var(--sidebar-text-color, #777777);
+    --sidebar-border: var(--border-color, #e5e5e5);
     --sidebar-active: #eeeeee;
     --sidebar-active-bg: #eeeeee;
-    --sidebar-active-text: #222222;
-    --sidebar-primary: #222222;
+    --sidebar-active-text: var(--sidebar-text-color, #222222);
+    --sidebar-primary: var(--primary-color, #222222);
 
     /* Buttons */
-    --button-bg: #222222;
-    --button-text: #ffffff;
-    --button-hover: #000000;
+    --button-bg: var(--primary-color, #222222);
+    --button-text: var(--button-text-color, #ffffff);
+    --button-hover: var(--primary-hover-color, #000000);
 
     /* Form controls */
-    --input-bg: #ffffff;
-    --input-border: #d9d9d9;
-    --input-text: #222222;
-    --input-focus: #777777;
+    --input-bg: var(--card-color, #ffffff);
+    --input-border: var(--border-color, #d9d9d9);
+    --input-text: var(--text-color, #222222);
+    --input-focus: var(--primary-color, #777777);
 
-    /* Statuses — monochrome */
+    /* Statuses */
     --success: #444444;
     --danger: #333333;
     --warning: #555555;
     --info: #444444;
 
-    /* Legacy variable compatibility */
-    --navy: #222222;
-    --blue: #222222;
-    --primary-color: #222222;
+    /* Legacy compatibility */
+    --navy: var(--primary-color, #222222);
+    --blue: var(--primary-color, #222222);
+    --brand-color: var(--primary-color, #222222);
     --secondary-color: #777777;
-    --brand-color: #222222;
-    --accent: #444444;
+    --accent: var(--accent-color, #444444);
 }
 
 /* Base */
@@ -81,7 +82,8 @@ body {
 .admin-layout,
 .admin-main,
 .admin-content,
-.dashboard-page {
+.dashboard-page,
+.page-content {
     color: var(--text);
 }
 
@@ -124,22 +126,23 @@ button.primary-button,
 }
 
 .primary-button:hover,
+button.primary-button:hover,
 .edu-modules-primary-btn:hover {
     background: var(--button-hover);
-    color: #ffffff;
-    border-color: #000000;
+    color: var(--button-text);
+    border-color: var(--button-hover);
 }
 
 /* Secondary buttons */
 .secondary-button {
-    background: #ffffff;
-    color: #333333;
-    border-color: #d9d9d9;
+    background: var(--card-color, #ffffff);
+    color: var(--text-color, #333333);
+    border: 1px solid var(--border-color, #d9d9d9);
 }
 
 .secondary-button:hover {
-    background: #eeeeee;
-    color: #222222;
+    background: var(--surface-hover);
+    color: var(--text-color, #222222);
 }
 
 /* Form controls */
@@ -157,7 +160,7 @@ select:focus,
 textarea:focus,
 .form-control:focus {
     border-color: var(--input-focus);
-    outline-color: #aaaaaa;
+    outline-color: var(--input-focus);
     box-shadow: 0 0 0 2px rgb(0 0 0 / 6%);
 }
 
@@ -168,11 +171,11 @@ table {
 
 thead,
 thead tr {
-    background: #f5f5f5;
+    background: var(--surface-hover);
 }
 
 th {
-    color: #555555;
+    color: var(--text-secondary);
 }
 
 td,
@@ -187,14 +190,14 @@ th {
 }
 
 .edu-modules-card {
-    background: #ffffff;
-    border-color: var(--border);
+    background: var(--card-color, #ffffff);
+    border-color: var(--border-color, #e2e2e2);
 }
 
 .edu-modules-category-name,
 .edu-modules-module-title,
 .edu-modules-view-link {
-    color: #222222;
+    color: var(--text-color, #222222);
 }
 
 /* Selection and keyboard focus */
@@ -204,15 +207,15 @@ th {
 }
 
 :focus-visible {
-    outline-color: #777777;
+    outline-color: var(--primary-color, #777777);
 }
 
-/* Reduce blue browser autofill styling */
+/* Browser autofill */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-    -webkit-text-fill-color: #222222;
-    box-shadow: 0 0 0 1000px #ffffff inset;
+    -webkit-text-fill-color: var(--input-text);
+    box-shadow: 0 0 0 1000px var(--input-bg) inset;
 }
 
 /* Respect accessibility preferences */
@@ -225,6 +228,7 @@ input:-webkit-autofill:focus {
     }
 }
 
+/* Header avatar */
 .topbar .avatar {
     width: 38px;
     height: 38px;
@@ -240,6 +244,32 @@ input:-webkit-autofill:focus {
     width: 100%;
     height: 100%;
     display: block;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.topbar .profile-chip .avatar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    overflow: hidden;
+    border-radius: 50%;
+    background: #eeeeee;
+}
+
+.topbar .profile-chip .avatar .header-profile-photo {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: cover;
     border-radius: 50%;
 }

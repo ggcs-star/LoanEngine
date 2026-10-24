@@ -91,16 +91,15 @@
 }
 
 .edu-modules-primary-btn {
-    color: var(--button-text);
-    background: var(--primary);
-    border-color: var(--primary);
+    background: var(--primary-color, #222222);
+    border-color: var(--primary-color, #222222);
+    color: var(--button-text-color, #ffffff);
 }
 
 .edu-modules-primary-btn:hover {
-    color: var(--button-text);
-    background: var(--primary-hover);
-    border-color: var(--primary-hover);
-    transform: translateY(-1px);
+    background: var(--primary-hover-color, #000000);
+    border-color: var(--primary-hover-color, #000000);
+    color: var(--button-text-color, #ffffff);
 }
 
 .edu-modules-primary-btn span {
@@ -1422,20 +1421,22 @@ body.edu-modules-modal-open {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    border: 1px solid var(--primary);
+    border: 1px solid var(--primary-color, #222222);
     border-radius: 8px;
-    background: var(--primary);
-    color: var(--button-text) !important;
+    background: var(--primary-color, #222222);
+    color: var(--button-text-color, #ffffff) !important;
     text-decoration: none !important;
     font-size: 13px;
     font-weight: 650;
     white-space: nowrap;
     cursor: pointer;
-    transition: background .18s ease, transform .18s ease;
+    transition: background .18s ease, border-color .18s ease, transform .18s ease;
 }
 
 .edu-modules-primary-btn:hover {
-    background: var(--surface);
+    background: var(--primary-hover-color, #000000);
+    border-color: var(--primary-hover-color, #000000);
+    color: var(--button-text-color, #ffffff) !important;
     transform: translateY(-1px);
 }
 

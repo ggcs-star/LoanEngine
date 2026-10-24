@@ -4,11 +4,11 @@
    ========================================= */
 
 .le-settings {
-    --settings-primary: var(--primary-color, #2563eb);
-    --settings-border: var(--border-color, #e5e7eb);
+     --settings-primary: var(--primary-color, #262626);
+    --settings-border: var(--border-color, #e5e5e5);
     --settings-card: var(--card-color, #ffffff);
-    --settings-text: var(--text-color, #111827);
-    --settings-muted: #6b7280;
+    --settings-text: var(--text-color, #262626);
+    --settings-muted: #737373;
 
     width: 100%;
     max-width: 1440px;
@@ -162,7 +162,7 @@
     margin-right: 12px;
     padding: 7px 11px;
     color: var(--settings-text);
-    background: #f3f4f6;
+    background: #f5f5f5;
     border: 0;
     border-radius: 6px;
     cursor: pointer;
@@ -234,6 +234,20 @@
     border-radius: 12px;
 }
 
+.le-settings__preview {
+    padding: 20px;
+    background: var(--page-background-color, #f5f5f5);
+    border: 1px solid var(--settings-border);
+    border-radius: 12px;
+}
+
+.le-settings__preview-card {
+    padding: 20px;
+    background: var(--card-color, #ffffff);
+    border: 1px solid var(--border-color, #e5e5e5);
+    border-radius: 12px;
+}
+
 .le-settings__preview-button {
     display: inline-flex;
     align-items: center;
@@ -241,7 +255,7 @@
     min-height: 42px;
     padding: 10px 18px;
     color: var(--button-text-color, #ffffff);
-    background: var(--primary-color, #2563eb);
+    background: var(--primary-color, #262626);
     border: 0;
     border-radius: 8px;
     font-size: 14px;
@@ -251,7 +265,7 @@
 }
 
 .le-settings__preview-button:hover {
-    background: var(--primary-hover-color, #1d4ed8);
+    background: var(--primary-hover-color, #404040);
     transform: translateY(-1px);
 }
 
@@ -289,13 +303,12 @@
 
 .le-settings__button--primary {
     color: var(--button-text-color, #ffffff);
-    background: var(--primary-color, #2563eb);
+    background: var(--primary-color, #262626);
 }
 
 .le-settings__button--primary:hover {
-    background: var(--primary-hover-color, #1d4ed8);
+    background: var(--primary-hover-color, #404040);
 }
-
 .le-settings__button--secondary {
     color: var(--settings-text);
     background: var(--settings-card);
