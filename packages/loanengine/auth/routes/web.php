@@ -5,6 +5,9 @@ use LoanEngine\Auth\Http\Controllers\AuthController;
 
 Route::middleware('web')->group(function (): void {
     Route::middleware('guest')->group(function (): void {
+        Route::get('/', function () {
+            return redirect()->route('auth.login');
+        })->name('home');
         Route::get('/login', [AuthController::class, 'showLogin'])->name('auth.login');
         Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1')->name('auth.login.submit');
         Route::get('/register', [AuthController::class, 'showRegister'])->name('auth.register');

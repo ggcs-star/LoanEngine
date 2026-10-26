@@ -164,7 +164,7 @@ class CalculatorController extends Controller
 
             $inputs = array_merge($inputs, $validated);
             $result = $emiVsTenureCalculator->calculate($inputs);
-            $usageTracker->record($request->user(), $calculator);
+            $usageTracker->record($request->user(), $calculator,$inputs,$result);
         }
 
         return view($this->viewFor($formulaType), [
@@ -226,7 +226,7 @@ class CalculatorController extends Controller
             $inputs['processing_fee'] = (float) ($validated['processing_fee'] ?? 0);
 
             $result = $emiCalculator->calculate($inputs);
-            $usageTracker->record($request->user(), $calculatorRecord);
+            $usageTracker->record($request->user(), $calculatorRecord, $inputs, $result);
 
 
             return view('user.calculators.emi', compact('tool', 'inputs', 'result'));
@@ -249,7 +249,7 @@ class CalculatorController extends Controller
 
             $inputs = array_merge($this->affordabilityDefaults(), $validated);
             $result = $affordabilityCalculator->calculate($inputs);
-            $usageTracker->record($request->user(), $calculatorRecord);
+            $usageTracker->record($request->user(), $calculatorRecord, $inputs, $result);
 
 
             return view('user.calculators.show', compact('tool', 'inputs', 'result'));
@@ -285,7 +285,7 @@ class CalculatorController extends Controller
 
             $inputs = $validated;
             $result = $eligibilityCalculator->calculate($inputs);
-            $usageTracker->record($request->user(), $calculatorRecord);
+            $usageTracker->record($request->user(), $calculatorRecord, $inputs, $result);
 
             return view('user.calculators.eligibility', compact('tool', 'inputs', 'result'));
         }
@@ -299,7 +299,7 @@ class CalculatorController extends Controller
 
             $inputs = array_merge($this->defaultsFor($formulaType), $validated);
             $result = $emiVsTenureCalculator->calculate($inputs);
-            $usageTracker->record($request->user(), $calculatorRecord);
+            $usageTracker->record($request->user(), $calculatorRecord, $inputs, $result);
 
             return view('user.calculators.emi-vs-tenure', compact('tool', 'inputs', 'result'));
         }
@@ -331,7 +331,7 @@ class CalculatorController extends Controller
 
             $inputs = $validated;
             $result = $stampDutyCalculator->calculate($inputs);
-            $usageTracker->record($request->user(), $calculatorRecord);
+            $usageTracker->record($request->user(), $calculatorRecord, $inputs, $result);
 
             return view('user.calculators.stamp-duty', compact('tool', 'inputs', 'result'));
         }
@@ -354,7 +354,7 @@ class CalculatorController extends Controller
 
             $inputs = $validated;
             $result = $interestRateCalculator->calculate($inputs);
-            $usageTracker->record($request->user(), $calculatorRecord);
+            $usageTracker->record($request->user(), $calculatorRecord, $inputs, $result);
 
             return view('user.calculators.interest-rate', compact('tool', 'inputs', 'result'));
         }
@@ -371,7 +371,7 @@ class CalculatorController extends Controller
 
             $inputs = $validated;
             $result = $prepaymentCalculator->calculate($inputs);
-            $usageTracker->record($request->user(), $calculatorRecord);
+            $usageTracker->record($request->user(), $calculatorRecord, $inputs,$result);
 
             return view('user.calculators.prepayment', compact('tool', 'inputs', 'result'));
         }

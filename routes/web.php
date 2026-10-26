@@ -22,6 +22,7 @@ use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\User\LessonProgressController;
 use App\Http\Controllers\User\ProfileController as UserProfileController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use App\Http\Controllers\Admin\Calculators\CalculatorInsightsController;
 
 
 /*
@@ -94,6 +95,13 @@ Route::middleware(['auth', 'role:admin'])
     ->name('tool-journeys.bulk-destroy');
 
 Route::resource('tool-journeys', ToolJourneyController::class);
+    });
+    Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin/calculator-insights')
+    ->name('admin.calculator-insights.')
+    ->group(function (): void {
+        Route::get('/', [CalculatorInsightsController::class, 'index'])
+            ->name('index');
     });
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin/education')

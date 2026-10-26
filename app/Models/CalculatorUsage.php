@@ -12,6 +12,13 @@ class CalculatorUsage extends Model
     protected $fillable = [
         'user_id',
         'calculator_id',
+        'inputs',
+        'result',
+        'event_type',
+        'status',
+        'session_id',
+        'created_at',
+        'updated_at',
     ];
 
     protected function casts(): array
@@ -19,7 +26,10 @@ class CalculatorUsage extends Model
         return [
             'user_id' => 'integer',
             'calculator_id' => 'integer',
+            'inputs' => 'array',
+            'result' => 'array',
             'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 
@@ -31,5 +41,15 @@ class CalculatorUsage extends Model
     public function calculator(): BelongsTo
     {
         return $this->belongsTo(Calculator::class);
+    }
+
+    public function scopeCalculated($query)
+    {
+        return $query->where('event_type', 'calculated');
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
     }
 }
