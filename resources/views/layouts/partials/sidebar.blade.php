@@ -132,6 +132,11 @@
                 <span class="nav-icon">▦</span>
                 <span>Calculator</span>
             </a>
+            <a href="{{ route('admin.calculator-insights.index') }}"
+            class="nav-item {{ request()->routeIs('admin.calculator-insights.*') ? 'active' : '' }}">
+                <span class="nav-icon">▤</span>
+                <span>Calculator Insights</span>
+            </a>
 
             <div class="sidebar-caption">SETTINGS</div>
 
