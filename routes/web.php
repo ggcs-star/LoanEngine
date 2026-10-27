@@ -23,6 +23,8 @@ use App\Http\Controllers\User\LessonProgressController;
 use App\Http\Controllers\User\ProfileController as UserProfileController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\Calculators\CalculatorInsightsController;
+use App\Http\Controllers\Admin\FinancialFlow\DashboardController as AdminFinancialFlowDashboardController;
+
 
 
 /*
@@ -126,6 +128,14 @@ Route::middleware(['auth', 'role:admin'])
         )->name('lessons.bulk-destroy');
 
         Route::resource('lessons', LessonController::class);
+    });
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin/financial-flow')
+    ->name('admin.financial-flow.')
+    ->controller(AdminFinancialFlowDashboardController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/export', 'export')->name('export');
     });
 
 /*

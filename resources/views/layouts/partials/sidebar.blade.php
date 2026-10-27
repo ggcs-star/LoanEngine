@@ -137,6 +137,17 @@
                 <span class="nav-icon">▤</span>
                 <span>Calculator Insights</span>
             </a>
+            @if(auth()->user()?->role === 'admin')
+            <div class="sidebar-caption">FINANCIAL MANAGEMENT</div>
+
+            <a
+                href="{{ route('admin.financial-flow.index') }}"
+                class="nav-item {{ request()->routeIs('admin.financial-flow.*') ? 'active' : '' }}"
+            >
+                <span class="nav-icon" aria-hidden="true">▥</span>
+                <span>Financial Flow</span>
+            </a>
+        @endif
 
             <div class="sidebar-caption">SETTINGS</div>
 
