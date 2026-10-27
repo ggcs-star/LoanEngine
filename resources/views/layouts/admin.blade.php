@@ -108,6 +108,7 @@
      <link rel="stylesheet" href="{{ asset('css/education-categories.css') }}">
     <link rel="stylesheet" href="{{ asset('css/education-lessons.css') }}">
     <link rel="stylesheet" href="{{ asset('css/tools-admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin-financial-flow.css') }}">
 
     @stack('styles')
 </head>

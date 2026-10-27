@@ -68,4 +68,20 @@ return Application::configure(basePath: dirname(__DIR__))
 
         return null;
     });
- })->create();
+     $exceptions->render(function (
+        \Illuminate\Session\TokenMismatchException $exception,
+        Request $request
+    ) {
+        if (
+            $request->isMethod('POST') &&
+            $request->routeIs('auth.logout')
+        ) {
+            return redirect()
+                ->route('auth.login')
+                ->with('status', 'Your session expired. Please sign in again.');
+        }
+
+        return null;
+    });
+})
+->create();
