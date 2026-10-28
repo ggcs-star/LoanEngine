@@ -139,6 +139,11 @@
             </a>
             @if(auth()->user()?->role === 'admin')
             <div class="sidebar-caption">FINANCIAL MANAGEMENT</div>
+            <a href="{{ route('admin.financial-flow.calendar.index') }}"
+                class="nav-item {{ request()->routeIs('admin.financial-flow.calendar.*') ? 'active' : '' }}">
+                    <span class="nav-icon" aria-hidden="true">▦</span>
+                    <span>Calendar</span>
+            </a>
 
             <a
                 href="{{ route('admin.financial-flow.index') }}"

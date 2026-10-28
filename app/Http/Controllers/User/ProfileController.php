@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-
+use App\Helpers\ImageHelper;
 
 class ProfileController extends Controller
 {
@@ -76,16 +76,13 @@ class ProfileController extends Controller
         $user->city = $validated['city'] ?? null;
         $user->employment_type = $validated['employment_type'] ?? null;
         $user->annual_income = $validated['annual_income'] ?? null;
-
+        
         if ($request->hasFile('profile_photo')) {
-            $path = $request->file('profile_photo')
-                ->store('profile-photos', 'public');
-
-            if ($user->profile_photo_path) {
-                Storage::disk('public')->delete(
-                    $user->profile_photo_path
-                );
-            }
+            $path = ImageHelper::store(
+                $request->file('profile_photo'),
+                'profile-photos',
+                $validated['name']
+            );
 
             $user->profile_photo_path = $path;
         }

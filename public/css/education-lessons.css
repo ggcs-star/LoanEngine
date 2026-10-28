@@ -114,13 +114,19 @@
 
 .edu-lessons-card {
     overflow: hidden;
-    background: var(--card-bg);
+    background: var(--surface);
     color: var(--text);
     border: 1px solid var(--border);
     border-radius: 14px;
     box-shadow: 0 4px 18px rgb(0 0 0 / 3%);
 }
+.edu-lessons-table tbody tr {
+    background: var(--surface);
+}
 
+.edu-lessons-table tbody tr:hover {
+    background: var(--surface-hover);
+}
 /* Alerts */
 
 .edu-lessons-alert {
