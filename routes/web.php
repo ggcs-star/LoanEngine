@@ -25,6 +25,25 @@ use App\Http\Controllers\User\RecommendedCalculatorController;
 use App\Http\Controllers\User\ToolController as UserToolController;
 use App\Http\Controllers\User\ToolJourneyController as UserToolJourneyController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\UserManagementController;
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin/users')
+    ->name('admin.users.')
+    ->controller(UserManagementController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{user}', 'show')
+            ->whereNumber('user')
+            ->name('show');
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| Home
+|--------------------------------------------------------------------------
+*/
+
 
 Route::get('/', function () {
     if (! auth()->check()) {
