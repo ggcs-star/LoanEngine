@@ -39,7 +39,15 @@
 
     <span class="brand-name">{{ $siteName }}</span>
 </a>
+<div class="sidebar-caption">USER MANAGEMENT</div>
 
+<a
+    href="{{ route('admin.users.index') }}"
+    class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
+>
+    <span class="nav-icon" aria-hidden="true">♙</span>
+    <span>Users Management</span>
+</a>
     <div class="sidebar-caption">WORKSPACE</div>
 
     <nav class="sidebar-nav" aria-label="Admin navigation">
