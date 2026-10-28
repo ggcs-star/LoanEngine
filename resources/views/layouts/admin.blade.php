@@ -103,12 +103,18 @@
 </style>
     <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin-dashboard.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/education.css') }}">
+    <!-- <link rel="stylesheet" href="{{ asset('css/education.css') }}"> -->
      <link rel="stylesheet" href="{{ asset('css/education-modules.css') }}">
      <link rel="stylesheet" href="{{ asset('css/education-categories.css') }}">
     <link rel="stylesheet" href="{{ asset('css/education-lessons.css') }}">
     <link rel="stylesheet" href="{{ asset('css/tools-admin.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin-financial-flow.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/financial-calendar.css') }}">
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    >
 
     @stack('styles')
 </head>

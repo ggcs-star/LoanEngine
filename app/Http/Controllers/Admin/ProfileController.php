@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use App\Helpers\ImageHelper;
 use Throwable;
 
 class ProfileController extends Controller
@@ -99,18 +100,13 @@ class ProfileController extends Controller
             $oldPhoto = $user->profile_photo_path;
             $newPhoto = null;
 
-            try {
+            try {                
                 if ($request->hasFile('profile_photo')) {
-                    $newPhoto = $request->file('profile_photo')
-                        ->store('profile-photos', 'public');
-
-                    if (! $newPhoto) {
-                        return back()
-                            ->withInput()
-                            ->withErrors([
-                                'profile_photo' => 'Unable to save the uploaded photo. Please try again.',
-                            ]);
-                    }
+                    $newPhoto = ImageHelper::store(
+                        $request->file('profile_photo'),
+                        'profile-photos',
+                        $validated['name']
+                    );
                 }
 
                 $user->name = $validated['name'];

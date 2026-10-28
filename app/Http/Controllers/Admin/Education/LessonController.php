@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use App\Helpers\ImageHelper;
 use Throwable;
 
 class LessonController extends Controller
@@ -63,8 +64,23 @@ class LessonController extends Controller
         $mediaPath = $thumbnailPath = null;
         try {
             DB::transaction(function () use ($request, &$data, &$mediaPath, &$thumbnailPath): void {
-                if ($request->hasFile('media')) $mediaPath = $this->media->store($request->file('media'), 'education/lessons');
-                if ($request->hasFile('thumbnail')) $thumbnailPath = $this->media->store($request->file('thumbnail'), 'education/lesson-thumbnails');
+                
+                if ($request->hasFile('media')) {
+                    $mediaPath = ImageHelper::store(
+                        $request->file('media'),
+                        'education/lessons',
+                        $data['title']
+                    );
+                }
+
+                if ($request->hasFile('thumbnail')) {
+                    $thumbnailPath = ImageHelper::store(
+                        $request->file('thumbnail'),
+                        'education/lesson-thumbnails',
+                        $data['title']
+                    );
+                }
+
                 $data['slug'] = $this->uniqueSlug($data['slug'] ?: $data['title'], (int) $data['education_module_id']);
                 EducationLesson::create([
                     'education_module_id' => $data['education_module_id'], 'title' => $data['title'],
@@ -101,8 +117,23 @@ class LessonController extends Controller
         $newMediaPath = $newThumbnailPath = null;
         try {
             DB::transaction(function () use ($request, $lesson, &$data, &$newMediaPath, &$newThumbnailPath): void {
-                if ($request->hasFile('media')) $newMediaPath = $this->media->store($request->file('media'), 'education/lessons');
-                if ($request->hasFile('thumbnail')) $newThumbnailPath = $this->media->store($request->file('thumbnail'), 'education/lesson-thumbnails');
+                
+                if ($request->hasFile('media')) {
+                    $newMediaPath = ImageHelper::store(
+                        $request->file('media'),
+                        'education/lessons',
+                        $data['title']
+                    );
+                }
+
+                if ($request->hasFile('thumbnail')) {
+                    $newThumbnailPath = ImageHelper::store(
+                        $request->file('thumbnail'),
+                        'education/lesson-thumbnails',
+                        $data['title']
+                    );
+                }
+
                 $data['slug'] = $this->uniqueSlug($data['slug'] ?: $data['title'], (int) $data['education_module_id'], $lesson->id);
                 $lesson->update([
                     'education_module_id' => $data['education_module_id'], 'title' => $data['title'], 'slug' => $data['slug'],

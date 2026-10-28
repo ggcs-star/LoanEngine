@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Helpers\ImageHelper;
 use Throwable;
 
 class ModuleController extends Controller
@@ -156,8 +157,10 @@ class ModuleController extends Controller
                 }
 
                 if (isset($data['thumbnail'])) {
-                    $thumbnailPath = $this->storeThumbnail(
-                        $data['thumbnail']
+                    $thumbnailPath = ImageHelper::store(
+                        $data['thumbnail'],
+                        'education/modules',
+                        $data['title']
                     );
 
                     unset($data['thumbnail']);
@@ -256,8 +259,10 @@ class ModuleController extends Controller
                 }
 
                 if (isset($data['thumbnail'])) {
-                    $newThumbnailPath = $this->storeThumbnail(
-                        $data['thumbnail']
+                    $newThumbnailPath = ImageHelper::store(
+                        $data['thumbnail'],
+                        'education/modules',
+                        $data['title']
                     );
 
                     unset($data['thumbnail']);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\ImageHelper;
 use App\Models\SiteSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -78,18 +79,25 @@ class SiteSettingController extends Controller
                 'android_icon' => 'android_icon_path',
             ];
 
+            
             foreach ($uploads as $input => $column) {
                 if ($request->hasFile($input)) {
                     $file = $request->file($input);
-                    $path = $file->store('site-settings', 'public');
 
-                    if ($settings->{$column}) {
-                        Storage::disk('public')->delete($settings->{$column});
-                    }
+                    $name = $validated['site_name']
+                        ?? $settings->site_name
+                        ?? $input;
+
+                    $path = ImageHelper::store(
+                        $file,
+                        'site-settings',
+                        $name . '-' . $input
+                    );
 
                     $validated[$column] = $path;
                 }
             }
+
 
             unset(
                 $validated['logo'],

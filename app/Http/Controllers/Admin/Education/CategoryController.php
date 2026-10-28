@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use App\Helpers\ImageHelper;
 use Throwable;
 
 class CategoryController extends Controller
@@ -122,9 +123,10 @@ class CategoryController extends Controller
         try {
             DB::transaction(function () use ($data, $request, &$path) {
                 if ($request->hasFile('thumbnail')) {
-                    $path = $this->media->store(
+                    $path = ImageHelper::store(
                         $request->file('thumbnail'),
-                        'education/categories'
+                        'education/categories',
+                        $data['name']
                     );
                 }
 
@@ -189,9 +191,10 @@ class CategoryController extends Controller
         try {
             DB::transaction(function () use ($request, $data, $category, &$newPath) {
                 $newPath = $request->hasFile('thumbnail')
-                    ? $this->media->store(
+                    ? ImageHelper::store(
                         $request->file('thumbnail'),
-                        'education/categories'
+                        'education/categories',
+                        $data['name']
                     )
                     : null;
 
