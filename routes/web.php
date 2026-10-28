@@ -24,7 +24,17 @@ use App\Http\Controllers\User\ProfileController as UserProfileController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\Calculators\CalculatorInsightsController;
 use App\Http\Controllers\Admin\FinancialFlow\DashboardController as AdminFinancialFlowDashboardController;
-
+use App\Http\Controllers\Admin\UserManagementController;
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin/users')
+    ->name('admin.users.')
+    ->controller(UserManagementController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{user}', 'show')
+            ->whereNumber('user')
+            ->name('show');
+    });
 
 
 /*
