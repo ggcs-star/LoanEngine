@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+use LoanEngine\Auth\Support\AuthActivityLogger;
 class AuthController extends Controller
 {
     public function showLogin(): View
@@ -42,7 +43,7 @@ class AuthController extends Controller
             'channel_url.url' => 'Enter a valid URL, including https://.',
         ]);
 
-        User::create([
+        $createdUser = User::create([
             'name' => trim($validated['name']),
             'channel_name' => trim($validated['channel_name']),
             'channel_url' => $validated['channel_url'] ?? null,
@@ -53,6 +54,13 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
+AuthActivityLogger::record(
+    'register_success',
+    (int) $createdUser->getAuthIdentifier(),
+    $createdUser->email,
+    ['status_code' => 201],
+    $request
+);
         return redirect()->route('auth.login')
             ->with('status', 'Account created successfully. Please sign in.');
     }
@@ -67,14 +75,26 @@ class AuthController extends Controller
         $credentials['email'] = strtolower($credentials['email']);
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            return back()
+AuthActivityLogger::record(
+    'login_failed',
+    null,
+    $credentials['email'],
+    ['status_code' => 401],
+    $request
+);            return back()
                 ->withErrors(['email' => 'The email or password is incorrect.'])
                 ->onlyInput('email');
         }
 
         $request->session()->regenerate();
         $user = $request->user();
-
+AuthActivityLogger::record(
+    'login_success',
+    $user ? (int) $user->getAuthIdentifier() : null,
+    $user?->email,
+    ['status_code' => 200],
+    $request
+);
         return redirect()->intended(
             $user->role === 'admin'
                 ? route('admin.dashboard')
@@ -429,7 +449,15 @@ class AuthController extends Controller
 
     public function logout(Request $request): RedirectResponse
     {
-        Auth::logout();
+        $user = $request->user();
+AuthActivityLogger::record(
+    'logout_success',
+    $user ? (int) $user->getAuthIdentifier() : null,
+    $user?->email,
+    ['status_code' => 200],
+    $request
+);
+        Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
