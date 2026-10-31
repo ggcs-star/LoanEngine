@@ -297,14 +297,14 @@
                     <h2>{{ $tabs[$tab] ?? 'Activity' }} Search</h2>
                     <p>Search and filter this user's records.</p>
                 </div>
-
+<!-- 
                 <a class="le-button le-button-primary"
                    href="{{ route('admin.reports.users.export', array_merge(
                        ['user' => $user->id, 'tab' => $tab],
                        request()->query()
                    )) }}">
                     ↓ Export Report
-                </a>
+                </a> -->
             </div>
 
             <form method="GET"
