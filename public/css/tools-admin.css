@@ -1026,3 +1026,24 @@
     display: inline-block !important;
     flex-shrink: 0 !important;
 }
+/* Delete Selected button — theme colors */
+.tools-page #toolsDeleteSelected {
+    background: var(--tools-primary) !important;
+    border-color: var(--tools-primary) !important;
+    color: var(--tools-primary-text) !important;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.tools-page #toolsDeleteSelected:hover:not(:disabled) {
+    background: var(--tools-text) !important;
+    border-color: var(--tools-text) !important;
+    color: var(--tools-primary-text) !important;
+}
+
+.tools-page #toolsDeleteSelected:disabled {
+    background: var(--tools-page-bg) !important;
+    border-color: var(--tools-border) !important;
+    color: var(--tools-muted) !important;
+    opacity: 0.65;
+    cursor: not-allowed;
+}

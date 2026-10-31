@@ -39,16 +39,7 @@
 
     <span class="brand-name">{{ $siteName }}</span>
 </a>
-<div class="sidebar-caption">USER MANAGEMENT</div>
-
-<a
-    href="{{ route('admin.users.index') }}"
-    class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
->
-    <span class="nav-icon" aria-hidden="true">♙</span>
-    <span>Users Management</span>
-</a>
-    <div class="sidebar-caption">WORKSPACE</div>
+<div class="sidebar-caption">WORKSPACE</div>
 
     <nav class="sidebar-nav" aria-label="Admin navigation">
         <a
@@ -68,6 +59,16 @@
             <span>Dashboard</span>
         </a>
 
+<div class="sidebar-caption">USER MANAGEMENT</div>
+
+<a
+    href="{{ route('admin.users.index') }}"
+    class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
+>
+    <span class="nav-icon" aria-hidden="true">♙</span>
+    <span>Users Management</span>
+</a>
+    
         @if(auth()->user()?->role === 'admin')
             <div class="sidebar-caption">EDUCATION</div>
 
@@ -149,14 +150,12 @@
             <div class="sidebar-caption">FINANCIAL MANAGEMENT</div>
             <a href="{{ route('admin.financial-flow.calendar.index') }}"
                 class="nav-item {{ request()->routeIs('admin.financial-flow.calendar.*') ? 'active' : '' }}">
-                    <span class="nav-icon" aria-hidden="true">▦</span>
-                    <span>Calendar</span>
+                <span class="nav-icon" aria-hidden="true">▦</span>
+                <span>Calendar</span>
             </a>
 
-            <a
-                href="{{ route('admin.financial-flow.index') }}"
-                class="nav-item {{ request()->routeIs('admin.financial-flow.*') ? 'active' : '' }}"
-            >
+            <a href="{{ route('admin.financial-flow.index') }}"
+                class="nav-item {{ request()->routeIs('admin.financial-flow.index') ? 'active' : '' }}">
                 <span class="nav-icon" aria-hidden="true">▥</span>
                 <span>Financial Flow</span>
             </a>

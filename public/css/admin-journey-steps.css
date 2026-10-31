@@ -1111,3 +1111,48 @@
         margin-left: 0;
     }
 }
+/* Journey Steps: Delete Selected button theme fix */
+html body .journey-step-page #journeyStepDeleteSelected {
+    background: var(--admin-primary, #262626) !important;
+    border-color: var(--admin-primary, #262626) !important;
+    color: var(--admin-primary-text, #ffffff) !important;
+}
+
+html body .journey-step-page #journeyStepDeleteSelected:hover:not(:disabled) {
+    background: var(--admin-text, #262626) !important;
+    border-color: var(--admin-text, #262626) !important;
+}
+
+html body .journey-step-page #journeyStepDeleteSelected:disabled {
+    background: var(--admin-bg, #f5f5f5) !important;
+    border-color: var(--admin-border, #e5e5e5) !important;
+    color: var(--admin-text-muted, #737373) !important;
+    opacity: 0.65;
+}
+
+/* Delete confirmation popup */
+html body .journey-step-delete-modal .journey-step-delete-dialog {
+    background: var(--admin-card-bg, #ffffff) !important;
+    border-color: var(--admin-border, #e5e5e5) !important;
+    color: var(--admin-text, #262626) !important;
+}
+
+html body .journey-step-delete-modal .journey-step-delete-dialog h2 {
+    color: var(--admin-text, #262626) !important;
+}
+
+html body .journey-step-delete-modal .journey-step-delete-dialog p {
+    color: var(--admin-text-muted, #737373) !important;
+}
+
+html body .journey-step-delete-modal #journeyStepCancelDelete {
+    background: var(--admin-card-bg, #ffffff) !important;
+    border-color: var(--admin-border, #e5e5e5) !important;
+    color: var(--admin-text, #262626) !important;
+}
+
+html body .journey-step-delete-modal #journeyStepConfirmDelete {
+    background: var(--admin-primary, #262626) !important;
+    border-color: var(--admin-primary, #262626) !important;
+    color: var(--admin-primary-text, #ffffff) !important;
+}
