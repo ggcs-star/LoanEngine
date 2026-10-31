@@ -33,6 +33,7 @@ class UserActivityController extends Controller
         private UserActivityReportService $reports
     ) {}
 
+    
     public function index(Request $request): View
     {
         $filters = $this->validateFilters($request);
@@ -42,8 +43,11 @@ class UserActivityController extends Controller
             'stats' => $this->reports->dashboardStats(),
             'filters' => $filters,
             'activityTypes' => $this->reports->activityTypes(),
+            'dashboardChart' => $this->reports->dashboardChartData(30),
+            'moduleBreakdown' => $this->reports->dashboardModuleBreakdown(),
         ]);
     }
+
 
     public function exportAll(Request $request): BinaryFileResponse|RedirectResponse
     {

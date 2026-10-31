@@ -12,6 +12,29 @@ use Illuminate\View\View;
 class UserAnalyticsController extends Controller
 {
     public function __construct(private UserActivityReportService $reports) {}
+    public function activities(Request $request): View
+    {
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:150'],
+            'user_status' => ['nullable', 'in:all,active,inactive'],
+            'module' => ['nullable', 'in:education,tools,calculators,calendar'],
+            'activity_type' => ['nullable', 'string', 'max:60'],
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date', 'after_or_equal:from'],
+            'sort' => ['nullable', 'in:latest,oldest,name,most_active'],
+        ]);
+
+        $data = [
+            'filters' => $filters,
+            'users' => $this->reports->activityDirectory($filters),
+            'stats' => $this->reports->dashboardStats(),
+            'activityTypes' => $this->reports->activityTypes(),
+            'dashboardChart' => $this->reports->dashboardChartData(30),
+            'moduleBreakdown' => $this->reports->dashboardModuleBreakdown(),
+        ];
+
+        return view('admin.reports.index', $data);
+    }
 
     public function show(Request $request, User $user): View
     {

@@ -418,6 +418,7 @@ class UserActivityReportService
     public function activityDirectory(array $filters): LengthAwarePaginator
     {
         $users = User::query()
+            ->where('role', '!=', 'admin')
             ->when(filled($filters['search'] ?? null), function ($query) use ($filters) {
                 $term = trim($filters['search']);
 
@@ -748,4 +749,90 @@ class UserActivityReportService
 
         return $records;
     }
+    
+
+public function dashboardChartData(int $days = 30): array
+{
+    $start = now()->subDays($days - 1)->startOfDay();
+
+    $records = $this->activityStream()
+        ->filter(fn ($record) => $record->happened_at >= $start);
+
+    $labels = [];
+    $dates = [];
+
+    for ($i = 0; $i < $days; $i++) {
+        $date = $start->copy()->addDays($i);
+
+        $dates[] = $date->toDateString();
+        $labels[] = $date->format('d M');
+    }
+
+    $modules = [
+        'education',
+        'tools',
+        'calculators',
+        'calendar',
+        'authentication',
+    ];
+
+    $series = [];
+
+    foreach ($modules as $module) {
+        $series[$module] = collect($dates)
+            ->map(function ($date) use ($records, $module) {
+                return $records
+                    ->filter(fn ($record) =>
+                        $record->module === $module
+                        && $record->happened_at->toDateString() === $date
+                    )
+                    ->count();
+            })
+            ->all();
+    }
+
+    return [
+        'labels' => $labels,
+        'series' => $series,
+    ];
+}
+
+public function dashboardModuleBreakdown(): array
+{
+    $records = $this->activityStream();
+
+    $counts = $records->countBy('module');
+
+    return [
+        [
+            'key' => 'education',
+            'label' => 'Education',
+            'value' => (int) $counts->get('education', 0),
+        ],
+        [
+            'key' => 'tools',
+            'label' => 'Tools',
+            'value' => (int) $counts->get('tools', 0),
+        ],
+        [
+            'key' => 'calculators',
+            'label' => 'Calculators',
+            'value' => (int) $counts->get('calculators', 0),
+        ],
+        [
+            'key' => 'calendar',
+            'label' => 'Calendar',
+            'value' => (int) $counts->get('calendar', 0),
+        ],
+        [
+            'key' => 'authentication',
+            'label' => 'Authentication',
+            'value' => (int) $counts->get('authentication', 0),
+        ],
+    ];
+}
+
+
+
+
 }

@@ -1,224 +1,206 @@
 
 @extends('layouts.admin')
 
-@section('title', 'User Activity')
+@section('title', 'User Activity Reports')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/admin-reports.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin-reports.css') }}?v={{ filemtime(public_path('css/admin-reports.css')) }}">
 @endpush
 
 @section('content')
-
 <div class="le-report-page">
 
-    <div class="le-page-heading">
-        <div>
-            <div class="le-breadcrumb">Reports <span>›</span> User Activity</div>
+    <section class="le-report-heading">
+        <div class="le-heading-copy">
+            <div class="le-breadcrumb">
+                <span>Reports</span>
+                <span class="le-breadcrumb-separator">›</span>
+                <strong>User Activity</strong>
+            </div>
             <h1>User Activity</h1>
             <p>Review every registered user and open their complete activity report.</p>
         </div>
 
-        <a href="{{ route('admin.reports.export', request()->query()) }}"
-            class="le-button le-button-primary">
-                ↓ Export All Users
-            </a>
-    </div>
-
-    <div class="le-kpi-grid">
-
-        <article class="le-kpi">
-            <span class="le-kpi-icon">♙</span>
-            <div>
-                <small>Total Users</small>
-                <strong>{{ number_format($stats['total_users']) }}</strong>
-                <em>All registered users</em>
-            </div>
-        </article>
-
-        <article class="le-kpi">
-            <span class="le-kpi-icon">◉</span>
-            <div>
-                <small>Active Users</small>
-                <strong>{{ number_format($stats['active_users']) }}</strong>
-                <em>Users with tracked activity</em>
-            </div>
-        </article>
-
-        <article class="le-kpi">
-            <span class="le-kpi-icon">⌁</span>
-            <div>
-                <small>Total Activities</small>
-                <strong>{{ number_format($stats['total_activities']) }}</strong>
-                <em>Recorded platform events</em>
-            </div>
-        </article>
-
-        <article class="le-kpi">
-            <span class="le-kpi-icon">◷</span>
-            <div>
-                <small>Avg. Activities / User</small>
-                <strong>{{ number_format($stats['average'], 2) }}</strong>
-                <em>Across all registered users</em>
-            </div>
-        </article>
-
-    </div>
-
-    <form class="le-filter-panel"
-          method="GET"
-          action="{{ route('admin.reports.activities') }}">
-
-        <div class="le-filter-title">
-            <div>
-                <h2>Find Users</h2>
-                <p>Search users and filter their activity summary.</p>
-            </div>
-
-            <a href="{{ route('admin.reports.activities') }}"
-               class="le-text-link">
-                Clear all
+        <div class="le-heading-actions">
+            <a href="{{ route('admin.reports.export', request()->query()) }}" class="le-report-button le-report-button-primary">
+                <span class="le-button-symbol">↓</span>
+                Export All Users
             </a>
         </div>
+    </section>
 
-        <label class="le-search-field">
-            <span>⌕</span>
-            <input
-                type="search"
-                name="search"
-                value="{{ $filters['search'] ?? '' }}"
-                placeholder="Search name, email, mobile or user ID..."
-            >
-        </label>
+    <section class="le-analytics-grid">
 
-        <div class="le-filter-grid">
+        <article class="le-report-card le-trend-card">
+            <div class="le-card-heading">
+                <div>
+                    <h2>User Activity Overview</h2>
+                    <p>Total platform activities in the last 30 days</p>
+                </div>
+                <span class="le-period-label">Last 30 days</span>
+            </div>
 
-            <label>
-                User Status
-                <select name="user_status">
-                    <option value="all"
-                        @selected(($filters['user_status'] ?? 'all') === 'all')>
-                        All Users
-                    </option>
+            <div class="le-chart-container">
+                <canvas id="leActivityTrend"></canvas>
+            </div>
 
-                    <option value="active"
-                        @selected(($filters['user_status'] ?? '') === 'active')>
-                        With Tracked Activity
-                    </option>
+            <div class="le-chart-legend">
+                <span class="le-legend-item"><i class="le-legend-education"></i>Education</span>
+                <span class="le-legend-item"><i class="le-legend-tools"></i>Tools</span>
+                <span class="le-legend-item"><i class="le-legend-calculators"></i>Calculators</span>
+                <span class="le-legend-item"><i class="le-legend-calendar"></i>Calendar</span>
+            </div>
+        </article>
 
-                    <option value="inactive"
-                        @selected(($filters['user_status'] ?? '') === 'inactive')>
-                        No Tracked Activity
-                    </option>
-                </select>
-            </label>
+        <article class="le-report-card le-distribution-card">
+            <div class="le-card-heading">
+                <div>
+                    <h2>Activity Distribution</h2>
+                    <p>Share of total recorded activities</p>
+                </div>
+            </div>
 
-            <label>
-                Module
-                <select name="module">
-                    <option value="">All Modules</option>
+            <div class="le-distribution-content">
+                <div class="le-donut-container">
+                    <canvas id="leActivityDistribution"></canvas>
+                    <div class="le-donut-center">
+                        <strong>{{ number_format($stats['total_activities']) }}</strong>
+                        <span>Total Activities</span>
+                    </div>
+                </div>
 
-                    @foreach([
-                        'education'=>'Education',
-                        'tools'=>'Tools',
-                        'calculators'=>'Calculators',
-                        'calendar'=>'Calendar'
-                    ] as $value=>$label)
+                <div class="le-distribution-legend">
+                    @foreach($moduleBreakdown as $item)
+                        @php
+                            $percentage = $stats['total_activities'] > 0
+                                ? round(($item['value'] / $stats['total_activities']) * 100)
+                                : 0;
+                        @endphp
 
-                        <option value="{{ $value }}"
-                            @selected(($filters['module'] ?? '') === $value)>
-                            {{ $label }}
-                        </option>
-
+                        <div class="le-distribution-row">
+                            <span class="le-distribution-name">
+                                <i class="le-distribution-dot le-dot-{{ $item['key'] }}"></i>
+                                {{ $item['label'] }}
+                            </span>
+                            <strong>{{ number_format($item['value']) }}</strong>
+                            <small>{{ $percentage }}%</small>
+                        </div>
                     @endforeach
-                </select>
-            </label>
+                </div>
+            </div>
+        </article>
 
-            <label>
-                Activity Type
-                <select name="activity_type">
-                    <option value="">All Activities</option>
+    </section>
 
-                    @foreach($activityTypes as $type)
-                        <option value="{{ $type }}"
-                            @selected(($filters['activity_type'] ?? '') === $type)>
-                            {{ str($type)->replace('_',' ')->title() }}
-                        </option>
-                    @endforeach
-                </select>
-            </label>
+    <section class="le-filter-card">
+        <div class="le-filter-heading">
+            <div class="le-filter-heading-left">
+                <span class="le-filter-icon">⌕</span>
+                <div>
+                    <h2>Find Users</h2>
+                    <p>Search and filter their activity summary.</p>
+                </div>
+            </div>
 
-            <label>
-                From Date
-                <input type="date"
-                       name="from"
-                       value="{{ $filters['from'] ?? '' }}">
-            </label>
-
-            <label>
-                To Date
-                <input type="date"
-                       name="to"
-                       value="{{ $filters['to'] ?? '' }}">
-            </label>
-
-            <label>
-                Sort By
-                <select name="sort">
-                    <option value="latest"
-                        @selected(($filters['sort'] ?? 'latest') === 'latest')>
-                        Last Active
-                    </option>
-
-                    <option value="most_active"
-                        @selected(($filters['sort'] ?? '') === 'most_active')>
-                        Most Activities
-                    </option>
-
-                    <option value="name"
-                        @selected(($filters['sort'] ?? '') === 'name')>
-                        Name A–Z
-                    </option>
-
-                    <option value="oldest"
-                        @selected(($filters['sort'] ?? '') === 'oldest')>
-                        Oldest Joined
-                    </option>
-                </select>
-            </label>
-
+            <a href="{{ route('admin.reports.activities') }}" class="le-clear-button">Clear all</a>
         </div>
 
-        <div class="le-filter-actions">
-            <button class="le-button le-button-primary" type="submit">
-                Apply Filters
-            </button>
+        <form method="GET" action="{{ route('admin.reports.activities') }}" class="le-report-filter-form">
 
-            <a class="le-button le-button-secondary"
-               href="{{ route('admin.reports.activities') }}">
-                Reset
-            </a>
-        </div>
+            <label class="le-search-field">
+                <span class="le-search-icon">⌕</span>
+                <input
+                    type="search"
+                    name="search"
+                    value="{{ $filters['search'] ?? '' }}"
+                    placeholder="Search name, email, mobile or user ID..."
+                >
+            </label>
 
-    </form>
+            <div class="le-filter-fields">
 
-    <section class="le-data-panel">
+                <label class="le-report-field">
+                    <span>User Status</span>
+                    <select name="user_status">
+                        <option value="all" @selected(($filters['user_status'] ?? 'all') === 'all')>All Users</option>
+                        <option value="active" @selected(($filters['user_status'] ?? '') === 'active')>Active Users</option>
+                        <option value="inactive" @selected(($filters['user_status'] ?? '') === 'inactive')>Inactive Users</option>
+                    </select>
+                </label>
 
-        <div class="le-panel-heading">
+                <label class="le-report-field">
+                    <span>Module</span>
+                    <select name="module">
+                        <option value="">All Modules</option>
+                        @foreach(['education','tools','calculators','calendar'] as $module)
+                            <option value="{{ $module }}" @selected(($filters['module'] ?? '') === $module)>
+                                {{ ucfirst($module) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </label>
+
+                <label class="le-report-field">
+                    <span>Activity Type</span>
+                    <select name="activity_type">
+                        <option value="">All Activities</option>
+                        @foreach($activityTypes as $type)
+                            <option value="{{ $type }}" @selected(($filters['activity_type'] ?? '') === $type)>
+                                {{ str($type)->replace('_', ' ')->title() }}
+                            </option>
+                        @endforeach
+                    </select>
+                </label>
+
+                <label class="le-report-field">
+                    <span>From Date</span>
+                    <input type="date" name="from" value="{{ $filters['from'] ?? '' }}">
+                </label>
+
+                <label class="le-report-field">
+                    <span>To Date</span>
+                    <input type="date" name="to" value="{{ $filters['to'] ?? '' }}">
+                </label>
+
+                <label class="le-report-field">
+                    <span>Sort By</span>
+                    <select name="sort">
+                        <option value="latest" @selected(($filters['sort'] ?? 'latest') === 'latest')>Last Active</option>
+                        <option value="oldest" @selected(($filters['sort'] ?? '') === 'oldest')>Oldest Registered</option>
+                        <option value="name" @selected(($filters['sort'] ?? '') === 'name')>Name</option>
+                        <option value="most_active" @selected(($filters['sort'] ?? '') === 'most_active')>Most Active</option>
+                    </select>
+                </label>
+
+            </div>
+
+            <div class="le-filter-footer">
+                <button type="submit" class="le-report-button le-report-button-primary">
+                    <span class="le-button-symbol">⌕</span>
+                    Apply Filters
+                </button>
+
+                <a href="{{ route('admin.reports.activities') }}" class="le-report-button le-report-button-secondary">
+                    Reset
+                </a>
+            </div>
+
+        </form>
+    </section>
+
+    <section class="le-report-card le-user-list-card">
+
+        <div class="le-user-list-heading">
             <div>
                 <h2>User Activity List</h2>
-                <p>
-                    {{ number_format($users->total()) }} users found.
-                    Select any row to open the complete user report.
-                </p>
+                <p>{{ number_format($users->total()) }} users found. Select any row to open the complete user report.</p>
             </div>
 
-            <span class="le-live-label">● User Directory</span>
+            <span class="le-result-count">{{ number_format($users->total()) }} entries</span>
         </div>
 
-        <div class="le-table-wrap">
-
-            <table class="le-table le-user-directory-table">
-
+        <div class="le-table-scroll">
+            <table class="le-report-table">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -234,106 +216,64 @@
                 </thead>
 
                 <tbody>
-
-                    @forelse($users as $user)
-
-                        <tr
-                            class="le-clickable-user-row"
-                            data-href="{{ route('admin.reports.users.show', ['user'=>$user->id]) }}"
-                            tabindex="0"
-                            role="link"
-                            aria-label="Open report for {{ $user->name }}"
-                        >
+                    @forelse($users as $index => $user)
+                        <tr class="le-report-user-row" data-href="{{ route('admin.reports.users.show', $user->id) }}" tabindex="0">
+                            <td class="le-row-number">{{ $users->firstItem() + $index }}</td>
 
                             <td>
-                                {{ $users->firstItem() + $loop->index }}
-                            </td>
-
-                            <td>
-                                <div class="le-user-cell">
-
-                                    <span class="le-avatar">
-                                        {{ strtoupper(substr($user->name ?? 'U', 0, 1)) }}
+                                <div class="le-report-user">
+                                    <span class="le-report-avatar">
+                                        {{ strtoupper(substr($user->name ?? 'U', 0, 2)) }}
                                     </span>
-
-                                    <span>
-                                        <b>{{ $user->name }}</b>
+                                    <span class="le-report-user-info">
+                                        <strong>{{ $user->name }}</strong>
                                         <small>{{ $user->email }}</small>
-                                        <small>{{ $user->mobile ?? '—' }}</small>
-                                        <small class="le-user-id">
-                                            User ID: {{ $user->id }}
-                                        </small>
                                     </span>
-
                                 </div>
                             </td>
 
+                            <td>{{ number_format($user->education_count) }}</td>
+                            <td>{{ number_format($user->tools_count) }}</td>
+                            <td>{{ number_format($user->calculators_count) }}</td>
+                            <td>{{ number_format($user->calendar_count) }}</td>
+
                             <td>
-                                <span class="le-count-pill">
-                                    {{ number_format($user->education_count) }}
+                                <strong class="le-activity-total">{{ number_format($user->total_activities) }}</strong>
+                            </td>
+
+                            <td>
+                                <span class="le-last-active">
+                                    {{ $user->last_active
+                                        ? \Illuminate\Support\Carbon::parse($user->last_active)->format('d M Y, h:i A')
+                                        : 'Never' }}
                                 </span>
                             </td>
 
                             <td>
-                                <span class="le-count-pill">
-                                    {{ number_format($user->tools_count) }}
-                                </span>
-                            </td>
-
-                            <td>
-                                <span class="le-count-pill">
-                                    {{ number_format($user->calculators_count) }}
-                                </span>
-                            </td>
-
-                            <td>
-                                <span class="le-count-pill">
-                                    {{ number_format($user->calendar_count) }}
-                                </span>
-                            </td>
-
-                            <td>
-                                <strong>
-                                    {{ number_format($user->total_activities) }}
-                                </strong>
-                            </td>
-
-                            <td>
-                                {{ $user->last_active
-                                    ? \Illuminate\Support\Carbon::parse($user->last_active)->format('d M Y, h:i A')
-                                    : 'Never tracked'
-                                }}
-                            </td>
-
-                            <td>
-                                <a class="le-button le-button-small le-button-secondary"
-                                   href="{{ route('admin.reports.users.show', ['user'=>$user->id]) }}">
-                                    View Report →
+                                <a href="{{ route('admin.reports.users.show', $user->id) }}" class="le-view-report-button">
+                                    <span>▤</span> View Report
                                 </a>
                             </td>
-
                         </tr>
-
                     @empty
-
                         <tr>
-                            <td colspan="9" class="le-empty">
-                                No users match the selected filters.
+                            <td colspan="9">
+                                <div class="le-report-empty">
+                                    <strong>No users found</strong>
+                                    <span>Try changing your filters or search query.</span>
+                                </div>
                             </td>
                         </tr>
-
                     @endforelse
-
                 </tbody>
-
             </table>
-
         </div>
 
-        <div class="le-pagination">
+        <div class="le-table-footer">
             <span>
-                Showing {{ $users->firstItem() ?? 0 }}–{{ $users->lastItem() ?? 0 }}
-                of {{ number_format($users->total()) }} users
+                Showing {{ $users->firstItem() ?? 0 }}
+                to {{ $users->lastItem() ?? 0 }}
+                of {{ $users->total() }} entries
             </span>
 
             {{ $users->links() }}
@@ -343,32 +283,131 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const chartData = @json($dashboardChart);
+    const breakdown = @json($moduleBreakdown);
 
-    document.querySelectorAll('.le-clickable-user-row').forEach(function (row) {
+    const rootStyles = getComputedStyle(document.documentElement);
 
-        row.addEventListener('click', function (event) {
+    const primary = rootStyles.getPropertyValue('--primary').trim()
+        || rootStyles.getPropertyValue('--button-bg').trim();
 
-            if (event.target.closest('a, button, input, select, label')) {
-                return;
+    const muted = rootStyles.getPropertyValue('--muted').trim();
+    const border = rootStyles.getPropertyValue('--border').trim();
+    const surface = rootStyles.getPropertyValue('--surface').trim();
+
+    const shades = [
+        primary,
+        `color-mix(in srgb, ${primary} 72%, ${muted})`,
+        `color-mix(in srgb, ${primary} 48%, ${muted})`,
+        `color-mix(in srgb, ${primary} 25%, ${muted})`
+    ];
+
+    const modules = [
+        { key: 'education', label: 'Education' },
+        { key: 'tools', label: 'Tools' },
+        { key: 'calculators', label: 'Calculators' },
+        { key: 'calendar', label: 'Calendar' },
+        { key: 'authentication', label: 'Authentication' }
+    ];
+
+    const trendCanvas = document.getElementById('leActivityTrend');
+
+    if (trendCanvas && window.Chart) {
+        new Chart(trendCanvas, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: modules.map(function (module, index) {
+                    return {
+                        label: module.label,
+                        data: chartData.series[module.key],
+                        borderColor: shades[index],
+                        backgroundColor: shades[index],
+                        borderWidth: 2,
+                        pointRadius: 2,
+                        pointHoverRadius: 5,
+                        tension: 0.35,
+                        fill: false
+                    };
+                })
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: muted,
+                            maxTicksLimit: 10,
+                            font: { size: 10 }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                            color: muted,
+                            font: { size: 10 }
+                        },
+                        grid: { color: border }
+                    }
+                }
             }
+        });
+    }
 
+    const donutCanvas = document.getElementById('leActivityDistribution');
+
+    if (donutCanvas && window.Chart) {
+        new Chart(donutCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: breakdown.map(item => item.label),
+                datasets: [{
+                    data: breakdown.map(item => item.value),
+                    backgroundColor: shades,
+                    borderColor: surface,
+                    borderWidth: 3,
+                    hoverOffset: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '72%',
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    document.querySelectorAll('.le-report-user-row').forEach(function (row) {
+        row.addEventListener('click', function (event) {
+            if (event.target.closest('a,button')) return;
             window.location.href = row.dataset.href;
         });
 
         row.addEventListener('keydown', function (event) {
-
             if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
                 window.location.href = row.dataset.href;
             }
-
         });
-
     });
-
 });
 </script>
-
 @endsection
