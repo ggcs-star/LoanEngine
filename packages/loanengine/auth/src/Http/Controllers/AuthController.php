@@ -54,8 +54,13 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
-        AuthActivityLogger::record($request, 'register_success', $createdUser->getAuthIdentifier(), $createdUser->email, 201);
-
+AuthActivityLogger::record(
+    'register_success',
+    (int) $createdUser->getAuthIdentifier(),
+    $createdUser->email,
+    ['status_code' => 201],
+    $request
+);
         return redirect()->route('auth.login')
             ->with('status', 'Account created successfully. Please sign in.');
     }
@@ -70,16 +75,26 @@ class AuthController extends Controller
         $credentials['email'] = strtolower($credentials['email']);
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            AuthActivityLogger::record($request, 'login_failed', null, $credentials['email'], 401);
-            return back()
+AuthActivityLogger::record(
+    'login_failed',
+    null,
+    $credentials['email'],
+    ['status_code' => 401],
+    $request
+);            return back()
                 ->withErrors(['email' => 'The email or password is incorrect.'])
                 ->onlyInput('email');
         }
 
         $request->session()->regenerate();
         $user = $request->user();
-        AuthActivityLogger::record($request, 'login_success', $user?->getAuthIdentifier(), $user?->email, 200);
-
+AuthActivityLogger::record(
+    'login_success',
+    $user ? (int) $user->getAuthIdentifier() : null,
+    $user?->email,
+    ['status_code' => 200],
+    $request
+);
         return redirect()->intended(
             $user->role === 'admin'
                 ? route('admin.dashboard')
@@ -435,7 +450,13 @@ class AuthController extends Controller
     public function logout(Request $request): RedirectResponse
     {
         $user = $request->user();
-        AuthActivityLogger::record($request, 'logout_success', $user?->getAuthIdentifier(), $user?->email, 200);
+AuthActivityLogger::record(
+    'logout_success',
+    $user ? (int) $user->getAuthIdentifier() : null,
+    $user?->email,
+    ['status_code' => 200],
+    $request
+);
         Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
