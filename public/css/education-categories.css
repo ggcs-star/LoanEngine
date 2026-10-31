@@ -3428,3 +3428,45 @@ body.education-modal-open {
     border-color: var(--primary-hover-color, #000000) !important;
     color: var(--button-text-color, #ffffff) !important;
 }
+
+/* Education Categories: theme-aware action buttons */
+.education-categories-page .ec-bulk-delete-btn:not(:disabled),
+.education-categories-page .ec-modal-confirm,
+.education-categories-page .ec-btn-filter {
+    background: var(--primary-color, var(--primary, #d13d3d)) !important;
+    background-color: var(--primary-color, var(--primary, #d13d3d)) !important;
+    border-color: var(--primary-color, var(--primary, #d13d3d)) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+
+/* Hover */
+.education-categories-page .ec-bulk-delete-btn:not(:disabled):hover,
+.education-categories-page .ec-modal-confirm:hover,
+.education-categories-page .ec-btn-filter:hover {
+    background: var(--primary-hover-color, var(--primary-color, var(--primary, #b92f2f))) !important;
+    background-color: var(--primary-hover-color, var(--primary-color, var(--primary, #b92f2f))) !important;
+    border-color: var(--primary-hover-color, var(--primary-color, var(--primary, #b92f2f))) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+
+/* Disabled bulk delete */
+.education-categories-page .ec-bulk-delete-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Force theme colour on the delete confirmation popup */
+#ec-delete-modal .ec-modal-dialog .ec-modal-actions #ec-confirm-delete {
+    background: var(--primary-color, var(--primary, #d13d3d)) !important;
+    background-color: var(--primary-color, var(--primary, #d13d3d)) !important;
+    border: 1px solid var(--primary-color, var(--primary, #d13d3d)) !important;
+    color: var(--button-text-color, #ffffff) !important;
+    box-shadow: none !important;
+}
+
+#ec-delete-modal .ec-modal-dialog .ec-modal-actions #ec-confirm-delete:hover {
+    background: var(--primary-hover-color, var(--primary-color, var(--primary, #b92f2f))) !important;
+    background-color: var(--primary-hover-color, var(--primary-color, var(--primary, #b92f2f))) !important;
+    border-color: var(--primary-hover-color, var(--primary-color, var(--primary, #b92f2f))) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}

@@ -2180,17 +2180,23 @@ body.edu-modules-modal-open {
     border: 1px solid #d9d9d9 !important;
 }
 
-.edu-modules-modal-actions .edu-modules-modal-confirm, .edu-modules-confirm-actions .edu-modules-confirm-delete-btn {
-    color: #ffffff !important;
-    background: #222222 !important;
-    border: 1px solid #222222 !important;
+
+.edu-modules-modal-actions .edu-modules-modal-confirm,
+.edu-modules-confirm-actions .edu-modules-confirm-delete-btn {
+    color: var(--button-text-color, #ffffff) !important;
+    background: var(--primary-color, #d13d3d) !important;
+    background-color: var(--primary-color, #d13d3d) !important;
+    border: 1px solid var(--primary-color, #d13d3d) !important;
 }
 
-.edu-modules-modal-actions .edu-modules-modal-confirm:hover, .edu-modules-confirm-actions .edu-modules-confirm-delete-btn:hover {
-    color: #ffffff !important;
-    background: #000000 !important;
-    border-color: #000000 !important;
+.edu-modules-modal-actions .edu-modules-modal-confirm:hover,
+.edu-modules-confirm-actions .edu-modules-confirm-delete-btn:hover {
+    color: var(--button-text-color, #ffffff) !important;
+    background: var(--primary-hover-color, var(--primary-color, #b92f2f)) !important;
+    background-color: var(--primary-hover-color, var(--primary-color, #b92f2f)) !important;
+    border-color: var(--primary-hover-color, var(--primary-color, #b92f2f)) !important;
 }
+
 
 .edu-modules-modal-actions .edu-modules-modal-cancel:hover, .edu-modules-confirm-actions .edu-modules-cancel-btn:hover {
     color: #222222 !important;
@@ -2641,4 +2647,111 @@ body.edu-modules-modal-open {
         align-items: flex-start;
         flex-direction: column;
     }
+}
+
+/* Theme colour: Education Modules bulk delete button */
+.edu-modules-page .edu-modules-bulk-delete-btn:not(:disabled) {
+    background: var(--primary-color, #d13d3d) !important;
+    background-color: var(--primary-color, #d13d3d) !important;
+    border-color: var(--primary-color, #d13d3d) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+
+.edu-modules-page .edu-modules-bulk-delete-btn:not(:disabled):hover {
+    background: var(--primary-hover-color, #b92f2f) !important;
+    background-color: var(--primary-hover-color, #b92f2f) !important;
+    border-color: var(--primary-hover-color, #b92f2f) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+
+/* Theme colour: Delete confirmation popup button */
+.edu-modules-modal .edu-modules-confirm-delete-btn {
+    background: var(--primary-color, #d13d3d) !important;
+    background-color: var(--primary-color, #d13d3d) !important;
+    border-color: var(--primary-color, #d13d3d) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+
+.edu-modules-modal .edu-modules-confirm-delete-btn:hover {
+    background: var(--primary-hover-color, #b92f2f) !important;
+    background-color: var(--primary-hover-color, #b92f2f) !important;
+    border-color: var(--primary-hover-color, #b92f2f) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+
+/* Education Modules: force theme colours inside delete popup */
+body .edu-modules-modal .edu-modules-confirm-content
+.edu-modules-confirm-actions .edu-modules-confirm-delete-btn {
+    background: var(--primary-color) !important;
+    background-color: var(--primary-color) !important;
+    border: 1px solid var(--primary-color) !important;
+    color: var(--button-text-color, #ffffff) !important;
+    box-shadow: none !important;
+}
+
+body .edu-modules-modal .edu-modules-confirm-content
+.edu-modules-confirm-actions .edu-modules-confirm-delete-btn:hover,
+body .edu-modules-modal .edu-modules-confirm-content
+.edu-modules-confirm-actions .edu-modules-confirm-delete-btn:focus {
+    background: var(--primary-hover-color, var(--primary-color)) !important;
+    background-color: var(--primary-hover-color, var(--primary-color)) !important;
+    border-color: var(--primary-hover-color, var(--primary-color)) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+
+/* Education Modules: use website theme colors */
+.edu-modules-page .edu-modules-bulk-delete-btn,
+.edu-modules-page .edu-modules-filter-btn {
+    background: var(--primary-color, #d43d3d) !important;
+    border-color: var(--primary-color, #d43d3d) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+
+.edu-modules-page .edu-modules-bulk-delete-btn:hover:not(:disabled),
+.edu-modules-page .edu-modules-filter-btn:hover {
+    background: var(--primary-hover-color, var(--primary-color, #d43d3d)) !important;
+    border-color: var(--primary-hover-color, var(--primary-color, #d43d3d)) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+
+.edu-modules-modal .edu-modules-modal-dialog {
+    background: var(--surface, #ffffff) !important;
+    border-color: var(--border, #e5e5e5) !important;
+    color: var(--text, #222222) !important;
+}
+
+.edu-modules-modal .edu-modules-modal-dialog h2 {
+    color: var(--text, #222222) !important;
+}
+
+.edu-modules-modal .edu-modules-modal-dialog p {
+    color: var(--muted, #666666) !important;
+}
+
+.edu-modules-modal .edu-modules-modal-icon {
+    color: var(--primary-color, #d43d3d) !important;
+    background: var(--primary-light, #fceaea) !important;
+}
+
+.edu-modules-modal .edu-modules-modal-actions .edu-modules-modal-confirm {
+    background: var(--primary-color, #d43d3d) !important;
+    border-color: var(--primary-color, #d43d3d) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+
+.edu-modules-modal .edu-modules-modal-actions .edu-modules-modal-confirm:hover {
+    background: var(--primary-hover-color, var(--primary-color, #d43d3d)) !important;
+    border-color: var(--primary-hover-color, var(--primary-color, #d43d3d)) !important;
+    color: var(--button-text-color, #ffffff) !important;
+}
+
+.edu-modules-modal .edu-modules-modal-actions .edu-modules-modal-cancel {
+    background: var(--surface, #ffffff) !important;
+    border-color: var(--border, #d9d9d9) !important;
+    color: var(--text, #222222) !important;
+}
+
+.edu-modules-modal .edu-modules-modal-actions .edu-modules-modal-cancel:hover {
+    background: var(--surface-hover, #f3f3f3) !important;
+    color: var(--text, #222222) !important;
 }

@@ -27,27 +27,10 @@ class AuthServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadViewsFrom(
-            __DIR__ . '/../resources/views',
-            'loanengine-auth'
-        );
-
-        // Register package web routes with device identification.
-        Route::middleware(IdentifyWebDevice::class)->group(function () {
-            $this->loadRoutesFrom(
-                __DIR__ . '/../routes/web.php'
-            );
-        });
-
-        // Register package API routes.
-        $this->loadRoutesFrom(
-            __DIR__ . '/../routes/api.php'
-        );
-
-        // Register package migrations.
-        $this->loadMigrationsFrom(
-            __DIR__ . '/../database/migrations'
-        );
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'loanengine-auth');
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         // Standardize JSON API errors only.
         $this->app->afterResolving(
