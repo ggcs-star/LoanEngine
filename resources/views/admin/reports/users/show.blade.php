@@ -8,7 +8,6 @@
 @endpush
 
 @section('content')
-
 @php
     $tabs = [
         'overview' => 'Overview',
@@ -18,6 +17,11 @@
         'calendar' => 'Calendar',
         'timeline' => 'Activity Timeline',
     ];
+
+    $recentActivities = $recentActivities ?? collect();
+    $summary = $summary ?? [];
+    $records = $records ?? null;
+    $tab = $tab ?? 'overview';
 @endphp
 
 <div class="le-report-page">
@@ -26,9 +30,7 @@
         ← Back to User Activity
     </a>
 
-    {{-- User Profile --}}
     <section class="le-profile-card">
-
         <div class="le-profile-avatar">
             {{ strtoupper(substr($user->name ?? 'U', 0, 2)) }}
         </div>
@@ -39,7 +41,7 @@
             <small>
                 User ID: {{ $user->id }}
                 <span>•</span>
-                Joined: {{ $user->created_at?->format('d M Y') }}
+                Joined: {{ $user->created_at?->format('d M Y') ?? '—' }}
             </small>
         </div>
 
@@ -48,66 +50,88 @@
             View Profile ↗
         </a>
 
-        <a href="{{ route('admin.reports.users.export', $user->id) }}"
-           class="le-button le-button-primary">
-            ↓ Export User Report
+        <a class="le-button le-button-primary"
+           href="{{ route('admin.reports.users.export', array_merge(
+               ['user' => $user->id, 'tab' => $tab],
+               request()->query()
+           )) }}">
+            ↓ Export Report
         </a>
-
     </section>
 
-    {{-- Tabs --}}
     <nav class="le-tabs" aria-label="User analytics sections">
         @foreach($tabs as $key => $label)
             <a
                 class="{{ $tab === $key ? 'active' : '' }}"
-                href="{{ route(
-                    'admin.reports.users.show',
-                    array_merge(
-                        ['user' => $user->id, 'tab' => $key],
-                        request()->except('tab', 'page')
-                    )
-                ) }}"
+                href="{{ route('admin.reports.users.show', array_merge(
+                    ['user' => $user->id, 'tab' => $key],
+                    request()->except('tab', 'page')
+                )) }}"
             >
                 {{ $label }}
             </a>
         @endforeach
     </nav>
 
-    {{-- KPI Cards --}}
-    <div class="le-kpi-grid le-kpi-six">
+    <div class="le-kpi-grid le-kpi-six le-kpi-nine">
 
         <article class="le-kpi">
             <div>
                 <small>Total Activities</small>
-                <strong>{{ number_format($summary['total']) }}</strong>
+                <strong>{{ number_format($summary['total'] ?? 0) }}</strong>
             </div>
         </article>
 
         <article class="le-kpi">
             <div>
                 <small>Education Views</small>
-                <strong>{{ number_format($summary['education']) }}</strong>
+                <strong>{{ number_format($summary['education'] ?? 0) }}</strong>
             </div>
         </article>
 
         <article class="le-kpi">
             <div>
                 <small>Tools Usage</small>
-                <strong>{{ number_format($summary['tools']) }}</strong>
+                <strong>{{ number_format($summary['tools'] ?? 0) }}</strong>
             </div>
         </article>
 
         <article class="le-kpi">
             <div>
                 <small>Calculator Usage</small>
-                <strong>{{ number_format($summary['calculators']) }}</strong>
+                <strong>{{ number_format($summary['calculators'] ?? 0) }}</strong>
             </div>
         </article>
 
         <article class="le-kpi">
             <div>
                 <small>Calendar Events</small>
-                <strong>{{ number_format($summary['calendar_total']) }}</strong>
+                <strong>{{ number_format($summary['calendar_total'] ?? 0) }}</strong>
+            </div>
+        </article>
+
+        <article class="le-kpi">
+            <div>
+                <small>Total Logins</small>
+                <strong>{{ number_format($summary['total_logins'] ?? 0) }}</strong>
+            </div>
+        </article>
+
+        <article class="le-kpi">
+            <div>
+                <small>Failed Logins</small>
+                <strong>{{ number_format($summary['failed_logins'] ?? 0) }}</strong>
+            </div>
+        </article>
+
+        <article class="le-kpi">
+            <div>
+                <small>Last Login</small>
+                <strong class="le-kpi-last">
+                    {{ !empty($summary['last_login'])
+                        ? \Illuminate\Support\Carbon::parse($summary['last_login'])->diffForHumans()
+                        : '—' }}
+                </strong>
             </div>
         </article>
 
@@ -115,7 +139,7 @@
             <div>
                 <small>Last Active</small>
                 <strong class="le-kpi-last">
-                    {{ $summary['last_active']
+                    {{ !empty($summary['last_active'])
                         ? \Illuminate\Support\Carbon::parse($summary['last_active'])->diffForHumans()
                         : '—' }}
                 </strong>
@@ -124,7 +148,6 @@
 
     </div>
 
-    {{-- OVERVIEW TAB --}}
     @if($tab === 'overview')
 
         <div class="le-chart-grid">
@@ -147,13 +170,13 @@
                 <div class="le-panel-heading">
                     <div>
                         <h2>Module Usage</h2>
-                        <p>Share of recorded activities</p>
+                        <p>Activity distribution</p>
                     </div>
                 </div>
 
                 <div class="le-donut-layout">
                     <div class="le-donut-area">
-                        <canvas id="moduleDonut"></canvas>
+                        <canvas id="moduleUsage"></canvas>
                     </div>
 
                     <div class="le-legend">
@@ -172,204 +195,107 @@
 
         <div class="le-overview-grid">
 
-            {{-- Recent Activity --}}
             <section class="le-data-panel">
-
                 <div class="le-panel-heading">
                     <div>
                         <h2>Recent Activity</h2>
-                        <p>Latest activity across available modules</p>
+                        <p>Latest tracked user events</p>
                     </div>
-
-                    <a href="{{ route('admin.reports.users.show', [
-                        'user' => $user->id,
-                        'tab' => 'timeline'
-                    ]) }}" class="le-text-link">
-                        View all →
+                    <a class="le-text-link"
+                       href="{{ route('admin.reports.users.show', [
+                           'user' => $user->id,
+                           'tab' => 'timeline'
+                       ]) }}">
+                        View timeline →
                     </a>
                 </div>
 
                 <div class="le-overview-list">
-
-                    @php
-                        $recent = \App\Models\UserActivityLog::where(
-                            'user_id',
-                            $user->id
-                        )->latest()->limit(6)->get();
-                    @endphp
-
-                    @forelse($recent as $r)
+                    @forelse($recentActivities as $activity)
                         <div class="le-activity-row">
                             <span class="le-activity-dot"></span>
 
                             <div>
                                 <b>
-                                    {{ str($r->activity_type)->replace('_', ' ')->title() }}
+                                    {{ str($activity->activity_type ?? 'Activity')->replace('_', ' ')->title() }}
                                 </b>
 
                                 <small>
-                                    {{ ucfirst($r->module) }}
-                                    ·
-                                    {{ str($r->subject_type ?? 'Activity')->replace('_', ' ')->title() }}
+                                    {{ str($activity->module ?? '')->replace('_', ' ')->title() }}
+                                    @if(!empty($activity->subject_name))
+                                        · {{ $activity->subject_name }}
+                                    @elseif(!empty($activity->detail))
+                                        · {{ $activity->detail }}
+                                    @endif
                                 </small>
                             </div>
 
                             <time>
-                                {{ $r->created_at?->format('d M, h:i A') }}
+                                {{ $activity->happened_at
+                                    ? \Illuminate\Support\Carbon::parse($activity->happened_at)->diffForHumans()
+                                    : '—' }}
                             </time>
                         </div>
                     @empty
-                        <div class="le-empty">
-                            No activity log entries yet.
-                        </div>
+                        <div class="le-empty">No activity recorded yet.</div>
                     @endforelse
-
                 </div>
             </section>
 
-            {{-- Calendar Summary --}}
             <section class="le-data-panel">
-
                 <div class="le-panel-heading">
                     <div>
-                        <h2>Calendar Summary</h2>
-                        <p>Financial events recorded for this user</p>
+                        <h2>Account Security Activity</h2>
+                        <p>Authentication summary</p>
                     </div>
-
-                    <a href="{{ route('admin.reports.users.show', [
-                        'user' => $user->id,
-                        'tab' => 'calendar'
-                    ]) }}" class="le-text-link">
-                        View all →
-                    </a>
                 </div>
-
-                @php
-                    $calendar = \App\Models\FinancialEvent::where(
-                        'user_id',
-                        $user->id
-                    )->get();
-                @endphp
 
                 <div class="le-summary-list">
                     <div>
-                        <span>Total Events</span>
-                        <b>{{ $calendar->count() }}</b>
+                        <span>Successful logins</span>
+                        <b>{{ number_format($summary['total_logins'] ?? 0) }}</b>
                     </div>
 
                     <div>
-                        <span>Projected</span>
-                        <b>{{ $calendar->where('payment_status', 'projected')->count() }}</b>
+                        <span>Failed login attempts</span>
+                        <b>{{ number_format($summary['failed_logins'] ?? 0) }}</b>
                     </div>
 
                     <div>
-                        <span>Cleared</span>
-                        <b>{{ $calendar->where('payment_status', 'cleared')->count() }}</b>
+                        <span>Last successful login</span>
+                        <b>
+                            {{ !empty($summary['last_login'])
+                                ? \Illuminate\Support\Carbon::parse($summary['last_login'])->format('d M Y, h:i A')
+                                : '—' }}
+                        </b>
                     </div>
 
                     <div>
-                        <span>Total Amount</span>
-                        <b>₹ {{ number_format((float) $calendar->sum('amount'), 2) }}</b>
+                        <span>Completed lessons</span>
+                        <b>{{ number_format($summary['completed_lessons'] ?? 0) }}</b>
                     </div>
-                </div>
 
-            </section>
+                    <div>
+                        <span>Cleared calendar events</span>
+                        <b>{{ number_format($summary['calendar_cleared'] ?? 0) }}</b>
+                    </div>
 
-        </div>
-
-        {{-- Overview Mini Cards --}}
-        <div class="le-three-grid">
-
-            <section class="le-data-panel le-mini-panel">
-                <div class="le-panel-heading">
-                    <h2>Education Progress</h2>
-                    <a href="{{ route('admin.reports.users.show', [
-                        'user' => $user->id,
-                        'tab' => 'education'
-                    ]) }}" class="le-text-link">
-                        View all →
-                    </a>
-                </div>
-
-                <strong>{{ number_format($summary['completed_lessons']) }}</strong>
-                <small>Lessons completed</small>
-
-                <div class="le-mini-bars">
-                    <i style="height:35%"></i>
-                    <i style="height:52%"></i>
-                    <i style="height:43%"></i>
-                    <i style="height:78%"></i>
-                    <i style="height:64%"></i>
-                    <i style="height:90%"></i>
-                    <i style="height:72%"></i>
-                </div>
-            </section>
-
-            <section class="le-data-panel le-mini-panel">
-                <div class="le-panel-heading">
-                    <h2>Tools Usage</h2>
-                    <a href="{{ route('admin.reports.users.show', [
-                        'user' => $user->id,
-                        'tab' => 'tools'
-                    ]) }}" class="le-text-link">
-                        View all →
-                    </a>
-                </div>
-
-                <strong>{{ number_format($summary['tools']) }}</strong>
-                <small>Recorded tool and journey activity</small>
-
-                <div class="le-mini-bars">
-                    <i style="height:42%"></i>
-                    <i style="height:68%"></i>
-                    <i style="height:55%"></i>
-                    <i style="height:82%"></i>
-                    <i style="height:48%"></i>
-                    <i style="height:74%"></i>
-                    <i style="height:90%"></i>
-                </div>
-            </section>
-
-            <section class="le-data-panel le-mini-panel">
-                <div class="le-panel-heading">
-                    <h2>Calculator Usage</h2>
-                    <a href="{{ route('admin.reports.users.show', [
-                        'user' => $user->id,
-                        'tab' => 'calculators'
-                    ]) }}" class="le-text-link">
-                        View all →
-                    </a>
-                </div>
-
-                <strong>{{ number_format($summary['calculators']) }}</strong>
-                <small>Recorded calculations</small>
-
-                <div class="le-mini-bars">
-                    <i style="height:48%"></i>
-                    <i style="height:72%"></i>
-                    <i style="height:60%"></i>
-                    <i style="height:88%"></i>
-                    <i style="height:53%"></i>
-                    <i style="height:78%"></i>
-                    <i style="height:95%"></i>
+                    <div>
+                        <span>Projected calendar events</span>
+                        <b>{{ number_format($summary['calendar_projected'] ?? 0) }}</b>
+                    </div>
                 </div>
             </section>
 
         </div>
 
-    {{-- ALL NON-OVERVIEW TABS --}}
     @else
 
-        {{-- Filters --}}
         <section class="le-filter-panel">
-
             <div class="le-filter-title">
                 <div>
-                    <h2>{{ $tabs[$tab] }} Search</h2>
-                    <p>
-                        Search and filter this user's
-                        {{ strtolower($tabs[$tab]) }} records.
-                    </p>
+                    <h2>{{ $tabs[$tab] ?? 'Activity' }} Search</h2>
+                    <p>Search and filter this user's records.</p>
                 </div>
 
                 <a class="le-button le-button-primary"
@@ -377,7 +303,7 @@
                        ['user' => $user->id, 'tab' => $tab],
                        request()->query()
                    )) }}">
-                    ↓ Export Excel
+                    ↓ Export Report
                 </a>
             </div>
 
@@ -392,7 +318,7 @@
                         type="search"
                         name="search"
                         value="{{ $filters['search'] ?? '' }}"
-                        placeholder="Search {{ strtolower($tabs[$tab]) }} records..."
+                        placeholder="Search {{ strtolower($tabs[$tab] ?? 'activity') }}..."
                     >
                 </label>
 
@@ -410,18 +336,17 @@
                     @endif
 
                     @if($tab === 'calendar')
-
                         <label>
                             Category
                             <select name="category">
                                 <option value="">All Categories</option>
 
-                                @foreach(['income', 'investment', 'loan_emi', 'fixed_bill', 'living_expense'] as $v)
+                                @foreach(['income', 'investment', 'loan_emi', 'fixed_bill', 'living_expense'] as $value)
                                     <option
-                                        value="{{ $v }}"
-                                        @selected(($filters['category'] ?? '') === $v)
+                                        value="{{ $value }}"
+                                        @selected(($filters['category'] ?? '') === $value)
                                     >
-                                        {{ str($v)->replace('_', ' ')->title() }}
+                                        {{ str($value)->replace('_', ' ')->title() }}
                                     </option>
                                 @endforeach
                             </select>
@@ -431,19 +356,14 @@
                             Payment Status
                             <select name="status">
                                 <option value="">All Statuses</option>
-
-                                <option value="projected"
-                                    @selected(($filters['status'] ?? '') === 'projected')>
+                                <option value="projected" @selected(($filters['status'] ?? '') === 'projected')>
                                     Projected
                                 </option>
-
-                                <option value="cleared"
-                                    @selected(($filters['status'] ?? '') === 'cleared')>
+                                <option value="cleared" @selected(($filters['status'] ?? '') === 'cleared')>
                                     Cleared
                                 </option>
                             </select>
                         </label>
-
                     @endif
 
                     @if($tab === 'calculators')
@@ -459,26 +379,18 @@
 
                     <label>
                         From Date
-                        <input
-                            type="date"
-                            name="from"
-                            value="{{ $filters['from'] ?? '' }}"
-                        >
+                        <input type="date" name="from" value="{{ $filters['from'] ?? '' }}">
                     </label>
 
                     <label>
                         To Date
-                        <input
-                            type="date"
-                            name="to"
-                            value="{{ $filters['to'] ?? '' }}"
-                        >
+                        <input type="date" name="to" value="{{ $filters['to'] ?? '' }}">
                     </label>
 
                 </div>
 
                 <div class="le-filter-actions">
-                    <button class="le-button le-button-primary">
+                    <button type="submit" class="le-button le-button-primary">
                         Apply Filters
                     </button>
 
@@ -490,351 +402,271 @@
                         Reset
                     </a>
                 </div>
-
             </form>
         </section>
 
-        {{-- Records --}}
         <section class="le-data-panel">
-
             <div class="le-panel-heading">
                 <div>
-                    <h2>{{ $tabs[$tab] }} Records</h2>
-                    <p>
-                        {{ number_format($records->total()) }} matching records
-                    </p>
+                    <h2>{{ $tabs[$tab] ?? 'Activity' }} Records</h2>
+                    <p>{{ number_format($records?->total() ?? 0) }} records found</p>
                 </div>
+                <span class="le-live-label">● Report Data</span>
             </div>
 
             <div class="le-table-wrap">
-                <table class="le-table">
 
-                    @if($tab === 'calendar')
+                @if($tab === 'calendar')
 
+                    <table class="le-table">
                         <thead>
                             <tr>
-                                <th>Description</th>
+                                <th>Event</th>
                                 <th>Category</th>
-                                <th>Event Date</th>
                                 <th>Amount</th>
                                 <th>Status</th>
-                                <th>Recurring</th>
-                                <th>Reminder</th>
+                                <th>Event Date</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            @forelse($records as $r)
+                            @forelse($records ?? [] as $record)
                                 <tr>
-                                    <td>{{ $r->description }}</td>
-                                    <td>{{ str($r->category)->replace('_', ' ')->title() }}</td>
-                                    <td>{{ $r->event_date?->format('d M Y') }}</td>
-                                    <td>₹ {{ number_format((float) $r->amount, 2) }}</td>
-                                    <td>
-                                        <span class="le-module-pill">
-                                            {{ ucfirst($r->payment_status) }}
-                                        </span>
-                                    </td>
-                                    <td>{{ $r->is_recurring ? 'Yes' : 'No' }}</td>
-                                    <td>
-                                        {{ $r->reminder_sent_at ? 'Sent' : ($r->reminder_time ?: '—') }}
-                                    </td>
+                                    <td>{{ $record->description ?: '—' }}</td>
+                                    <td>{{ str($record->category ?? '—')->replace('_', ' ')->title() }}</td>
+                                    <td>{{ number_format((float) ($record->amount ?? 0), 2) }}</td>
+                                    <td>{{ str($record->payment_status ?? '—')->title() }}</td>
+                                    <td>{{ $record->event_date ? \Illuminate\Support\Carbon::parse($record->event_date)->format('d M Y') : '—' }}</td>
                                 </tr>
                             @empty
-                                <tr>
-                                    <td colspan="7" class="le-empty">
-                                        No matching calendar records.
-                                    </td>
-                                </tr>
+                                <tr><td colspan="5" class="le-empty">No calendar records found.</td></tr>
                             @endforelse
                         </tbody>
+                    </table>
 
-                    @elseif($tab === 'calculators')
+                @elseif($tab === 'calculators')
 
+                    <table class="le-table">
                         <thead>
                             <tr>
                                 <th>Calculator</th>
-                                <th>Event</th>
+                                <th>Event Type</th>
                                 <th>Status</th>
-                                <th>Inputs</th>
-                                <th>Result</th>
                                 <th>Date & Time</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            @forelse($records as $r)
+                            @forelse($records ?? [] as $record)
                                 <tr>
-                                    <td>{{ $r->calculator?->name ?? '—' }}</td>
-                                    <td>{{ $r->event_type }}</td>
-                                    <td>{{ $r->status }}</td>
-                                    <td>
-                                        <code>{{ \Illuminate\Support\Str::limit(json_encode($r->inputs), 70) }}</code>
-                                    </td>
-                                    <td>
-                                        <code>{{ \Illuminate\Support\Str::limit(json_encode($r->result), 70) }}</code>
-                                    </td>
-                                    <td>{{ $r->created_at?->format('d M Y, h:i A') }}</td>
+                                    <td>{{ $record->calculator?->name ?? ('Calculator #' . $record->calculator_id) }}</td>
+                                    <td>{{ str($record->event_type ?? 'calculated')->replace('_', ' ')->title() }}</td>
+                                    <td>{{ $record->status ?? '—' }}</td>
+                                    <td>{{ $record->created_at?->format('d M Y, h:i A') ?? '—' }}</td>
                                 </tr>
                             @empty
-                                <tr>
-                                    <td colspan="6" class="le-empty">
-                                        No calculator records.
-                                    </td>
-                                </tr>
+                                <tr><td colspan="4" class="le-empty">No calculator records found.</td></tr>
                             @endforelse
                         </tbody>
+                    </table>
 
-                    @else
+                @else
 
+                    <table class="le-table">
                         <thead>
                             <tr>
                                 <th>Activity</th>
                                 <th>Module</th>
                                 <th>Subject Type</th>
-                                <th>Subject Name</th>
+                                <th>Subject Name / Details</th>
                                 <th>Date & Time</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            @forelse($records as $r)
+                            @forelse($records ?? [] as $record)
                                 <tr>
+                                    <td>{{ str($record->activity_type ?? 'Activity')->replace('_', ' ')->title() }}</td>
                                     <td>
-                                        {{ str($r->activity_type)->replace('_', ' ')->title() }}
+                                        <span class="le-module-pill">
+                                            {{ str($record->module ?? $tab)->replace('_', ' ')->title() }}
+                                        </span>
                                     </td>
+                                    <td>{{ str($record->subject_type ?? '—')->replace('_', ' ')->title() }}</td>
+                                    <td class="le-subject-name">
+                                        {{ $record->subject_name ?? $record->detail ?? '—' }}
 
-                                    <td>{{ ucfirst($r->module) }}</td>
-
-                                    <td>
-                                        {{ str($r->subject_type ?? 'Activity')->replace('_', ' ')->title() }}
+                                        @if(($record->module ?? '') === 'authentication')
+                                            <small class="le-auth-details">
+                                                @if(!empty($record->ip_address))
+                                                    IP: {{ $record->ip_address }}
+                                                @endif
+                                                @if(!empty($record->browser))
+                                                    · {{ $record->browser }}
+                                                @endif
+                                                @if(!empty($record->operating_system))
+                                                    · {{ $record->operating_system }}
+                                                @endif
+                                                @if(!empty($record->device_type))
+                                                    · {{ $record->device_type }}
+                                                @endif
+                                                @if(!empty($record->status_code))
+                                                    · Status: {{ $record->status_code }}
+                                                @endif
+                                            </small>
+                                        @endif
                                     </td>
-
                                     <td>
-                                        {{ $r->subject_name ?? '—' }}
-                                    </td>
-
-                                    <td>
-                                        {{ isset($r->happened_at)
-                                            ? \Illuminate\Support\Carbon::parse($r->happened_at)->format('d M Y, h:i A')
-                                            : ($r->created_at?->format('d M Y, h:i A') ?? '—') }}
+                                        {{ $record->happened_at
+                                            ? \Illuminate\Support\Carbon::parse($record->happened_at)->format('d M Y, h:i A')
+                                            : ($record->created_at?->format('d M Y, h:i A') ?? '—') }}
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="le-empty">
-                                        No matching records.
-                                    </td>
+                                    <td colspan="5" class="le-empty">No activity records found.</td>
                                 </tr>
                             @endforelse
                         </tbody>
-
-                    @endif
-
-                </table>
-            </div>
-
-            {{-- SINGLE PAGINATION: NON-OVERVIEW TABS ONLY --}}
-            <div class="le-pagination">
-
-                <div class="le-pagination-info">
-                    Showing
-                    <strong>
-                        {{ $records->firstItem() ?? 0 }}–{{ $records->lastItem() ?? 0 }}
-                    </strong>
-                    of
-                    <strong>{{ $records->total() }}</strong>
-                    records
-                </div>
-
-                @if($records->hasPages())
-
-                    @php
-                        $currentPage = $records->currentPage();
-                        $lastPage = $records->lastPage();
-                        $startPage = max(1, $currentPage - 1);
-                        $endPage = min($lastPage, $currentPage + 1);
-                    @endphp
-
-                    <nav class="le-pagination-controls"
-                         aria-label="Records pagination">
-
-                        @if($records->onFirstPage())
-                            <span class="le-page-control disabled">
-                                ‹ Previous
-                            </span>
-                        @else
-                            <a class="le-page-control"
-                               href="{{ $records->previousPageUrl() }}">
-                                ‹ Previous
-                            </a>
-                        @endif
-
-                        @if($startPage > 1)
-
-                            <a class="le-page-number"
-                               href="{{ $records->url(1) }}">
-                                1
-                            </a>
-
-                            @if($startPage > 2)
-                                <span class="le-page-ellipsis">…</span>
-                            @endif
-
-                        @endif
-
-                        @foreach($records->getUrlRange($startPage, $endPage) as $page => $url)
-
-                            <a href="{{ $url }}"
-                               class="le-page-number {{ $currentPage == $page ? 'active' : '' }}"
-                               @if($currentPage == $page) aria-current="page" @endif>
-                                {{ $page }}
-                            </a>
-
-                        @endforeach
-
-                        @if($endPage < $lastPage)
-
-                            @if($endPage < $lastPage - 1)
-                                <span class="le-page-ellipsis">…</span>
-                            @endif
-
-                            <a class="le-page-number"
-                               href="{{ $records->url($lastPage) }}">
-                                {{ $lastPage }}
-                            </a>
-
-                        @endif
-
-                        @if($records->hasMorePages())
-                            <a class="le-page-control"
-                               href="{{ $records->nextPageUrl() }}">
-                                Next ›
-                            </a>
-                        @else
-                            <span class="le-page-control disabled">
-                                Next ›
-                            </span>
-                        @endif
-
-                    </nav>
+                    </table>
 
                 @endif
 
             </div>
 
+            @if($records instanceof \Illuminate\Contracts\Pagination\Paginator)
+                <div class="le-pagination">
+                    <span class="le-pagination-info">
+                        Showing
+                        <strong>{{ $records->firstItem() ?? 0 }}</strong>
+                        to
+                        <strong>{{ $records->lastItem() ?? 0 }}</strong>
+                        of
+                        <strong>{{ $records->total() }}</strong>
+                    </span>
+
+                    <div class="le-pagination-controls">
+                        @if($records->onFirstPage())
+                            <span class="le-page-control disabled">Previous</span>
+                        @else
+                            <a class="le-page-control" href="{{ $records->previousPageUrl() }}">Previous</a>
+                        @endif
+
+                        @foreach($records->getUrlRange(
+                            max(1, $records->currentPage() - 2),
+                            min($records->lastPage(), $records->currentPage() + 2)
+                        ) as $page => $url)
+                            <a
+                                class="le-page-number {{ $records->currentPage() === $page ? 'active' : '' }}"
+                                href="{{ $url }}"
+                            >
+                                {{ $page }}
+                            </a>
+                        @endforeach
+
+                        @if($records->hasMorePages())
+                            <a class="le-page-control" href="{{ $records->nextPageUrl() }}">Next</a>
+                        @else
+                            <span class="le-page-control disabled">Next</span>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </section>
 
     @endif
 
 </div>
+@endsection
 
-{{-- OVERVIEW CHARTS --}}
 @if($tab === 'overview')
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const trendCanvas = document.getElementById('activityTrend');
+                const moduleCanvas = document.getElementById('moduleUsage');
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
+                if (typeof Chart === 'undefined') {
+                    return;
+                }
 
-            if (!window.Chart) return;
+                const chartData = @json($chart);
+                const breakdown = @json($breakdown);
 
-            const labels = @json($chart['labels']);
-            const series = @json($chart['series']);
-
-            const colors = {
-                education: getComputedStyle(document.documentElement)
-                    .getPropertyValue('--primary').trim() || '#222',
-                tools: '#777777',
-                calculators: '#a0a0a0',
-                calendar: '#c4c4c4'
-            };
-
-            const ctx = document.getElementById('activityTrend');
-
-            if (ctx) {
-                new Chart(ctx, {
-                    type: 'line',
-
-                    data: {
-                        labels,
-                        datasets: Object.keys(series).map(key => ({
-                            label: key.charAt(0).toUpperCase() + key.slice(1),
-                            data: series[key],
-                            borderColor: colors[key],
-                            backgroundColor: colors[key] + '18',
-                            tension: .35,
-                            fill: false,
-                            pointRadius: 2,
-                            borderWidth: 2
-                        }))
-                    },
-
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        interaction: {
-                            mode: 'index',
-                            intersect: false
+                if (trendCanvas) {
+                    new Chart(trendCanvas, {
+                        type: 'line',
+                        data: {
+                            labels: chartData.labels || [],
+                            datasets: [
+                                {
+                                    label: 'Education',
+                                    data: chartData.series?.education || [],
+                                    tension: 0.35
+                                },
+                                {
+                                    label: 'Tools',
+                                    data: chartData.series?.tools || [],
+                                    tension: 0.35
+                                },
+                                {
+                                    label: 'Calculators',
+                                    data: chartData.series?.calculators || [],
+                                    tension: 0.35
+                                },
+                                {
+                                    label: 'Calendar',
+                                    data: chartData.series?.calendar || [],
+                                    tension: 0.35
+                                },
+                                {
+                                    label: 'Authentication',
+                                    data: chartData.series?.authentication || [],
+                                    tension: 0.35
+                                }
+                            ]
                         },
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    usePointStyle: true,
-                                    boxWidth: 7
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                intersect: false,
+                                mode: 'index'
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
                                 }
                             }
+                        }
+                    });
+                }
+
+                if (moduleCanvas) {
+                    new Chart(moduleCanvas, {
+                        type: 'doughnut',
+                        data: {
+                            labels: breakdown.map(item => item.label),
+                            datasets: [{
+                                data: breakdown.map(item => item.value),
+                                borderWidth: 0
+                            }]
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { precision: 0 }
-                            },
-                            x: {
-                                grid: { display: false }
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '68%',
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
                             }
                         }
-                    }
-                });
-            }
-
-            const donut = document.getElementById('moduleDonut');
-
-            if (donut) {
-                new Chart(donut, {
-                    type: 'doughnut',
-
-                    data: {
-                        labels: @json(collect($breakdown)->pluck('label')),
-                        datasets: [{
-                            data: @json(collect($breakdown)->pluck('value')),
-                            backgroundColor: [
-                                '#222222',
-                                '#666666',
-                                '#999999',
-                                '#cccccc'
-                            ],
-                            borderWidth: 2,
-                            borderColor: getComputedStyle(document.documentElement)
-                                .getPropertyValue('--surface').trim() || '#fff'
-                        }]
-                    },
-
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '72%',
-                        plugins: {
-                            legend: { display: false }
-                        }
-                    }
-                });
-            }
-
-        });
-    </script>
-
+                    });
+                }
+            });
+        </script>
+    @endpush
 @endif
-
-@endsection
