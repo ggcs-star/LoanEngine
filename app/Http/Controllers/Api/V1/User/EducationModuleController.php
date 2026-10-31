@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\User;
 
 use App\Http\Controllers\Controller;
 use App\Services\Api\Education\EducationModuleService;
+use App\Services\Tracking\UserActivityTracker;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,8 @@ class EducationModuleController extends Controller
     use ApiResponse;
 
     public function __construct(
-        private readonly EducationModuleService $moduleService
+        private readonly EducationModuleService $moduleService,
+        private readonly UserActivityTracker $activityTracker
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -54,6 +56,7 @@ class EducationModuleController extends Controller
                                 (int) ($module->published_duration_seconds ?? 0),
                         ]
                     )->values(),
+
                     'pagination' => [
                         'current_page' => $modules->currentPage(),
                         'per_page' => $modules->perPage(),
@@ -71,7 +74,7 @@ class EducationModuleController extends Controller
         }
     }
 
-    public function show(int $module): JsonResponse
+    public function show(int $module, Request $request): JsonResponse
     {
         try {
             $item = $this->moduleService->findPublishedModule($module);
@@ -82,6 +85,22 @@ class EducationModuleController extends Controller
 
             $firstLesson = $this->moduleService
                 ->findFirstPublishedLesson($item);
+
+            // Track successful module views without breaking the API response.
+            try {
+                $user = $request->user();
+
+                if ($user) {
+                    $this->activityTracker->education(
+                        $user,
+                        'module_viewed',
+                        'education_module',
+                        (int) $item->id
+                    );
+                }
+            } catch (Throwable $exception) {
+                $this->logApiException($exception);
+            }
 
             return $this->successResponse(
                 'Education module fetched successfully.',

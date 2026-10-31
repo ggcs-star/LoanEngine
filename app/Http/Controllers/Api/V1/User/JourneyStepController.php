@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\User;
 use App\Http\Controllers\Controller;
 use App\Models\ToolJourney;
 use App\Services\Api\Tools\JourneyStepService;
+use App\Services\Tracking\UserActivityTracker;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Throwable;
@@ -14,7 +15,8 @@ class JourneyStepController extends Controller
     use ApiResponse;
 
     public function __construct(
-        private readonly JourneyStepService $stepService
+        private readonly JourneyStepService $stepService,
+        private readonly UserActivityTracker $activityTracker
     ) {}
 
     public function show(
@@ -45,6 +47,22 @@ class JourneyStepController extends Controller
                 $steps,
                 $item->id
             );
+
+            // Track successful journey step views.
+            try {
+                $user = request()->user();
+
+                if ($user) {
+                    $this->activityTracker->tool(
+                        $user,
+                        'journey_step_viewed',
+                        'journey_step',
+                        (int) $item->id
+                    );
+                }
+            } catch (Throwable $exception) {
+                $this->logApiException($exception);
+            }
 
             return $this->successResponse(
                 'Journey step fetched successfully.',

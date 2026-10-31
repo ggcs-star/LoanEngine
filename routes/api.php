@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -7,6 +8,8 @@ use App\Http\Controllers\Api\V1\User\EducationLessonController;
 use App\Http\Controllers\Api\V1\User\ToolController;
 use App\Http\Controllers\Api\V1\User\ToolJourneyController;
 use App\Http\Controllers\Api\V1\User\JourneyStepController;
+use App\Http\Controllers\Api\V1\User\CalculatorController;
+use App\Http\Controllers\Api\V1\User\CalendarController;
 
 Route::prefix('v1')
     ->name('api.v1.')
@@ -51,19 +54,11 @@ Route::prefix('v1')
                 ])->whereNumber('lesson')
                   ->name('lessons.show');
             });
-    });
-    
 
-
-Route::prefix('v1')
-    ->name('api.v1.')
-    ->middleware('auth:sanctum')
-    ->group(function () {
         Route::prefix('user/tools')
             ->name('user.tools.')
             ->group(function () {
 
-                // Tools
                 Route::get('/', [
                     ToolController::class,
                     'index',
@@ -74,7 +69,6 @@ Route::prefix('v1')
                     'show',
                 ])->whereNumber('tool')->name('show');
 
-                // Tool journeys
                 Route::get('/journeys', [
                     ToolJourneyController::class,
                     'index',
@@ -85,7 +79,6 @@ Route::prefix('v1')
                     'show',
                 ])->whereNumber('journey')->name('journeys.show');
 
-                // Journey step details and navigation
                 Route::get('/journeys/{journey}/steps/{step}', [
                     JourneyStepController::class,
                     'show',
@@ -93,5 +86,65 @@ Route::prefix('v1')
                   ->whereNumber('step')
                   ->name('journeys.steps.show');
             });
+
+        Route::prefix('user/calculators')
+            ->name('user.calculators.')
+            ->group(function () {
+
+                Route::get('/', [
+                    CalculatorController::class,
+                    'index',
+                ])->name('index');
+
+                Route::get('/history', [
+                    CalculatorController::class,
+                    'history',
+                ])->name('history.index');
+
+                Route::get('/history/{usage}', [
+                    CalculatorController::class,
+                    'historyShow',
+                ])->whereNumber('usage')
+                  ->name('history.show');
+
+                Route::get('/{calculator}', [
+                    CalculatorController::class,
+                    'show',
+                ])->whereNumber('calculator')
+                  ->name('show');
+
+                Route::post('/{calculator}/calculate', [
+                    CalculatorController::class,
+                    'calculate',
+                ])->whereNumber('calculator')
+                  ->name('calculate');
+            });
+            
+
+
+Route::prefix('user/calendar')
+    ->name('user.calendar.')
+    ->group(function () {
+        Route::get('/', [CalendarController::class, 'index'])->name('index');
+
+        Route::get('/events', [CalendarController::class, 'events'])->name('events.index');
+        Route::post('/events', [CalendarController::class, 'store'])->name('events.store');
+
+        Route::get('/events/{event}', [CalendarController::class, 'show'])
+            ->whereNumber('event')
+            ->name('events.show');
+
+        Route::put('/events/{event}', [CalendarController::class, 'update'])
+            ->whereNumber('event')
+            ->name('events.update');
+
+        Route::patch('/events/{event}/status', [CalendarController::class, 'updateStatus'])
+            ->whereNumber('event')
+            ->name('events.status');
+
+        Route::delete('/events/{event}', [CalendarController::class, 'destroy'])
+            ->whereNumber('event')
+            ->name('events.destroy');
     });
 
+    });

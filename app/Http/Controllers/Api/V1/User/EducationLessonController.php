@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\User;
 
 use App\Http\Controllers\Controller;
 use App\Services\Api\Education\EducationLessonService;
+use App\Services\Tracking\UserActivityTracker;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,7 +15,8 @@ class EducationLessonController extends Controller
     use ApiResponse;
 
     public function __construct(
-        private readonly EducationLessonService $lessonService
+        private readonly EducationLessonService $lessonService,
+        private readonly UserActivityTracker $activityTracker
     ) {}
 
     public function show(int $lesson, Request $request): JsonResponse
@@ -51,6 +53,18 @@ class EducationLessonController extends Controller
                 $user,
                 (int) $item->id
             );
+
+            // Track successful lesson views without breaking the API response.
+            try {
+                $this->activityTracker->education(
+                    $user,
+                    'lesson_viewed',
+                    'education_lesson',
+                    (int) $item->id
+                );
+            } catch (Throwable $exception) {
+                $this->logApiException($exception);
+            }
 
             return $this->successResponse(
                 'Education lesson fetched successfully.',
