@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\User;
 
 use App\Http\Controllers\Controller;
 use App\Services\Api\Tools\ToolService;
+use App\Services\Tracking\UserActivityTracker;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,8 @@ class ToolController extends Controller
     use ApiResponse;
 
     public function __construct(
-        private readonly ToolService $toolService
+        private readonly ToolService $toolService,
+        private readonly UserActivityTracker $activityTracker
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -53,6 +55,7 @@ class ToolController extends Controller
                             )->values(),
                         ]
                     )->values(),
+
                     'pagination' => [
                         'current_page' => $tools->currentPage(),
                         'per_page' => $tools->perPage(),
@@ -70,7 +73,7 @@ class ToolController extends Controller
         }
     }
 
-    public function show(int $tool): JsonResponse
+    public function show(int $tool, Request $request): JsonResponse
     {
         try {
             $item = $this->toolService->findActiveTool($tool);
@@ -80,6 +83,22 @@ class ToolController extends Controller
             }
 
             $relatedTools = $this->toolService->relatedTools($item);
+
+            // Track successful tool views without breaking the API response.
+            try {
+                $user = $request->user();
+
+                if ($user) {
+                    $this->activityTracker->tool(
+                        $user,
+                        'tool_viewed',
+                        'tool',
+                        (int) $item->id
+                    );
+                }
+            } catch (Throwable $exception) {
+                $this->logApiException($exception);
+            }
 
             return $this->successResponse(
                 'Tool fetched successfully.',

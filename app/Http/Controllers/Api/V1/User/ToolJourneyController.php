@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\User;
 
 use App\Http\Controllers\Controller;
 use App\Services\Api\Tools\ToolJourneyService;
+use App\Services\Tracking\UserActivityTracker;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,8 @@ class ToolJourneyController extends Controller
     use ApiResponse;
 
     public function __construct(
-        private readonly ToolJourneyService $journeyService
+        private readonly ToolJourneyService $journeyService,
+        private readonly UserActivityTracker $activityTracker
     ) {}
 
     public function index(): JsonResponse
@@ -60,6 +62,24 @@ class ToolJourneyController extends Controller
 
             if ($request->query('for') !== null && ! $calculatorsOnly) {
                 return $this->errorResponse('Something went wrong', 422);
+            }
+
+            // Track the journey view without affecting the API response.
+            if (! $calculatorsOnly) {
+                try {
+                    $user = $request->user();
+
+                    if ($user) {
+                        $this->activityTracker->tool(
+                            $user,
+                            'journey_viewed',
+                            'tool_journey',
+                            (int) $item->id
+                        );
+                    }
+                } catch (Throwable $exception) {
+                    $this->logApiException($exception);
+                }
             }
 
             if ($calculatorsOnly) {
