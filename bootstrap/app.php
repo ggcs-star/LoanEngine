@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use LoanEngine\Auth\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Http\Request;
+use Throwable;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -98,6 +99,36 @@ return Application::configure(basePath: dirname(__DIR__))
 
             return null;
         });
+        $exceptions->render(function (
+            Throwable $exception,
+            Request $request
+        ) {
+            if (!$request->is('api/*')) {
+                return null;
+            }
+
+            $statusCode = match (true) {
+                $exception instanceof \Illuminate\Validation\ValidationException => 422,
+                $exception instanceof \Illuminate\Auth\AuthenticationException => 401,
+                $exception instanceof \Illuminate\Auth\Access\AuthorizationException => 403,
+                $exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException => 404,
+                $exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException => 404,
+                $exception instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException => 405,
+                $exception instanceof TooManyRequestsHttpException => 429,
+                $exception instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface => $exception->getStatusCode(),
+                default => 500,
+            };
+
+            return response()->json([
+                'status' => false,
+                'success' => false,
+                'status_code' => $statusCode,
+                'errors' => [],
+                'message' => 'Something went wrong',
+                'data' => [],
+            ], $statusCode);
+        });
 
     })
+    
     ->create();

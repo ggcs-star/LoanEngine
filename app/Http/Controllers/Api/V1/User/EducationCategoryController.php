@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\User;
 
 use App\Http\Controllers\Controller;
 use App\Services\Api\Education\EducationCategoryService;
+use App\Services\Tracking\UserActivityTracker;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,8 @@ class EducationCategoryController extends Controller
     use ApiResponse;
 
     public function __construct(
-        private readonly EducationCategoryService $categoryService
+        private readonly EducationCategoryService $categoryService,
+        private readonly UserActivityTracker $activityTracker
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -40,6 +42,7 @@ class EducationCategoryController extends Controller
                             $category->published_modules_count,
                     ]
                 )->values(),
+
                 'pagination' => [
                     'current_page' => $categories->currentPage(),
                     'per_page' => $categories->perPage(),
@@ -61,13 +64,28 @@ class EducationCategoryController extends Controller
         }
     }
 
-    public function show(int $category): JsonResponse
+    public function show(Request $request, int $category): JsonResponse
     {
         try {
             $item = $this->categoryService->findActiveCategory($category);
 
             if (! $item) {
                 return $this->notFoundResponse('Something went wrong');
+            }
+
+            try {
+                $user = $request->user();
+
+                if ($user) {
+                    $this->activityTracker->education(
+                        $user,
+                        'category_viewed',
+                        'education_category',
+                        $item->id
+                    );
+                }
+            } catch (Throwable $exception) {
+                $this->logApiException($exception);
             }
 
             return $this->successResponse(
@@ -116,6 +134,7 @@ class EducationCategoryController extends Controller
                         'name' => $item->name,
                         'slug' => $item->slug,
                     ],
+
                     'items' => $modules->getCollection()->map(
                         fn ($module) => [
                             'id' => $module->id,
@@ -131,6 +150,7 @@ class EducationCategoryController extends Controller
                                 (int) ($module->published_duration_seconds ?? 0),
                         ]
                     )->values(),
+
                     'pagination' => [
                         'current_page' => $modules->currentPage(),
                         'per_page' => $modules->perPage(),
