@@ -89,3 +89,67 @@
         width: 100%;
     }
 }
+
+/* User analytics: additional authentication and responsive KPI styles */
+
+.le-kpi-grid.le-kpi-nine {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.le-auth-details {
+    display: block;
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.6;
+    white-space: normal;
+}
+
+.le-table td {
+    overflow-wrap: anywhere;
+}
+
+.le-subject-name {
+    min-width: 180px;
+}
+
+.le-activity-row time {
+    white-space: nowrap;
+}
+
+.le-data-panel,
+.le-filter-panel {
+    min-width: 0;
+}
+
+@media (max-width: 1100px) {
+    .le-kpi-grid.le-kpi-nine {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 850px) {
+    .le-kpi-grid.le-kpi-nine {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .le-kpi-grid.le-kpi-nine {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .le-activity-row {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .le-activity-row time {
+        width: 100%;
+        padding-left: 18px;
+    }
+
+    .le-profile-card > .le-button {
+        margin-left: 0;
+    }
+}

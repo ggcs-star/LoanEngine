@@ -2,154 +2,353 @@
 
 namespace App\Services\Admin\Reports;
 
-use App\Models\FinancialEvent;
-use App\Models\User;
-use App\Models\UserActivityLog;
-use App\Models\CalculatorUsage;
 use App\Models\Calculator;
+use App\Models\CalculatorUsage;
 use App\Models\EducationCategory;
 use App\Models\EducationLesson;
 use App\Models\EducationModule;
+use App\Models\FinancialEvent;
 use App\Models\JourneyStep;
 use App\Models\Tool;
 use App\Models\ToolJourney;
+use App\Models\User;
+use App\Models\UserActivityLog;
 use App\Models\UserLessonProgress;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator as Paginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Carbon;
 
 class UserActivityReportService
 {
-    /**
-     * Combine existing tracking sources into one activity stream.
-     * Login activity is intentionally not fabricated.
-     */
-    private function activityStream(?int $userId = null)
+    private const PER_PAGE = 15;
+
+    private function makeActivity(
+    mixed $userId,
+    string $module,
+    ?string $activityType,
+    ?string $subjectType,
+    mixed $subjectId,
+    mixed $date,
+    ?string $detail = null,
+    array $extra = []
+): object {
+    return (object) array_merge([
+        'user_id' => $userId,
+        'module' => $module,
+        'activity_type' => $activityType,
+        'subject_type' => $subjectType,
+        'subject_id' => $subjectId,
+
+        // Normalize every date into Carbon.
+        'happened_at' => $date ? Carbon::parse($date) : null,
+
+        'detail' => $detail,
+        'ip_address' => null,
+        'browser' => null,
+        'operating_system' => null,
+        'device_type' => null,
+        'status_code' => null,
+        'event' => null,
+    ], $extra);
+}
+    private function emailFingerprint(User $user): ?string
     {
-        $logs = DB::table('user_activity_logs')
-            ->selectRaw("
-                user_id,
-                module,
-                activity_type,
-                subject_type,
-                subject_id,
-                created_at AS happened_at,
-                COALESCE(
-                    JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.title')),
-                    ''
-                ) AS detail
-            ")
-            ->when($userId, fn ($q) => $q->where('user_id', $userId));
+        $email = strtolower(trim((string) $user->email));
 
-        $calculators = DB::table('calculator_usages')
-            ->selectRaw("
-                user_id,
-                'calculators' AS module,
-                COALESCE(event_type, 'calculated') AS activity_type,
-                'calculator' AS subject_type,
-                calculator_id AS subject_id,
-                created_at AS happened_at,
-                CONCAT('Calculator #', calculator_id) AS detail
-            ")
-            ->when($userId, fn ($q) => $q->where('user_id', $userId));
+        if ($email === '') {
+            return null;
+        }
 
-        $calendar = DB::table('financial_events')
-            ->selectRaw("
-                user_id,
-                'calendar' AS module,
-                'event_created' AS activity_type,
-                'financial_event' AS subject_type,
-                id AS subject_id,
-                created_at AS happened_at,
-                description AS detail
-            ")
-            ->when($userId, fn ($q) => $q->where('user_id', $userId));
+        return hash_hmac(
+            'sha256',
+            $email,
+            (string) config('app.key')
+        );
+    }
 
-        $completedLessons = DB::table('user_lesson_progress')
+    /**
+     * Return all activity sources as a Laravel Collection.
+     * No SQL unions or SQL aggregation are used.
+     */
+    private function activityStream(?User $user = null): Collection
+    {
+        $records = collect();
+
+        $logs = UserActivityLog::query()
+            ->when($user, fn (Builder $query) => $query->where('user_id', $user->id))
+            ->get();
+
+        foreach ($logs as $log) {
+            $metadata = $log->metadata;
+
+            if (is_string($metadata)) {
+                $metadata = json_decode($metadata, true) ?: [];
+            }
+
+            $records->push($this->makeActivity(
+                $log->user_id,
+                (string) $log->module,
+                $log->activity_type,
+                $log->subject_type,
+                $log->subject_id,
+                $log->created_at,
+                data_get($metadata, 'title'),
+                [
+                    'source' => 'activity_log',
+                    'source_id' => $log->id,
+                ]
+            ));
+        }
+
+        $calculatorUsages = CalculatorUsage::query()
+            ->when($user, fn (Builder $query) => $query->where('user_id', $user->id))
+            ->get();
+
+        foreach ($calculatorUsages as $usage) {
+            $records->push($this->makeActivity(
+                $usage->user_id,
+                'calculators',
+                $usage->event_type ?: 'calculated',
+                'calculator',
+                $usage->calculator_id,
+                $usage->created_at,
+                'Calculator #' . $usage->calculator_id,
+                [
+                    'source' => 'calculator_usage',
+                    'source_id' => $usage->id,
+                ]
+            ));
+        }
+
+        $financialEvents = FinancialEvent::query()
+            ->when($user, fn (Builder $query) => $query->where('user_id', $user->id))
+            ->get();
+
+        foreach ($financialEvents as $event) {
+            $records->push($this->makeActivity(
+                $event->user_id,
+                'calendar',
+                'event_created',
+                'financial_event',
+                $event->id,
+                $event->created_at,
+                $event->description,
+                [
+                    'source' => 'financial_event',
+                    'source_id' => $event->id,
+                ]
+            ));
+        }
+
+        $completedLessons = UserLessonProgress::query()
             ->whereNotNull('completed_at')
-            ->selectRaw("
-                user_id,
-                'education' AS module,
-                'lesson_completed' AS activity_type,
-                'lesson' AS subject_type,
-                lesson_id AS subject_id,
-                completed_at AS happened_at,
-                CONCAT('Lesson #', lesson_id, ' completed') AS detail
-            ")
-            ->when($userId, fn ($q) => $q->where('user_id', $userId));
+            ->when($user, fn (Builder $query) => $query->where('user_id', $user->id))
+            ->get();
 
-        return $logs
-            ->unionAll($calculators)
-            ->unionAll($calendar)
-            ->unionAll($completedLessons);
+        foreach ($completedLessons as $progress) {
+            $records->push($this->makeActivity(
+                $progress->user_id,
+                'education',
+                'lesson_completed',
+                'lesson',
+                $progress->lesson_id,
+                $progress->completed_at,
+                'Lesson #' . $progress->lesson_id . ' completed',
+                [
+                    'source' => 'lesson_progress',
+                    'source_id' => $progress->id,
+                ]
+            ));
+        }
+
+        /*
+         * Authentication records:
+         * - Successful login: user_id matches.
+         * - Failed login: user_id can be NULL, so fingerprint is matched.
+         */
+        if (DB::getSchemaBuilder()->hasTable('loanengine_auth_activities')) {
+            $authQuery = DB::table('loanengine_auth_activities');
+
+            if ($user) {
+                $fingerprint = $this->emailFingerprint($user);
+
+                $authQuery->where(function ($query) use ($user, $fingerprint) {
+                    $query->where('user_id', $user->id);
+
+                    if ($fingerprint) {
+                        $query->orWhere('email_fingerprint', $fingerprint);
+                    }
+                });
+            }
+
+            foreach ($authQuery->get() as $auth) {
+                $metadata = $auth->metadata ?? [];
+
+                if (is_string($metadata)) {
+                    $metadata = json_decode($metadata, true) ?: [];
+                }
+
+                $event = (string) $auth->event;
+
+                $detailParts = array_filter([
+                    data_get($metadata, 'message'),
+                    $auth->ip_address ? 'IP: ' . $auth->ip_address : null,
+                    $auth->browser ? 'Browser: ' . $auth->browser : null,
+                    $auth->operating_system
+                        ? 'OS: ' . $auth->operating_system
+                        : null,
+                    $auth->device_type
+                        ? 'Device: ' . $auth->device_type
+                        : null,
+                    $auth->status_code
+                        ? 'Status: ' . $auth->status_code
+                        : null,
+                ]);
+
+                $records->push($this->makeActivity(
+                    $auth->user_id,
+                    'authentication',
+                    $event,
+                    'authentication',
+                    $auth->id,
+                    $auth->created_at,
+                    implode(' · ', $detailParts),
+                    [
+                        'source' => 'authentication',
+                        'source_id' => $auth->id,
+                        'event' => $event,
+                        'ip_address' => $auth->ip_address,
+                        'browser' => $auth->browser,
+                        'operating_system' => $auth->operating_system,
+                        'device_type' => $auth->device_type,
+                        'status_code' => $auth->status_code,
+                        'risk_level' => $auth->risk_level ?? null,
+                        'country' => $auth->country ?? null,
+                        'city' => $auth->city ?? null,
+                    ]
+                ));
+            }
+        }
+
+        return $records
+            ->filter(fn ($record) => !empty($record->happened_at))
+            ->sortByDesc(fn ($record) => $record->happened_at)
+            ->values();
     }
 
-    /**
-     * Normalize subject types so both short names and model class names work.
-     */
-    private function normalizeSubjectType(?string $type): string
-    {
-        $type = strtolower(class_basename((string) $type));
+    private function filteredStream(
+        array $filters,
+        ?User $user = null
+    ): Collection {
+        return $this->activityStream($user)
+            ->filter(function ($record) use ($filters) {
+                $search = trim((string) ($filters['search'] ?? ''));
 
-        return match ($type) {
-            'tool_journey' => 'tooljourney',
-            'journey_step' => 'journeystep',
-            'education_lesson' => 'educationlesson',
-            'education_module' => 'educationmodule',
-            'education_category' => 'educationcategory',
-            'financialevent',
-            'financial_event' => 'financialevent',
-            default => $type,
-        };
+                if ($search !== '') {
+                    $haystack = implode(' ', array_filter([
+                        $record->detail,
+                        $record->activity_type,
+                        $record->subject_type,
+                        $record->subject_id,
+                        $record->ip_address,
+                        $record->browser,
+                        $record->operating_system,
+                        $record->device_type,
+                    ]));
+
+                    if (stripos($haystack, $search) === false) {
+                        return false;
+                    }
+                }
+
+                if (
+                    filled($filters['module'] ?? null)
+                    && $record->module !== $filters['module']
+                ) {
+                    return false;
+                }
+
+                if (
+                    filled($filters['activity_type'] ?? null)
+                    && $record->activity_type !== $filters['activity_type']
+                ) {
+                    return false;
+                }
+
+                if (
+                    filled($filters['from'] ?? null)
+                    && $record->happened_at->toDateString() < $filters['from']
+                ) {
+                    return false;
+                }
+
+                if (
+                    filled($filters['to'] ?? null)
+                    && $record->happened_at->toDateString() > $filters['to']
+                ) {
+                    return false;
+                }
+
+                return true;
+            })
+            ->values();
     }
 
-    /**
-     * Resolve subject names for paginated activity records.
-     * Uses grouped Eloquent queries instead of one query per row.
-     */
-    private function resolveSubjectNames(LengthAwarePaginator $records): void
+    private function paginateCollection(
+        Collection $records,
+        int $perPage = self::PER_PAGE
+    ): LengthAwarePaginator {
+        $page = Paginator::resolveCurrentPage();
+
+        return new Paginator(
+            $records->forPage($page, $perPage)->values(),
+            $records->count(),
+            $perPage,
+            $page,
+            [
+                'path' => Paginator::resolveCurrentPath(),
+                'query' => request()->query(),
+            ]
+        );
+    }
+
+    private function normalizeSubjectType(?string $type): ?string
     {
-        $models = [
+        if (!$type) {
+            return null;
+        }
+
+        return strtolower(class_basename($type));
+    }
+
+    private function resolveSubjectNames(Collection $records): Collection
+    {
+        $groups = $records->groupBy(function ($record) {
+            return $this->normalizeSubjectType($record->subject_type);
+        });
+
+        $map = [
             'tool' => [Tool::class, 'name'],
-
-            'journey' => [ToolJourney::class, 'name'],
             'tooljourney' => [ToolJourney::class, 'name'],
-
-            'step' => [JourneyStep::class, 'title'],
             'journeystep' => [JourneyStep::class, 'title'],
-
-            'lesson' => [EducationLesson::class, 'title'],
             'educationlesson' => [EducationLesson::class, 'title'],
-
-            'module' => [EducationModule::class, 'title'],
+            'lesson' => [EducationLesson::class, 'title'],
             'educationmodule' => [EducationModule::class, 'title'],
-
-            'category' => [EducationCategory::class, 'name'],
             'educationcategory' => [EducationCategory::class, 'name'],
-
             'financialevent' => [FinancialEvent::class, 'description'],
-
             'calculator' => [Calculator::class, 'name'],
         ];
 
-        $rows = $records->getCollection();
-
-        $grouped = $rows
-            ->filter(fn ($row) =>
-                filled($row->subject_type ?? null) &&
-                filled($row->subject_id ?? null)
-            )
-            ->groupBy(fn ($row) =>
-                $this->normalizeSubjectType($row->subject_type)
-            );
-
-        $names = [];
-
-        foreach ($grouped as $type => $items) {
-            if (!isset($models[$type])) {
+        foreach ($groups as $type => $items) {
+            if (!isset($map[$type])) {
                 continue;
             }
 
-            [$model, $column] = $models[$type];
+            [$model, $column] = $map[$type];
 
             $ids = $items
                 ->pluck('subject_id')
@@ -161,255 +360,135 @@ class UserActivityReportService
                 continue;
             }
 
-            $names[$type] = $model::query()
-                ->whereKey($ids)
-                ->pluck($column, 'id')
-                ->all();
+            $names = $model::query()
+                ->whereIn('id', $ids)
+                ->pluck($column, 'id');
+
+            foreach ($items as $item) {
+                $item->subject_name = $names->get($item->subject_id)
+                    ?: ($item->detail ?: '—');
+            }
         }
 
-        $rows->transform(function ($row) use ($names) {
-            $type = $this->normalizeSubjectType(
-                $row->subject_type ?? ''
-            );
+        foreach ($records as $record) {
+            $record->subject_name ??= $record->detail ?: '—';
+        }
 
-            $id = $row->subject_id ?? null;
-
-            $row->subject_name = $names[$type][$id] ?? '—';
-
-            return $row;
-        });
+        return $records;
     }
 
-    /**
-     * Existing timeline resolver kept as a wrapper.
-     */
-    private function resolveTimelineSubjectNames(
+    public function resolveTimelineSubjectNames(
         LengthAwarePaginator $records
-    ): void {
-        $this->resolveSubjectNames($records);
-    }
+    ): LengthAwarePaginator {
+        $this->resolveSubjectNames(collect($records->items()));
 
-    private function filteredStream(
-        array $filters,
-        ?int $userId = null
-    ) {
-        return DB::query()
-            ->fromSub($this->activityStream($userId), 'activity_feed')
-            ->when(
-                filled($filters['search'] ?? null),
-                function ($q) use ($filters) {
-                    $term = trim($filters['search']);
-
-                    $q->where(function ($w) use ($term) {
-                        $w->where('detail', 'like', "%{$term}%")
-                            ->orWhere('activity_type', 'like', "%{$term}%")
-                            ->orWhere('subject_type', 'like', "%{$term}%");
-
-                        if (ctype_digit($term)) {
-                            $w->orWhere('subject_id', (int) $term);
-                        }
-                    });
-                }
-            )
-            ->when(
-                filled($filters['module'] ?? null),
-                fn ($q) => $q->where('module', $filters['module'])
-            )
-            ->when(
-                filled($filters['activity_type'] ?? null),
-                fn ($q) => $q->where(
-                    'activity_type',
-                    $filters['activity_type']
-                )
-            )
-            ->when(
-                filled($filters['from'] ?? null),
-                fn ($q) => $q->whereDate(
-                    'happened_at',
-                    '>=',
-                    $filters['from']
-                )
-            )
-            ->when(
-                filled($filters['to'] ?? null),
-                fn ($q) => $q->whereDate(
-                    'happened_at',
-                    '<=',
-                    $filters['to']
-                )
-            );
-    }
-
-    /**
-     * One row per registered user.
-     */
-    private function userDirectoryQuery(array $filters)
-    {
-        $activityFilters = $filters;
-
-        unset(
-            $activityFilters['search'],
-            $activityFilters['user_status'],
-            $activityFilters['sort']
-        );
-
-        $aggregated = $this->filteredStream($activityFilters)
-            ->selectRaw("
-                user_id,
-                COUNT(*) AS total_activities,
-                SUM(module = 'education') AS education_count,
-                SUM(module = 'tools') AS tools_count,
-                SUM(module = 'calculators') AS calculators_count,
-                SUM(module = 'calendar') AS calendar_count,
-                MAX(happened_at) AS last_active
-            ")
-            ->groupBy('user_id');
-
-        $query = User::query()
-            ->leftJoinSub(
-                $aggregated,
-                'report_activity',
-                fn ($join) => $join->on(
-                    'users.id',
-                    '=',
-                    'report_activity.user_id'
-                )
-            )
-            ->select([
-                'users.id',
-                'users.name',
-                'users.email',
-                'users.mobile',
-                'users.created_at',
-            ])
-            ->selectRaw("
-                COALESCE(report_activity.education_count, 0)
-                    AS education_count,
-
-                COALESCE(report_activity.tools_count, 0)
-                    AS tools_count,
-
-                COALESCE(report_activity.calculators_count, 0)
-                    AS calculators_count,
-
-                COALESCE(report_activity.calendar_count, 0)
-                    AS calendar_count,
-
-                COALESCE(report_activity.total_activities, 0)
-                    AS total_activities,
-
-                report_activity.last_active AS last_active
-            ");
-
-        if (filled($filters['search'] ?? null)) {
-            $term = trim($filters['search']);
-
-            $query->where(function ($where) use ($term) {
-                $where->where('users.name', 'like', "%{$term}%")
-                    ->orWhere('users.email', 'like', "%{$term}%")
-                    ->orWhere('users.mobile', 'like', "%{$term}%");
-
-                if (ctype_digit($term)) {
-                    $where->orWhere('users.id', (int) $term);
-                }
-            });
-        }
-
-        if (($filters['user_status'] ?? 'all') === 'active') {
-            $query->whereNotNull('report_activity.user_id');
-        } elseif (($filters['user_status'] ?? 'all') === 'inactive') {
-            $query->whereNull('report_activity.user_id');
-        }
-
-        match ($filters['sort'] ?? 'latest') {
-            'oldest' => $query->orderBy('users.created_at'),
-            'name' => $query->orderBy('users.name'),
-            'most_active' => $query->orderByDesc('total_activities'),
-            default => $query
-                ->orderByRaw('report_activity.last_active IS NULL ASC')
-                ->orderByDesc('report_activity.last_active')
-                ->orderByDesc('users.id'),
-        };
-
-        return $query;
+        return $records;
     }
 
     public function activityDirectory(array $filters): LengthAwarePaginator
     {
-        return $this->userDirectoryQuery($filters)
-            ->paginate(20)
-            ->withQueryString();
+        $users = User::query()
+            ->when(filled($filters['search'] ?? null), function ($query) use ($filters) {
+                $term = trim($filters['search']);
+
+                $query->where(function ($where) use ($term) {
+                    $where->where('name', 'like', "%{$term}%")
+                        ->orWhere('email', 'like', "%{$term}%")
+                        ->orWhere('mobile', 'like', "%{$term}%");
+
+                    if (ctype_digit($term)) {
+                        $where->orWhere('id', (int) $term);
+                    }
+                });
+            })
+            ->get();
+
+        $activity = $this->filteredStream($filters)->groupBy('user_id');
+
+        $rows = $users->map(function ($user) use ($activity) {
+            $items = $activity->get($user->id, collect());
+
+            $user->total_activities = $items->count();
+            $user->education_count = $items->where('module', 'education')->count();
+            $user->tools_count = $items->where('module', 'tools')->count();
+            $user->calculators_count = $items->where('module', 'calculators')->count();
+            $user->calendar_count = $items->where('module', 'calendar')->count();
+            $user->authentication_count = $items->where('module', 'authentication')->count();
+            $user->last_active = $items->first()?->happened_at;
+
+            return $user;
+        });
+
+        if (($filters['user_status'] ?? 'all') === 'active') {
+            $rows = $rows->filter(fn ($user) => $user->total_activities > 0);
+        } elseif (($filters['user_status'] ?? 'all') === 'inactive') {
+            $rows = $rows->filter(fn ($user) => $user->total_activities === 0);
+        }
+
+        $rows = match ($filters['sort'] ?? 'latest') {
+            'oldest' => $rows->sortBy('created_at'),
+            'name' => $rows->sortBy('name'),
+            'most_active' => $rows->sortByDesc('total_activities'),
+            default => $rows->sortByDesc('last_active'),
+        };
+
+        return $this->paginateCollection($rows->values(), 20);
     }
 
     public function exportDirectory(array $filters): iterable
     {
-        return $this->userDirectoryQuery($filters)->cursor();
+        return $this->activityDirectory($filters)->getCollection();
     }
 
     public function dashboardStats(): array
     {
         $totalUsers = User::count();
-
-        $activeUsers = DB::query()
-            ->fromSub($this->activityStream(), 'tracked')
-            ->distinct()
-            ->count('user_id');
-
-        $totalActivities = DB::query()
-            ->fromSub($this->activityStream(), 'tracked')
-            ->count();
+        $records = $this->activityStream();
 
         return [
             'total_users' => $totalUsers,
-            'active_users' => $activeUsers,
-            'total_activities' => $totalActivities,
+            'active_users' => $records->pluck('user_id')->filter()->unique()->count(),
+            'total_activities' => $records->count(),
             'average' => $totalUsers
-                ? round($totalActivities / $totalUsers, 2)
+                ? round($records->count() / $totalUsers, 2)
                 : 0,
         ];
     }
 
     public function activityTypes(): array
     {
-        return DB::query()
-            ->fromSub($this->activityStream(), 'feed')
-            ->whereNotNull('activity_type')
-            ->distinct()
-            ->orderBy('activity_type')
+        return $this->activityStream()
             ->pluck('activity_type')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values()
             ->all();
     }
 
     public function userSummary(User $user): array
     {
-        $counts = DB::query()
-            ->fromSub($this->activityStream($user->id), 'feed')
-            ->selectRaw("
-                COUNT(*) AS total,
-                SUM(module = 'education') AS education,
-                SUM(module = 'tools') AS tools,
-                SUM(module = 'calculators') AS calculators,
-                SUM(module = 'calendar') AS calendar
-            ")
-            ->first();
+        $records = $this->activityStream($user);
+        $calendar = FinancialEvent::query()->where('user_id', $user->id);
 
-        $completed = UserLessonProgress::where('user_id', $user->id)
-            ->whereNotNull('completed_at')
-            ->count();
-
-        $calendar = FinancialEvent::where('user_id', $user->id);
-
-        $last = DB::query()
-            ->fromSub($this->activityStream($user->id), 'feed')
-            ->max('happened_at');
+        $authRecords = $records->where('module', 'authentication');
 
         return [
-            'total' => (int) ($counts->total ?? 0),
-            'education' => (int) ($counts->education ?? 0),
-            'tools' => (int) ($counts->tools ?? 0),
-            'calculators' => (int) ($counts->calculators ?? 0),
-            'calendar' => (int) ($counts->calendar ?? 0),
-            'completed_lessons' => $completed,
+            'total' => $records->count(),
+            'education' => $records->where('module', 'education')->count(),
+            'tools' => $records->where('module', 'tools')->count(),
+            'calculators' => $records->where('module', 'calculators')->count(),
+            'calendar' => $records->where('module', 'calendar')->count(),
+            'authentication' => $authRecords->count(),
+            'total_logins' => $authRecords->where('event', 'login_success')->count(),
+            'failed_logins' => $authRecords->where('event', 'login_failed')->count(),
+            'last_login' => $authRecords
+                ->where('event', 'login_success')
+                ->first()?->happened_at,
+            'completed_lessons' => UserLessonProgress::query()
+                ->where('user_id', $user->id)
+                ->whereNotNull('completed_at')
+                ->count(),
             'calendar_total' => (clone $calendar)->count(),
             'calendar_cleared' => (clone $calendar)
                 ->where('payment_status', 'cleared')
@@ -417,43 +496,49 @@ class UserActivityReportService
             'calendar_projected' => (clone $calendar)
                 ->where('payment_status', 'projected')
                 ->count(),
-            'last_active' => $last,
+            'last_active' => $records->first()?->happened_at,
         ];
+    }
+
+    public function recentActivities(User $user, int $limit = 6): Collection
+    {
+        return $this->resolveSubjectNames(
+            $this->activityStream($user)->take($limit)->values()
+        );
     }
 
     public function chartData(User $user, int $days = 30): array
     {
         $start = now()->subDays($days - 1)->startOfDay();
 
-        $rows = DB::query()
-            ->fromSub($this->activityStream($user->id), 'feed')
-            ->where('happened_at', '>=', $start)
-            ->selectRaw("
-                DATE(happened_at) AS activity_date,
-                module,
-                COUNT(*) AS total
-            ")
-            ->groupBy('activity_date', 'module')
-            ->orderBy('activity_date')
-            ->get();
+        $records = $this->activityStream($user)
+            ->filter(fn ($record) => $record->happened_at >= $start);
 
         $labels = collect(range(0, $days - 1))
-            ->map(fn ($i) => $start->copy()->addDays($i)->format('d M'))
+            ->map(fn ($index) => $start->copy()->addDays($index)->format('d M'))
             ->all();
 
-        $modules = ['education', 'tools', 'calculators', 'calendar'];
+        $modules = [
+            'education',
+            'tools',
+            'calculators',
+            'calendar',
+            'authentication',
+        ];
+
         $series = [];
 
         foreach ($modules as $module) {
-            $map = $rows
-                ->where('module', $module)
-                ->keyBy(fn ($r) => substr($r->activity_date, 0, 10));
-
             $series[$module] = collect(range(0, $days - 1))
-                ->map(function ($i) use ($start, $map) {
-                    $key = $start->copy()->addDays($i)->toDateString();
+                ->map(function ($index) use ($start, $records, $module) {
+                    $date = $start->copy()->addDays($index)->toDateString();
 
-                    return (int) ($map[$key]->total ?? 0);
+                    return $records
+                        ->filter(fn ($record) =>
+                            $record->module === $module
+                            && Carbon::parse($record->happened_at)->toDateString() === $date
+                        )
+                        ->count();
                 })
                 ->all();
         }
@@ -473,6 +558,7 @@ class UserActivityReportService
             ['label' => 'Tools', 'value' => $summary['tools']],
             ['label' => 'Calculators', 'value' => $summary['calculators']],
             ['label' => 'Calendar', 'value' => $summary['calendar']],
+            ['label' => 'Authentication', 'value' => $summary['authentication']],
         ];
     }
 
@@ -481,199 +567,105 @@ class UserActivityReportService
         string $tab,
         array $filters
     ): LengthAwarePaginator {
-        /*
-         * CALCULATORS
-         */
         if ($tab === 'calculators') {
             return CalculatorUsage::query()
-                ->with(['calculator:id,name'])
                 ->where('user_id', $user->id)
-                ->when(
-                    filled($filters['search'] ?? null),
-                    function ($q) use ($filters) {
-                        $s = trim($filters['search']);
+                ->when(filled($filters['search'] ?? null), function ($query) use ($filters) {
+                    $term = trim($filters['search']);
 
-                        $q->where(function ($w) use ($s) {
-                            $w->where('calculator_id', 'like', "%{$s}%")
-                                ->orWhere('event_type', 'like', "%{$s}%")
-                                ->orWhere('status', 'like', "%{$s}%");
-                        });
-                    }
-                )
+                    $query->where(function ($where) use ($term) {
+                        $where->where('event_type', 'like', "%{$term}%")
+                            ->orWhere('calculator_id', 'like', "%{$term}%")
+                            ->orWhere('status', 'like', "%{$term}%");
+                    });
+                })
                 ->when(
                     filled($filters['activity_type'] ?? null),
-                    fn ($q) => $q->where(
-                        'event_type',
-                        $filters['activity_type']
-                    )
+                    fn ($query) => $query->where('event_type', $filters['activity_type'])
                 )
                 ->when(
                     filled($filters['from'] ?? null),
-                    fn ($q) => $q->whereDate(
-                        'created_at',
-                        '>=',
-                        $filters['from']
-                    )
+                    fn ($query) => $query->whereDate('created_at', '>=', $filters['from'])
                 )
                 ->when(
                     filled($filters['to'] ?? null),
-                    fn ($q) => $q->whereDate(
-                        'created_at',
-                        '<=',
-                        $filters['to']
-                    )
+                    fn ($query) => $query->whereDate('created_at', '<=', $filters['to'])
                 )
                 ->latest()
-                ->paginate(15)
+                ->paginate(self::PER_PAGE)
                 ->withQueryString();
         }
 
-        /*
-         * CALENDAR
-         */
         if ($tab === 'calendar') {
             return FinancialEvent::query()
                 ->where('user_id', $user->id)
-                ->when(
-                    filled($filters['search'] ?? null),
-                    function ($q) use ($filters) {
-                        $s = trim($filters['search']);
+                ->when(filled($filters['search'] ?? null), function ($query) use ($filters) {
+                    $term = trim($filters['search']);
 
-                        $q->where(fn ($w) => $w
-                            ->where('description', 'like', "%{$s}%")
-                            ->orWhere('notes', 'like', "%{$s}%"));
-                    }
-                )
+                    $query->where(function ($where) use ($term) {
+                        $where->where('description', 'like', "%{$term}%")
+                            ->orWhere('notes', 'like', "%{$term}%");
+                    });
+                })
                 ->when(
                     filled($filters['category'] ?? null),
-                    fn ($q) => $q->where(
-                        'category',
-                        $filters['category']
-                    )
+                    fn ($query) => $query->where('category', $filters['category'])
                 )
                 ->when(
                     filled($filters['status'] ?? null),
-                    fn ($q) => $q->where(
-                        'payment_status',
-                        $filters['status']
-                    )
+                    fn ($query) => $query->where('payment_status', $filters['status'])
                 )
                 ->when(
                     filled($filters['from'] ?? null),
-                    fn ($q) => $q->whereDate(
-                        'event_date',
-                        '>=',
-                        $filters['from']
-                    )
+                    fn ($query) => $query->whereDate('event_date', '>=', $filters['from'])
                 )
                 ->when(
                     filled($filters['to'] ?? null),
-                    fn ($q) => $q->whereDate(
-                        'event_date',
-                        '<=',
-                        $filters['to']
-                    )
+                    fn ($query) => $query->whereDate('event_date', '<=', $filters['to'])
                 )
                 ->orderByDesc('event_date')
-                ->paginate(15)
+                ->paginate(self::PER_PAGE)
                 ->withQueryString();
         }
 
-        /*
-         * TIMELINE
-         */
         if ($tab === 'timeline') {
-            $records = DB::query()
-                ->fromSub($this->activityStream($user->id), 'feed')
-                ->when(
-                    filled($filters['search'] ?? null),
-                    function ($q) use ($filters) {
-                        $s = trim($filters['search']);
+            $records = $this->filteredStream($filters, $user);
 
-                        $q->where(fn ($w) => $w
-                            ->where('detail', 'like', "%{$s}%")
-                            ->orWhere('activity_type', 'like', "%{$s}%")
-                            ->orWhere('subject_type', 'like', "%{$s}%"));
-                    }
-                )
-                ->when(
-                    filled($filters['activity_type'] ?? null),
-                    fn ($q) => $q->where(
-                        'activity_type',
-                        $filters['activity_type']
-                    )
-                )
-                ->when(
-                    filled($filters['from'] ?? null),
-                    fn ($q) => $q->whereDate(
-                        'happened_at',
-                        '>=',
-                        $filters['from']
-                    )
-                )
-                ->when(
-                    filled($filters['to'] ?? null),
-                    fn ($q) => $q->whereDate(
-                        'happened_at',
-                        '<=',
-                        $filters['to']
-                    )
-                )
-                ->orderByDesc('happened_at')
-                ->paginate(15)
-                ->withQueryString();
-
-            $this->resolveSubjectNames($records);
-
-            return $records;
+            return $this->paginateCollection(
+                $this->resolveSubjectNames($records),
+                self::PER_PAGE
+            );
         }
 
-        /*
-         * EDUCATION AND TOOLS
-         */
         $records = UserActivityLog::query()
             ->where('user_id', $user->id)
             ->where('module', $tab)
-            ->when(
-                filled($filters['search'] ?? null),
-                function ($q) use ($filters) {
-                    $s = trim($filters['search']);
+            ->when(filled($filters['search'] ?? null), function ($query) use ($filters) {
+                $term = trim($filters['search']);
 
-                    $q->where(fn ($w) => $w
-                        ->where('activity_type', 'like', "%{$s}%")
-                        ->orWhere('subject_type', 'like', "%{$s}%")
-                        ->orWhere('subject_id', 'like', "%{$s}%"));
-                }
-            )
+                $query->where(function ($where) use ($term) {
+                    $where->where('activity_type', 'like', "%{$term}%")
+                        ->orWhere('subject_type', 'like', "%{$term}%")
+                        ->orWhere('subject_id', 'like', "%{$term}%");
+                });
+            })
             ->when(
                 filled($filters['activity_type'] ?? null),
-                fn ($q) => $q->where(
-                    'activity_type',
-                    $filters['activity_type']
-                )
+                fn ($query) => $query->where('activity_type', $filters['activity_type'])
             )
             ->when(
                 filled($filters['from'] ?? null),
-                fn ($q) => $q->whereDate(
-                    'created_at',
-                    '>=',
-                    $filters['from']
-                )
+                fn ($query) => $query->whereDate('created_at', '>=', $filters['from'])
             )
             ->when(
                 filled($filters['to'] ?? null),
-                fn ($q) => $q->whereDate(
-                    'created_at',
-                    '<=',
-                    $filters['to']
-                )
+                fn ($query) => $query->whereDate('created_at', '<=', $filters['to'])
             )
             ->latest()
-            ->paginate(15)
+            ->paginate(self::PER_PAGE)
             ->withQueryString();
 
-        // Resolve the names for Education and Tools as well.
-        $this->resolveSubjectNames($records);
+        $this->resolveSubjectNames(collect($records->items()));
 
         return $records;
     }
