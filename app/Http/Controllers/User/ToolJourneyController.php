@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\JourneyStep;
 use App\Models\ToolJourney;
+use App\Services\Tracking\UserActivityTracker;
 use Illuminate\Contracts\View\View;
 
 class ToolJourneyController extends Controller
@@ -22,12 +23,13 @@ class ToolJourneyController extends Controller
         return view('user.tools.journeys', compact('journeys'));
     }
 
-    
-    public function show(ToolJourney $journey): View
-    {
+    public function show(
+        ToolJourney $journey,
+        UserActivityTracker $tracker
+    ): View {
         abort_unless($journey->status === 'active', 404);
 
-        // Calculator flow: show recommended tools directly.
+        // Calculator flow: keep existing behavior unchanged.
         if (request()->query('for') === 'calculators') {
             $tools = $journey->tools()
                 ->where('tools.status', 'active')
@@ -42,7 +44,15 @@ class ToolJourneyController extends Controller
             ));
         }
 
-        // Keep the existing Resources / Planning flow unchanged.
+        // Record actual journey opening.
+        $tracker->tool(
+            request()->user(),
+            'journey_opened',
+            'journey',
+            $journey->id
+        );
+
+        // Existing Resources / Planning flow.
         $steps = $journey->steps()
             ->where('status', 'active')
             ->with([
@@ -53,17 +63,28 @@ class ToolJourneyController extends Controller
             ])
             ->get();
 
-        return view('user.tools.journey', compact('journey', 'steps'));
+        return view('user.tools.journey', compact(
+            'journey',
+            'steps'
+        ));
     }
-
 
     public function step(
         ToolJourney $journey,
-        JourneyStep $step
+        JourneyStep $step,
+        UserActivityTracker $tracker
     ): View {
         abort_unless($journey->status === 'active', 404);
         abort_unless($step->journey_id === $journey->id, 404);
         abort_unless($step->status === 'active', 404);
+
+        // Record successful step opening.
+        $tracker->tool(
+            request()->user(),
+            'step_opened',
+            'step',
+            $step->id
+        );
 
         $step->load([
             'journey',

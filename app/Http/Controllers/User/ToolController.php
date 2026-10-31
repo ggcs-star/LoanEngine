@@ -4,13 +4,13 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tool;
+use App\Services\Tracking\UserActivityTracker;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class ToolController extends Controller
 {
-    public function index(): \Illuminate\Contracts\View\View
+    public function index(): View
     {
         $tools = app(\App\Services\Tools\ToolService::class)
             ->toolkitHomeTools();
@@ -35,16 +35,25 @@ class ToolController extends Controller
         ));
     }
 
-    public function show(Tool $tool)
-    {
+    public function show(
+        Tool $tool,
+        UserActivityTracker $tracker
+    ): View {
         abort_unless($tool->isActive(), 404);
+
+        // Record actual tool opening.
+        $tracker->tool(
+            request()->user(),
+            'tool_opened',
+            'tool',
+            $tool->id
+        );
 
         $tool->load([
             'journeys' => fn ($query) => $query
                 ->where('tool_journeys.status', 'active')
                 ->orderBy('tool_journeys.display_order'),
         ]);
-
 
         $relatedTools = Tool::query()
             ->active()
@@ -59,5 +68,4 @@ class ToolController extends Controller
             'relatedTools'
         ));
     }
-
 }

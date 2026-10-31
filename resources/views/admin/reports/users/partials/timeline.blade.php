@@ -1,0 +1,3 @@
+<section class="le-panel"><div class="panel-head"><h2>{{ $tab==='overview'?'Recent Activity':'Activity Timeline' }}</h2></div><div class="table-scroll"><table><thead><tr><th>Module</th><th>Activity</th><th>Subject</th><th>Date & Time</th></tr></thead><tbody>
+@forelse($timeline as $r)<tr><td>{{ ucfirst($r->module) }}</td><td>{{ str($r->activity_type)->replace('_',' ')->title() }}</td><td>{{ $r->subject_type ?? '—' }} {{ $r->subject_id ? '#'.$r->subject_id : '' }}</td><td>{{ \Illuminate\Support\Carbon::parse($r->happened_at)->format('d M Y, h:i A') }}</td></tr>@empty<tr><td colspan="4" class="empty">No activity records found.</td></tr>@endforelse
+</tbody></table></div><div class="pagination">{{ $timeline->links() }}</div></section>

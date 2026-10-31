@@ -160,6 +160,13 @@
                 <span>Financial Flow</span>
             </a>
         @endif
+            <div class="sidebar-caption">REPORTS</div>
+
+            <a href="{{ route('admin.reports.activities') }}"
+                class="nav-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                <span class="nav-icon" aria-hidden="true">▤</span>
+                <span>Reports</span>
+            </a>
 
             <div class="sidebar-caption">SETTINGS</div>
 
@@ -170,6 +177,7 @@
                 <span class="nav-icon" aria-hidden="true">⚙</span>
                 <span>Website Settings</span>
             </a>
+            
         @endif
     </nav>
 
