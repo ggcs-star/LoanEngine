@@ -2852,3 +2852,81 @@
     border-color: var(--primary-hover-color, #41454c) !important;
     color: var(--button-text-color, #ffffff) !important;
 }
+/* ==================================================
+   Calculator Management — Delete Theme Color Fix
+   ================================================== */
+
+/* Delete Selected button */
+html body .calculator-page #bulk-delete-button {
+    background: var(--admin-primary, #262626) !important;
+    border: 1px solid var(--admin-primary, #262626) !important;
+    color: var(--admin-primary-text, #ffffff) !important;
+}
+
+html body .calculator-page #bulk-delete-button:hover:not(:disabled) {
+    background: var(--admin-text, #262626) !important;
+    border-color: var(--admin-text, #262626) !important;
+    color: var(--admin-primary-text, #ffffff) !important;
+}
+
+html body .calculator-page #bulk-delete-button:disabled {
+    background: var(--admin-bg, #f5f5f5) !important;
+    border-color: var(--admin-border, #e5e5e5) !important;
+    color: var(--admin-text-muted, #737373) !important;
+    opacity: 0.65 !important;
+    cursor: not-allowed !important;
+}
+
+/* Both delete modal dialogs */
+html body #calculator-delete-modal .calculator-modal-dialog,
+html body #calculator-bulk-modal .calculator-modal-dialog {
+    background: var(--admin-card-bg, #ffffff) !important;
+    border-color: var(--admin-border, #e5e5e5) !important;
+    color: var(--admin-text, #262626) !important;
+}
+
+/* Modal headings */
+html body #calculator-delete-modal .calculator-modal-dialog h2,
+html body #calculator-bulk-modal .calculator-modal-dialog h2 {
+    color: var(--admin-text, #262626) !important;
+}
+
+/* Modal messages */
+html body #calculator-delete-modal .calculator-modal-dialog p,
+html body #calculator-bulk-modal .calculator-modal-dialog p {
+    color: var(--admin-text-muted, #737373) !important;
+}
+
+/* Remove the red warning icon styling */
+html body #calculator-delete-modal .calculator-modal-icon,
+html body #calculator-bulk-modal .calculator-modal-icon {
+    background: var(--admin-bg, #f5f5f5) !important;
+    border: 1px solid var(--admin-border, #e5e5e5) !important;
+    color: var(--admin-text, #262626) !important;
+}
+
+/* Cancel buttons */
+html body .calculator-modal-actions .btn-secondary-light {
+    background: var(--admin-card-bg, #ffffff) !important;
+    border-color: var(--admin-border, #e5e5e5) !important;
+    color: var(--admin-text, #262626) !important;
+}
+
+html body .calculator-modal-actions .btn-secondary-light:hover {
+    background: var(--admin-bg, #f5f5f5) !important;
+    border-color: var(--admin-border, #e5e5e5) !important;
+    color: var(--admin-text, #262626) !important;
+}
+
+/* Confirm Delete buttons */
+html body .calculator-modal-actions .btn-danger {
+    background: var(--admin-primary, #262626) !important;
+    border-color: var(--admin-primary, #262626) !important;
+    color: var(--admin-primary-text, #ffffff) !important;
+}
+
+html body .calculator-modal-actions .btn-danger:hover {
+    background: var(--admin-text, #262626) !important;
+    border-color: var(--admin-text, #262626) !important;
+    color: var(--admin-primary-text, #ffffff) !important;
+}

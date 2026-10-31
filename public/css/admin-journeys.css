@@ -954,3 +954,114 @@ html body .journey-delete-modal .journey-delete-dialog-actions .journey-confirm-
     color: inherit !important;
     opacity: 1 !important;
 }
+
+/* ==================================================
+   Journey Management — Delete Button & Popup Theme Fix
+   ================================================== */
+
+/* Delete Selected button */
+html body .journey-page #journeyDeleteSelected {
+    background: var(--journey-primary, #262626) !important;
+    border-color: var(--journey-primary, #262626) !important;
+    color: var(--journey-primary-text, #ffffff) !important;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html body .journey-page #journeyDeleteSelected:hover:not(:disabled) {
+    background: var(--journey-text, #262626) !important;
+    border-color: var(--journey-text, #262626) !important;
+    color: var(--journey-primary-text, #ffffff) !important;
+}
+
+html body .journey-page #journeyDeleteSelected:disabled {
+    background: var(--journey-bg, #f5f5f5) !important;
+    border-color: var(--journey-border, #e5e5e5) !important;
+    color: var(--journey-muted, #737373) !important;
+    opacity: 0.65 !important;
+}
+
+/* Popup overlay */
+html body .journey-delete-modal {
+    background: rgb(0 0 0 / 50%) !important;
+}
+
+/* Popup box — use theme variables instead of hardcoded colors */
+html body .journey-delete-modal .journey-delete-dialog {
+    background: var(--journey-surface, #ffffff) !important;
+    border-color: var(--journey-border, #e5e5e5) !important;
+    color: var(--journey-text, #262626) !important;
+}
+
+/* Popup heading */
+html body .journey-delete-modal .journey-delete-dialog h2 {
+    color: var(--journey-text, #262626) !important;
+}
+
+/* Popup message */
+html body .journey-delete-modal .journey-delete-dialog p {
+    color: var(--journey-muted, #737373) !important;
+}
+
+/* Cancel button */
+html body .journey-delete-modal .journey-delete-dialog-actions #journeyCancelDelete {
+    background: var(--journey-surface, #ffffff) !important;
+    border-color: var(--journey-border, #e5e5e5) !important;
+    color: var(--journey-text, #262626) !important;
+}
+
+/* Confirm Delete button */
+html body .journey-delete-modal .journey-delete-dialog-actions #journeyConfirmDelete {
+    background: var(--journey-primary, #262626) !important;
+    border-color: var(--journey-primary, #262626) !important;
+    color: var(--journey-primary-text, #ffffff) !important;
+}
+
+/* Popup button hover */
+html body .journey-delete-modal .journey-delete-dialog-actions #journeyCancelDelete:hover:not(:disabled) {
+    background: var(--journey-bg, #f5f5f5) !important;
+}
+
+html body .journey-delete-modal .journey-delete-dialog-actions #journeyConfirmDelete:hover:not(:disabled) {
+    background: var(--journey-text, #262626) !important;
+    border-color: var(--journey-text, #262626) !important;
+}
+/* Journey Delete Modal — use global theme variables */
+
+html body .journey-delete-modal {
+    background: rgb(0 0 0 / 50%) !important;
+}
+
+html body .journey-delete-modal .journey-delete-dialog {
+    background: var(--admin-card-bg, #ffffff) !important;
+    border: 1px solid var(--admin-border, #e5e5e5) !important;
+    color: var(--admin-text, #262626) !important;
+}
+
+html body .journey-delete-modal .journey-delete-dialog h2 {
+    color: var(--admin-text, #262626) !important;
+}
+
+html body .journey-delete-modal .journey-delete-dialog p {
+    color: var(--admin-text-muted, #737373) !important;
+}
+
+html body .journey-delete-modal .journey-delete-dialog-actions button {
+    background: var(--admin-card-bg, #ffffff) !important;
+    border: 1px solid var(--admin-border, #e5e5e5) !important;
+    color: var(--admin-text, #262626) !important;
+}
+
+html body .journey-delete-modal .journey-delete-dialog-actions #journeyConfirmDelete {
+    background: var(--admin-primary, #262626) !important;
+    border-color: var(--admin-primary, #262626) !important;
+    color: var(--admin-primary-text, #ffffff) !important;
+}
+
+html body .journey-delete-modal .journey-delete-dialog-actions #journeyCancelDelete:hover {
+    background: var(--admin-bg, #f5f5f5) !important;
+}
+
+html body .journey-delete-modal .journey-delete-dialog-actions #journeyConfirmDelete:hover {
+    background: var(--admin-text, #262626) !important;
+    border-color: var(--admin-text, #262626) !important;
+}

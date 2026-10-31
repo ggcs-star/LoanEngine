@@ -861,3 +861,49 @@ body {
     width: 32px;
     height: 32px;
 }
+
+/* Admin sidebar: connect hover and active states to Website Settings */
+
+.admin-sidebar .nav-item,
+.admin-sidebar .sidebar-link,
+.admin-sidebar .sidebar-nav a,
+.admin-sidebar nav > a,
+.admin-sidebar .nav-link {
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+/* Hover: use the configured button-hover colour */
+.admin-sidebar .nav-item:hover,
+.admin-sidebar .sidebar-link:hover,
+.admin-sidebar .sidebar-nav a:hover,
+.admin-sidebar nav > a:hover,
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-item:focus-visible,
+.admin-sidebar .sidebar-link:focus-visible,
+.admin-sidebar .nav-link:focus-visible {
+    background: var(--button-hover, var(--sidebar-active, #eeeeee)) !important;
+    color: var(--button-text, #ffffff) !important;
+    border-color: var(--border-color, #e2e2e2) !important;
+}
+
+/* Active page: use the configured primary colour */
+.admin-sidebar .nav-item.active,
+.admin-sidebar .sidebar-link.active,
+.admin-sidebar .sidebar-nav a.active,
+.admin-sidebar .nav-link.active,
+.admin-sidebar a[aria-current="page"] {
+    background: var(--primary-color, #eeeeee) !important;
+    color: var(--button-text, #ffffff) !important;
+    border-color: var(--border-color, #e2e2e2) !important;
+}
+
+/* Active indicator */
+.admin-sidebar .nav-item.active::before,
+.admin-sidebar .sidebar-link.active::before,
+.admin-sidebar .nav-link.active::before,
+.admin-sidebar a[aria-current="page"]::before {
+    background: var(--button-text, #ffffff) !important;
+}
