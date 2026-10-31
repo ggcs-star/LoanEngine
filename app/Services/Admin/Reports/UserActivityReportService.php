@@ -19,7 +19,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator as Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Carbon;
 
 class UserActivityReportService
@@ -27,34 +26,32 @@ class UserActivityReportService
     private const PER_PAGE = 15;
 
     private function makeActivity(
-    mixed $userId,
-    string $module,
-    ?string $activityType,
-    ?string $subjectType,
-    mixed $subjectId,
-    mixed $date,
-    ?string $detail = null,
-    array $extra = []
-): object {
-    return (object) array_merge([
-        'user_id' => $userId,
-        'module' => $module,
-        'activity_type' => $activityType,
-        'subject_type' => $subjectType,
-        'subject_id' => $subjectId,
+        mixed $userId,
+        string $module,
+        ?string $activityType,
+        ?string $subjectType,
+        mixed $subjectId,
+        mixed $date,
+        ?string $detail = null,
+        array $extra = []
+    ): object {
+        return (object) array_merge([
+            'user_id' => $userId,
+            'module' => $module,
+            'activity_type' => $activityType,
+            'subject_type' => $subjectType,
+            'subject_id' => $subjectId,
+            'happened_at' => $date ? Carbon::parse($date) : null,
+            'detail' => $detail,
+            'ip_address' => null,
+            'browser' => null,
+            'operating_system' => null,
+            'device_type' => null,
+            'status_code' => null,
+            'event' => null,
+        ], $extra);
+    }
 
-        // Normalize every date into Carbon.
-        'happened_at' => $date ? Carbon::parse($date) : null,
-
-        'detail' => $detail,
-        'ip_address' => null,
-        'browser' => null,
-        'operating_system' => null,
-        'device_type' => null,
-        'status_code' => null,
-        'event' => null,
-    ], $extra);
-}
     private function emailFingerprint(User $user): ?string
     {
         $email = strtolower(trim((string) $user->email));
@@ -71,15 +68,18 @@ class UserActivityReportService
     }
 
     /**
-     * Return all activity sources as a Laravel Collection.
-     * No SQL unions or SQL aggregation are used.
+     * Collect activity from all configured sources.
      */
     private function activityStream(?User $user = null): Collection
     {
         $records = collect();
 
+        // User activity logs
         $logs = UserActivityLog::query()
-            ->when($user, fn (Builder $query) => $query->where('user_id', $user->id))
+            ->when(
+                $user,
+                fn (Builder $query) => $query->where('user_id', $user->id)
+            )
             ->get();
 
         foreach ($logs as $log) {
@@ -104,8 +104,12 @@ class UserActivityReportService
             ));
         }
 
+        // Calculator usages
         $calculatorUsages = CalculatorUsage::query()
-            ->when($user, fn (Builder $query) => $query->where('user_id', $user->id))
+            ->when(
+                $user,
+                fn (Builder $query) => $query->where('user_id', $user->id)
+            )
             ->get();
 
         foreach ($calculatorUsages as $usage) {
@@ -124,8 +128,12 @@ class UserActivityReportService
             ));
         }
 
+        // Financial events
         $financialEvents = FinancialEvent::query()
-            ->when($user, fn (Builder $query) => $query->where('user_id', $user->id))
+            ->when(
+                $user,
+                fn (Builder $query) => $query->where('user_id', $user->id)
+            )
             ->get();
 
         foreach ($financialEvents as $event) {
@@ -144,9 +152,13 @@ class UserActivityReportService
             ));
         }
 
+        // Completed lessons
         $completedLessons = UserLessonProgress::query()
             ->whereNotNull('completed_at')
-            ->when($user, fn (Builder $query) => $query->where('user_id', $user->id))
+            ->when(
+                $user,
+                fn (Builder $query) => $query->where('user_id', $user->id)
+            )
             ->get();
 
         foreach ($completedLessons as $progress) {
@@ -165,11 +177,7 @@ class UserActivityReportService
             ));
         }
 
-        /*
-         * Authentication records:
-         * - Successful login: user_id matches.
-         * - Failed login: user_id can be NULL, so fingerprint is matched.
-         */
+        // Authentication records
         if (DB::getSchemaBuilder()->hasTable('loanengine_auth_activities')) {
             $authQuery = DB::table('loanengine_auth_activities');
 
@@ -180,7 +188,10 @@ class UserActivityReportService
                     $query->where('user_id', $user->id);
 
                     if ($fingerprint) {
-                        $query->orWhere('email_fingerprint', $fingerprint);
+                        $query->orWhere(
+                            'email_fingerprint',
+                            $fingerprint
+                        );
                     }
                 });
             }
@@ -196,8 +207,12 @@ class UserActivityReportService
 
                 $detailParts = array_filter([
                     data_get($metadata, 'message'),
-                    $auth->ip_address ? 'IP: ' . $auth->ip_address : null,
-                    $auth->browser ? 'Browser: ' . $auth->browser : null,
+                    $auth->ip_address
+                        ? 'IP: ' . $auth->ip_address
+                        : null,
+                    $auth->browser
+                        ? 'Browser: ' . $auth->browser
+                        : null,
                     $auth->operating_system
                         ? 'OS: ' . $auth->operating_system
                         : null,
@@ -240,6 +255,9 @@ class UserActivityReportService
             ->values();
     }
 
+    /**
+     * Apply activity filters.
+     */
     private function filteredStream(
         array $filters,
         ?User $user = null
@@ -296,6 +314,15 @@ class UserActivityReportService
                 return true;
             })
             ->values();
+    }
+
+    /**
+     * Public filtered activity collection for Excel export.
+     * No pagination is applied.
+     */
+    public function exportActivities(array $filters): Collection
+    {
+        return $this->filteredStream($filters);
     }
 
     private function paginateCollection(
@@ -385,6 +412,9 @@ class UserActivityReportService
         return $records;
     }
 
+    /**
+     * Paginated users directory.
+     */
     public function activityDirectory(array $filters): LengthAwarePaginator
     {
         $users = User::query()
@@ -435,9 +465,58 @@ class UserActivityReportService
         return $this->paginateCollection($rows->values(), 20);
     }
 
-    public function exportDirectory(array $filters): iterable
+    /**
+     * Return ALL users matching the filters.
+     * This method intentionally does not paginate.
+     */
+    public function exportDirectory(array $filters): Collection
     {
-        return $this->activityDirectory($filters)->getCollection();
+        $users = User::query()
+            ->when(filled($filters['search'] ?? null), function ($query) use ($filters) {
+                $term = trim($filters['search']);
+
+                $query->where(function ($where) use ($term) {
+                    $where->where('name', 'like', "%{$term}%")
+                        ->orWhere('email', 'like', "%{$term}%")
+                        ->orWhere('mobile', 'like', "%{$term}%");
+
+                    if (ctype_digit($term)) {
+                        $where->orWhere('id', (int) $term);
+                    }
+                });
+            })
+            ->get();
+
+        $activity = $this->filteredStream($filters)->groupBy('user_id');
+
+        $rows = $users->map(function ($user) use ($activity) {
+            $items = $activity->get($user->id, collect());
+
+            $user->total_activities = $items->count();
+            $user->education_count = $items->where('module', 'education')->count();
+            $user->tools_count = $items->where('module', 'tools')->count();
+            $user->calculators_count = $items->where('module', 'calculators')->count();
+            $user->calendar_count = $items->where('module', 'calendar')->count();
+            $user->authentication_count = $items->where('module', 'authentication')->count();
+            $user->last_active = $items->first()?->happened_at;
+
+            return $user;
+        });
+
+        if (($filters['user_status'] ?? 'all') === 'active') {
+            $rows = $rows->filter(fn ($user) => $user->total_activities > 0);
+        } elseif (($filters['user_status'] ?? 'all') === 'inactive') {
+            $rows = $rows->filter(fn ($user) => $user->total_activities === 0);
+        }
+
+        $rows = match ($filters['sort'] ?? 'latest') {
+            'oldest' => $rows->sortBy('created_at'),
+            'name' => $rows->sortBy('name'),
+            'most_active' => $rows->sortByDesc('total_activities'),
+            default => $rows->sortByDesc('last_active'),
+        };
+
+        return $rows->values();
     }
 
     public function dashboardStats(): array

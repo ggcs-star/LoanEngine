@@ -9,13 +9,23 @@ use App\Models\User;
 use App\Models\UserActivityLog;
 use App\Models\UserLessonProgress;
 use App\Services\Admin\Reports\UserActivityReportService;
+use DateTimeInterface;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 use Illuminate\View\View;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Throwable;
+use ZipArchive;
 
 class UserActivityController extends Controller
 {
@@ -23,26 +33,9 @@ class UserActivityController extends Controller
         private UserActivityReportService $reports
     ) {}
 
-    /**
-     * All users directory.
-     */
     public function index(Request $request): View
     {
-        $filters = $request->validate([
-            'search' => ['nullable', 'string', 'max:150'],
-            'module' => [
-                'nullable',
-                'in:education,tools,calculators,calendar'
-            ],
-            'activity_type' => ['nullable', 'string', 'max:60'],
-            'user_status' => ['nullable', 'in:all,active,inactive'],
-            'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date', 'after_or_equal:from'],
-            'sort' => [
-                'nullable',
-                'in:latest,oldest,name,most_active'
-            ],
-        ]);
+        $filters = $this->validateFilters($request);
 
         return view('admin.reports.users.index', [
             'users' => $this->reports->activityDirectory($filters),
@@ -52,66 +45,206 @@ class UserActivityController extends Controller
         ]);
     }
 
-    /**
-     * Export all registered users.
-     */
-    public function exportAll(Request $request): StreamedResponse
+    public function exportAll(Request $request): BinaryFileResponse|RedirectResponse
     {
-        $filters = $request->validate([
-            'search' => ['nullable', 'string', 'max:150'],
-            'module' => [
-                'nullable',
-                'in:education,tools,calculators,calendar'
-            ],
-            'activity_type' => ['nullable', 'string', 'max:60'],
-            'user_status' => ['nullable', 'in:all,active,inactive'],
-            'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date', 'after_or_equal:from'],
-            'sort' => [
-                'nullable',
-                'in:latest,oldest,name,most_active'
-            ],
-        ]);
+        $filters = $this->validateFilters($request);
 
         return $this->downloadWorkbook($filters);
     }
 
+public function exportUser(
+    Request $request,
+    User $user
+): BinaryFileResponse|RedirectResponse {
+    $filters = $this->validateFilters($request);
+
+    Log::info('[UserActivityExport] RECEIVED FILTERS', [
+        'url' => $request->fullUrl(),
+        'query' => $request->query(),
+        'filters' => $filters,
+    ]);
+
+    return $this->downloadWorkbook($filters, $user);
+}
+private function shouldCreateSheet(
+    array $filters,
+    string $module
+): bool {
+    return blank($filters['module'] ?? null)
+        || $filters['module'] === $module;
+}
+ private function validateFilters(Request $request): array
+{
+    $filters = $request->validate([
+        'search' => ['nullable', 'string', 'max:150'],
+        'module' => ['nullable', 'in:education,tools,calculators,calendar'],
+        'activity_type' => ['nullable', 'string', 'max:60'],
+        'user_status' => ['nullable', 'in:all,active,inactive'],
+        'from' => ['nullable', 'date'],
+        'to' => ['nullable', 'date', 'after_or_equal:from'],
+        'sort' => ['nullable', 'in:latest,oldest,name,most_active'],
+        'tab' => ['nullable', 'in:overview,education,tools,calculators,calendar,timeline'],
+        'category' => ['nullable', 'string', 'max:100'],
+        'status' => ['nullable', 'in:projected,cleared'],
+    ]);
+
+    // Convert selected analytics tab into export module.
+    if (empty($filters['module'])) {
+        $tab = $filters['tab'] ?? null;
+
+        if (in_array($tab, [
+            'education',
+            'tools',
+            'calculators',
+            'calendar',
+        ], true)) {
+            $filters['module'] = $tab;
+        }
+    }
+
+    return $filters;
+}
+
     /**
-     * Export only the selected user's complete report.
+     * Apply date filters to a query.
      */
-    public function exportUser(User $user): StreamedResponse
-    {
-        return $this->downloadWorkbook([], $user);
+    private function applyDateFilters(
+        Builder $query,
+        array $filters,
+        string $column = 'created_at'
+    ): Builder {
+        return $query
+            ->when(
+                filled($filters['from'] ?? null),
+                fn ($q) => $q->whereDate($column, '>=', $filters['from'])
+            )
+            ->when(
+                filled($filters['to'] ?? null),
+                fn ($q) => $q->whereDate($column, '<=', $filters['to'])
+            );
     }
 
     /**
-     * Build the Excel workbook.
+     * Check whether a module should be included.
      */
-    private function downloadWorkbook(
+    private function moduleSelected(array $filters, string $module): bool
+    {
+        return blank($filters['module'] ?? null)
+            || $filters['module'] === $module;
+    }
+
+    /**
+     * Convert any value into a safe Excel cell value.
+     */
+    private function safeValue(mixed $value): string|int|float
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        if ($value instanceof DateTimeInterface) {
+            return $value->format('Y-m-d H:i:s');
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'Yes' : 'No';
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return $value;
+        }
+
+        if (is_array($value) || is_object($value)) {
+            $value = json_encode(
+                $value,
+                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+            ) ?: '';
+        }
+
+        $value = (string) $value;
+        $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/u', '', $value) ?? '';
+
+        if (mb_strlen($value) > 32000) {
+            $value = mb_substr($value, 0, 32000) . '...';
+        }
+
+        return $value;
+    }
+
+    private function jsonValue(mixed $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        if (is_string($value)) {
+            return $value;
+        }
+
+        return json_encode(
+            $value,
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+        ) ?: '';
+    }
+
+    private function appendRow(Worksheet $sheet, array $values): void
+    {
+        $row = $sheet->getHighestDataRow() + 1;
+
+        foreach (array_values($values) as $index => $value) {
+            $value = $this->safeValue($value);
+            $coordinate = Coordinate::stringFromColumnIndex($index + 1) . $row;
+
+            if (is_int($value) || is_float($value)) {
+                $sheet->setCellValueExplicit(
+                    $coordinate,
+                    $value,
+                    DataType::TYPE_NUMERIC
+                );
+            } else {
+                $sheet->setCellValueExplicit(
+                    $coordinate,
+                    $value,
+                    DataType::TYPE_STRING
+                );
+            }
+        }
+    }
+
+    /**
+     * Build workbook using the selected filters.
+     */
+    private function buildWorkbook(
         array $filters = [],
         ?User $selectedUser = null
-    ): StreamedResponse {
-
+    ): Spreadsheet {
         $spreadsheet = new Spreadsheet();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Sheet creation helper
-        |--------------------------------------------------------------------------
-        */
+        $isFirstSheet = true;
 
         $createSheet = function (
             string $title,
             array $headers
-        ) use ($spreadsheet) {
-
-            $sheet = $spreadsheet->createSheet();
+        ) use ($spreadsheet, &$isFirstSheet): Worksheet {
+            if ($isFirstSheet) {
+                $sheet = $spreadsheet->getActiveSheet();
+                $isFirstSheet = false;
+            } else {
+                $sheet = $spreadsheet->createSheet();
+            }
 
             $sheet->setTitle($title);
 
-            $sheet->fromArray($headers, null, 'A1');
+            foreach ($headers as $index => $header) {
+                $sheet->setCellValueExplicit(
+                    Coordinate::stringFromColumnIndex($index + 1) . '1',
+                    $header,
+                    DataType::TYPE_STRING
+                );
+            }
 
-            $sheet->getStyle('1:1')->applyFromArray([
+            $lastColumn = Coordinate::stringFromColumnIndex(count($headers));
+
+            $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
                 'font' => [
                     'bold' => true,
                     'color' => ['rgb' => 'FFFFFF'],
@@ -137,34 +270,15 @@ class UserActivityController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $userQuery = User::query()
-            ->select('id', 'name', 'email', 'mobile', 'created_at')
-            ->when(
-                $selectedUser,
-                fn ($q) => $q->whereKey($selectedUser->id)
-            )
-            ->when(
-                filled($filters['search'] ?? null),
-                function ($q) use ($filters) {
-                    $term = trim($filters['search']);
-
-                    $q->where(function ($w) use ($term) {
-                        $w->where('name', 'like', "%{$term}%")
-                            ->orWhere('email', 'like', "%{$term}%")
-                            ->orWhere('mobile', 'like', "%{$term}%");
-
-                        if (ctype_digit($term)) {
-                            $w->orWhere('id', (int) $term);
-                        }
-                    });
-                }
-            )
-            ->orderBy('id');
-
-        $users = $userQuery->get();
+        if ($selectedUser) {
+            $users = collect([$selectedUser]);
+        } else {
+            // Important: this applies search, user_status and sorting
+            // using the same logic as the report listing.
+            $users = $this->reports->exportDirectory($filters);
+        }
 
         $userIds = $users->pluck('id')->all();
-
         $userMap = $users->keyBy('id');
 
         /*
@@ -189,46 +303,153 @@ class UserActivityController extends Controller
         ]);
 
         foreach ($users as $user) {
+            $educationCount = 0;
+            $completedCount = 0;
+            $toolsCount = 0;
+            $calculatorCount = 0;
+            $calendarCount = 0;
 
-            $educationCount = UserActivityLog::where('user_id', $user->id)
-                ->where('module', 'education')
-                ->count();
+            if ($this->moduleSelected($filters, 'education')) {
+                $educationQuery = UserActivityLog::where('user_id', $user->id)
+                    ->where('module', 'education');
 
-            $completedCount = UserLessonProgress::where('user_id', $user->id)
-                ->whereNotNull('completed_at')
-                ->count();
+                $this->applyDateFilters($educationQuery, $filters);
 
-            $toolsCount = UserActivityLog::where('user_id', $user->id)
-                ->where('module', 'tools')
-                ->count();
+                if (filled($filters['activity_type'] ?? null)) {
+                    $educationQuery->where(
+                        'activity_type',
+                        $filters['activity_type']
+                    );
+                }
 
-            $calculatorCount = CalculatorUsage::where('user_id', $user->id)
-                ->count();
+                $educationCount = $educationQuery->count();
 
-            $calendarCount = FinancialEvent::where('user_id', $user->id)
-                ->count();
+                $lessonQuery = UserLessonProgress::where('user_id', $user->id)
+                    ->whereNotNull('completed_at');
+
+                $this->applyDateFilters($lessonQuery, $filters, 'completed_at');
+
+                if (
+                    filled($filters['activity_type'] ?? null)
+                    && $filters['activity_type'] !== 'lesson_completed'
+                ) {
+                    $lessonQuery->whereRaw('1 = 0');
+                }
+
+                $completedCount = $lessonQuery->count();
+            }
+
+            if ($this->moduleSelected($filters, 'tools')) {
+                $toolsQuery = UserActivityLog::where('user_id', $user->id)
+                    ->where('module', 'tools');
+
+                $this->applyDateFilters($toolsQuery, $filters);
+
+                if (filled($filters['activity_type'] ?? null)) {
+                    $toolsQuery->where(
+                        'activity_type',
+                        $filters['activity_type']
+                    );
+                }
+
+                $toolsCount = $toolsQuery->count();
+            }
+
+            if ($this->moduleSelected($filters, 'calculators')) {
+                $calculatorQuery = CalculatorUsage::where('user_id', $user->id);
+
+                $this->applyDateFilters($calculatorQuery, $filters);
+
+                if (filled($filters['activity_type'] ?? null)) {
+                    $calculatorQuery->where(
+                        'event_type',
+                        $filters['activity_type']
+                    );
+                }
+
+                $calculatorCount = $calculatorQuery->count();
+            }
+
+            if ($this->moduleSelected($filters, 'calendar')) {
+                $calendarQuery = FinancialEvent::where('user_id', $user->id);
+
+                $this->applyDateFilters($calendarQuery, $filters);
+
+                if (
+                    filled($filters['activity_type'] ?? null)
+                    && $filters['activity_type'] !== 'event_created'
+                ) {
+                    $calendarQuery->whereRaw('1 = 0');
+                }
+
+                $calendarCount = $calendarQuery->count();
+            }
 
             $lastActivity = collect([
-                UserActivityLog::where('user_id', $user->id)->max('created_at'),
-                CalculatorUsage::where('user_id', $user->id)->max('created_at'),
-                FinancialEvent::where('user_id', $user->id)->max('created_at'),
-                UserLessonProgress::where('user_id', $user->id)->max('completed_at'),
+                $educationCount || $toolsCount
+                    ? UserActivityLog::where('user_id', $user->id)
+                        ->when(
+                            filled($filters['from'] ?? null),
+                            fn ($q) => $q->whereDate('created_at', '>=', $filters['from'])
+                        )
+                        ->when(
+                            filled($filters['to'] ?? null),
+                            fn ($q) => $q->whereDate('created_at', '<=', $filters['to'])
+                        )
+                        ->when(
+                            filled($filters['module'] ?? null),
+                            fn ($q) => $q->where('module', $filters['module'])
+                        )
+                        ->max('created_at')
+                    : null,
+
+                $calculatorCount
+                    ? CalculatorUsage::where('user_id', $user->id)
+                        ->when(
+                            filled($filters['from'] ?? null),
+                            fn ($q) => $q->whereDate('created_at', '>=', $filters['from'])
+                        )
+                        ->when(
+                            filled($filters['to'] ?? null),
+                            fn ($q) => $q->whereDate('created_at', '<=', $filters['to'])
+                        )
+                        ->max('created_at')
+                    : null,
+
+                $calendarCount
+                    ? FinancialEvent::where('user_id', $user->id)
+                        ->when(
+                            filled($filters['from'] ?? null),
+                            fn ($q) => $q->whereDate('created_at', '>=', $filters['from'])
+                        )
+                        ->when(
+                            filled($filters['to'] ?? null),
+                            fn ($q) => $q->whereDate('created_at', '<=', $filters['to'])
+                        )
+                        ->max('created_at')
+                    : null,
             ])->filter()->sortDesc()->first();
 
-            $summarySheet->fromArray([
+            $totalActivities = $educationCount
+                + $completedCount
+                + $toolsCount
+                + $calculatorCount
+                + $calendarCount;
+
+            $this->appendRow($summarySheet, [
                 $user->id,
                 $user->name,
                 $user->email,
                 $user->mobile,
-                $user->created_at?->format('Y-m-d H:i:s'),
+                $user->created_at,
                 $educationCount,
                 $completedCount,
                 $toolsCount,
                 $calculatorCount,
                 $calendarCount,
-                $educationCount + $toolsCount + $calculatorCount + $calendarCount,
+                $totalActivities,
                 $lastActivity,
-            ], null, 'A' . ($summarySheet->getHighestRow() + 1));
+            ]);
         }
 
         /*
@@ -248,53 +469,64 @@ class UserActivityController extends Controller
             'Activity Date',
         ]);
 
-        UserActivityLog::query()
-            ->whereIn('user_id', $userIds)
-            ->where('module', 'education')
-            ->orderBy('created_at')
-            ->chunk(500, function ($logs) use (
-                $educationSheet,
-                $userMap
-            ) {
-                foreach ($logs as $log) {
-                    $user = $userMap->get($log->user_id);
+        if ($this->moduleSelected($filters, 'education')) {
+            $educationQuery = UserActivityLog::query()
+                ->whereIn('user_id', $userIds)
+                ->where('module', 'education')
+                ->when(
+                    filled($filters['activity_type'] ?? null),
+                    fn ($q) => $q->where('activity_type', $filters['activity_type'])
+                );
 
-                    $educationSheet->fromArray([
-                        $log->user_id,
-                        $user?->name,
-                        $user?->email,
-                        $log->activity_type,
-                        $log->subject_type,
-                        $log->subject_id,
-                        json_encode($log->metadata),
-                        $log->created_at,
-                    ], null, 'A' . ($educationSheet->getHighestRow() + 1));
-                }
-            });
+            $this->applyDateFilters($educationQuery, $filters);
 
-        UserLessonProgress::query()
-            ->whereIn('user_id', $userIds)
-            ->whereNotNull('completed_at')
-            ->orderBy('completed_at')
-            ->chunk(500, function ($progressRecords) use (
-                $educationSheet,
-                $userMap
-            ) {
-                foreach ($progressRecords as $progress) {
-                    $user = $userMap->get($progress->user_id);
+            $educationQuery->orderBy('created_at')
+                ->chunk(500, function ($logs) use ($educationSheet, $userMap) {
+                    foreach ($logs as $log) {
+                        $user = $userMap->get($log->user_id);
 
-                    $educationSheet->fromArray([
-                        $progress->user_id,
-                        $user?->name,
-                        $user?->email,
-                        'lesson_completed',
-                        'lesson',
-                        $progress->lesson_id,
-                        'Lesson completion record',
-                        $progress->completed_at?->format('Y-m-d H:i:s'),
-                    ], null, 'A' . ($educationSheet->getHighestRow() + 1));
-                }
-            });
+                        $this->appendRow($educationSheet, [
+                            $log->user_id,
+                            $user?->name,
+                            $user?->email,
+                            $log->activity_type,
+                            $log->subject_type,
+                            $log->subject_id,
+                            $this->jsonValue($log->metadata),
+                            $log->created_at,
+                        ]);
+                    }
+                });
+
+            $lessonQuery = UserLessonProgress::query()
+                ->whereIn('user_id', $userIds)
+                ->whereNotNull('completed_at')
+                ->when(
+                    filled($filters['activity_type'] ?? null)
+                    && $filters['activity_type'] !== 'lesson_completed',
+                    fn ($q) => $q->whereRaw('1 = 0')
+                );
+
+            $this->applyDateFilters($lessonQuery, $filters, 'completed_at');
+
+            $lessonQuery->orderBy('completed_at')
+                ->chunk(500, function ($records) use ($educationSheet, $userMap) {
+                    foreach ($records as $progress) {
+                        $user = $userMap->get($progress->user_id);
+
+                        $this->appendRow($educationSheet, [
+                            $progress->user_id,
+                            $user?->name,
+                            $user?->email,
+                            'lesson_completed',
+                            'lesson',
+                            $progress->lesson_id,
+                            'Lesson completion record',
+                            $progress->completed_at,
+                        ]);
+                    }
+                });
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -313,29 +545,35 @@ class UserActivityController extends Controller
             'Activity Date',
         ]);
 
-        UserActivityLog::query()
-            ->whereIn('user_id', $userIds)
-            ->where('module', 'tools')
-            ->orderBy('created_at')
-            ->chunk(500, function ($logs) use (
-                $toolsSheet,
-                $userMap
-            ) {
-                foreach ($logs as $log) {
-                    $user = $userMap->get($log->user_id);
+        if ($this->moduleSelected($filters, 'tools')) {
+            $toolsQuery = UserActivityLog::query()
+                ->whereIn('user_id', $userIds)
+                ->where('module', 'tools')
+                ->when(
+                    filled($filters['activity_type'] ?? null),
+                    fn ($q) => $q->where('activity_type', $filters['activity_type'])
+                );
 
-                    $toolsSheet->fromArray([
-                        $log->user_id,
-                        $user?->name,
-                        $user?->email,
-                        $log->activity_type,
-                        $log->subject_type,
-                        $log->subject_id,
-                        json_encode($log->metadata),
-                        $log->created_at,
-                    ], null, 'A' . ($toolsSheet->getHighestRow() + 1));
-                }
-            });
+            $this->applyDateFilters($toolsQuery, $filters);
+
+            $toolsQuery->orderBy('created_at')
+                ->chunk(500, function ($logs) use ($toolsSheet, $userMap) {
+                    foreach ($logs as $log) {
+                        $user = $userMap->get($log->user_id);
+
+                        $this->appendRow($toolsSheet, [
+                            $log->user_id,
+                            $user?->name,
+                            $user?->email,
+                            $log->activity_type,
+                            $log->subject_type,
+                            $log->subject_id,
+                            $this->jsonValue($log->metadata),
+                            $log->created_at,
+                        ]);
+                    }
+                });
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -356,30 +594,36 @@ class UserActivityController extends Controller
             'Created At',
         ]);
 
-        CalculatorUsage::query()
-            ->whereIn('user_id', $userIds)
-            ->orderBy('created_at')
-            ->chunk(500, function ($usages) use (
-                $calculatorSheet,
-                $userMap
-            ) {
-                foreach ($usages as $usage) {
-                    $user = $userMap->get($usage->user_id);
+        if ($this->moduleSelected($filters, 'calculators')) {
+            $calculatorQuery = CalculatorUsage::query()
+                ->whereIn('user_id', $userIds)
+                ->when(
+                    filled($filters['activity_type'] ?? null),
+                    fn ($q) => $q->where('event_type', $filters['activity_type'])
+                );
 
-                    $calculatorSheet->fromArray([
-                        $usage->user_id,
-                        $user?->name,
-                        $user?->email,
-                        $usage->calculator_id,
-                        $usage->event_type,
-                        $usage->status,
-                        json_encode($usage->inputs),
-                        json_encode($usage->result),
-                        $usage->session_id,
-                        $usage->created_at?->format('Y-m-d H:i:s'),
-                    ], null, 'A' . ($calculatorSheet->getHighestRow() + 1));
-                }
-            });
+            $this->applyDateFilters($calculatorQuery, $filters);
+
+            $calculatorQuery->orderBy('created_at')
+                ->chunk(500, function ($usages) use ($calculatorSheet, $userMap) {
+                    foreach ($usages as $usage) {
+                        $user = $userMap->get($usage->user_id);
+
+                        $this->appendRow($calculatorSheet, [
+                            $usage->user_id,
+                            $user?->name,
+                            $user?->email,
+                            $usage->calculator_id,
+                            $usage->event_type,
+                            $usage->status,
+                            $this->jsonValue($usage->inputs),
+                            $this->jsonValue($usage->result),
+                            $usage->session_id,
+                            $usage->created_at,
+                        ]);
+                    }
+                });
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -408,38 +652,49 @@ class UserActivityController extends Controller
             'Created At',
         ]);
 
-        FinancialEvent::query()
-            ->whereIn('user_id', $userIds)
-            ->orderBy('event_date')
-            ->chunk(500, function ($events) use (
-                $calendarSheet,
-                $userMap
-            ) {
-                foreach ($events as $event) {
-                    $user = $userMap->get($event->user_id);
+        if ($this->moduleSelected($filters, 'calendar')) {
+            $calendarQuery = FinancialEvent::query()
+                ->whereIn('user_id', $userIds)
+                ->when(
+                    filled($filters['activity_type'] ?? null)
+                    && $filters['activity_type'] !== 'event_created',
+                    fn ($q) => $q->whereRaw('1 = 0')
+                );
 
-                    $calendarSheet->fromArray([
-                        $event->user_id,
-                        $user?->name,
-                        $user?->email,
-                        $event->id,
-                        $event->description,
-                        (float) $event->amount,
-                        $event->category,
-                        $event->event_date?->format('Y-m-d'),
-                        $event->reminder_time,
-                        $event->reminder_sent_at?->format('Y-m-d H:i:s'),
-                        $event->payment_status,
-                        $event->source_event_id,
-                        $event->notes,
-                        $event->is_recurring ? 'Yes' : 'No',
-                        $event->recurrence_frequency,
-                        $event->recurrence_end_date?->format('Y-m-d'),
-                        $event->last_processed_at?->format('Y-m-d H:i:s'),
-                        $event->created_at?->format('Y-m-d H:i:s'),
-                    ], null, 'A' . ($calendarSheet->getHighestRow() + 1));
-                }
-            });
+            $this->applyDateFilters($calendarQuery, $filters);
+
+            $calendarQuery->orderBy('event_date')
+                ->chunk(500, function ($events) use ($calendarSheet, $userMap) {
+                    foreach ($events as $event) {
+                        $user = $userMap->get($event->user_id);
+
+                        $this->appendRow($calendarSheet, [
+                            $event->user_id,
+                            $user?->name,
+                            $user?->email,
+                            $event->id,
+                            $event->description,
+                            (float) $event->amount,
+                            $event->category,
+                            $event->event_date instanceof DateTimeInterface
+                                ? $event->event_date->format('Y-m-d')
+                                : $event->event_date,
+                            $event->reminder_time,
+                            $event->reminder_sent_at,
+                            $event->payment_status,
+                            $event->source_event_id,
+                            $event->notes,
+                            $event->is_recurring ? 'Yes' : 'No',
+                            $event->recurrence_frequency,
+                            $event->recurrence_end_date instanceof DateTimeInterface
+                                ? $event->recurrence_end_date->format('Y-m-d')
+                                : $event->recurrence_end_date,
+                            $event->last_processed_at,
+                            $event->created_at,
+                        ]);
+                    }
+                });
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -459,17 +714,25 @@ class UserActivityController extends Controller
             'Activity Date',
         ]);
 
-        UserActivityLog::query()
+        $timelineQuery = UserActivityLog::query()
             ->whereIn('user_id', $userIds)
-            ->orderBy('created_at')
-            ->chunk(500, function ($logs) use (
-                $timelineSheet,
-                $userMap
-            ) {
+            ->when(
+                filled($filters['module'] ?? null),
+                fn ($q) => $q->where('module', $filters['module'])
+            )
+            ->when(
+                filled($filters['activity_type'] ?? null),
+                fn ($q) => $q->where('activity_type', $filters['activity_type'])
+            );
+
+        $this->applyDateFilters($timelineQuery, $filters);
+
+        $timelineQuery->orderBy('created_at')
+            ->chunk(500, function ($logs) use ($timelineSheet, $userMap) {
                 foreach ($logs as $log) {
                     $user = $userMap->get($log->user_id);
 
-                    $timelineSheet->fromArray([
+                    $this->appendRow($timelineSheet, [
                         $log->user_id,
                         $user?->name,
                         $user?->email,
@@ -477,11 +740,44 @@ class UserActivityController extends Controller
                         $log->activity_type,
                         $log->subject_type,
                         $log->subject_id,
-                        json_encode($log->metadata),
-                        $log->created_at?->format('Y-m-d H:i:s'),
-                    ], null, 'A' . ($timelineSheet->getHighestRow() + 1));
+                        $this->jsonValue($log->metadata),
+                        $log->created_at,
+                    ]);
                 }
             });
+            /*
+|--------------------------------------------------------------------------
+| Remove sheets not required for selected module
+|--------------------------------------------------------------------------
+*/
+
+$selectedModule = $filters['module'] ?? null;
+
+$sheetMap = [
+    'education' => 'Education',
+    'tools' => 'Tools',
+    'calculators' => 'Calculators',
+    'calendar' => 'Calendar',
+];
+
+$keepSheetName = $sheetMap[$selectedModule] ?? null;
+
+// Timeline tab support
+if (($filters['tab'] ?? null) === 'timeline' && !$selectedModule) {
+    $keepSheetName = 'Activity Timeline';
+}
+
+if ($keepSheetName !== null) {
+    foreach ($spreadsheet->getAllSheets() as $sheet) {
+        if ($sheet->getTitle() !== $keepSheetName) {
+            $spreadsheet->removeSheetByIndex(
+                $spreadsheet->getIndex($sheet)
+            );
+        }
+    }
+}
+
+$spreadsheet->setActiveSheetIndex(0);
 
         /*
         |--------------------------------------------------------------------------
@@ -490,40 +786,177 @@ class UserActivityController extends Controller
         */
 
         foreach ($spreadsheet->getAllSheets() as $sheet) {
-            $sheet->getDefaultRowDimension()->setRowHeight(20);
+            $lastColumn = $sheet->getHighestDataColumn();
+            $lastColumnIndex = Coordinate::columnIndexFromString($lastColumn);
+            $lastRow = $sheet->getHighestDataRow();
 
-            $sheet->getStyle(
-                'A1:' . $sheet->getHighestColumn() . $sheet->getHighestRow()
-            )->getAlignment()->setVertical(
-                Alignment::VERTICAL_CENTER
-            );
+            $sheet->getStyle("A1:{$lastColumn}{$lastRow}")
+                ->getAlignment()
+                ->setVertical(Alignment::VERTICAL_CENTER);
 
-            foreach (range('A', $sheet->getHighestColumn()) as $column) {
-                $sheet->getColumnDimension($column)->setAutoSize(true);
+            for ($i = 1; $i <= $lastColumnIndex; $i++) {
+                $sheet->getColumnDimension(
+                    Coordinate::stringFromColumnIndex($i)
+                )->setAutoSize(true);
             }
 
-            $sheet->setAutoFilter(
-                'A1:' . $sheet->getHighestColumn() . '1'
-            );
+            $sheet->setAutoFilter("A1:{$lastColumn}1");
         }
 
         $spreadsheet->setActiveSheetIndex(0);
 
-        $filename = $selectedUser
-            ? 'LoanEngine-User-' . $selectedUser->id . '-Report-' . now()->format('Ymd-His') . '.xlsx'
-            : 'LoanEngine-All-Users-Report-' . now()->format('Ymd-His') . '.xlsx';
+        return $spreadsheet;
+    }
 
-        return response()->streamDownload(
-            function () use ($spreadsheet) {
-                $writer = new Xlsx($spreadsheet);
-                $writer->save('php://output');
-                $spreadsheet->disconnectWorksheets();
-            },
-            $filename,
-            [
-                'Content-Type' =>
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            ]
-        );
+    /**
+     * Build, save, validate and download workbook.
+     */
+    private function downloadWorkbook(
+        array $filters = [],
+        ?User $selectedUser = null
+    ): BinaryFileResponse|RedirectResponse {
+        @set_time_limit(0);
+        @ini_set('memory_limit', '1024M');
+
+        $tag = '[UserActivityExport]';
+        $tmpDir = storage_path('app/tmp');
+        $tmpPath = null;
+
+        try {
+            Log::info("{$tag} START", [
+                'selected_user' => $selectedUser?->id,
+                'filters' => $filters,
+                'php' => PHP_VERSION,
+                'zip_ext' => class_exists(ZipArchive::class),
+                'ob_level' => ob_get_level(),
+                'headers_sent' => headers_sent($hsFile, $hsLine),
+                'headers_sent_at' => $hsFile ? "{$hsFile}:{$hsLine}" : null,
+            ]);
+
+            if (!class_exists(ZipArchive::class)) {
+                throw new \RuntimeException(
+                    'PHP zip extension is not enabled (enable extension=zip in php.ini).'
+                );
+            }
+
+            while (ob_get_level() > 0) {
+                $stray = (string) ob_get_contents();
+
+                if ($stray !== '') {
+                    Log::warning("{$tag} STRAY OUTPUT FOUND BEFORE EXPORT", [
+                        'length' => strlen($stray),
+                        'preview' => substr($stray, 0, 500),
+                    ]);
+                }
+
+                ob_end_clean();
+            }
+
+            if (!File::isDirectory($tmpDir)) {
+                File::makeDirectory($tmpDir, 0775, true);
+            }
+
+            $filename = $selectedUser
+                ? 'LoanEngine-User-' . $selectedUser->id . '-Report-' . now()->format('Ymd-His') . '.xlsx'
+                : 'LoanEngine-All-Users-Report-' . now()->format('Ymd-His') . '.xlsx';
+
+            $tmpPath = $tmpDir . DIRECTORY_SEPARATOR . uniqid('export_', true) . '.xlsx';
+
+            $startedAt = microtime(true);
+
+            $spreadsheet = $this->buildWorkbook($filters, $selectedUser);
+
+            Log::info("{$tag} WORKBOOK BUILT", [
+                'sheets' => $spreadsheet->getSheetCount(),
+                'seconds' => round(microtime(true) - $startedAt, 2),
+                'memory_mb' => round(memory_get_peak_usage(true) / 1048576, 1),
+            ]);
+
+            $writer = new Xlsx($spreadsheet);
+            $writer->setPreCalculateFormulas(false);
+            $writer->save($tmpPath);
+
+            $spreadsheet->disconnectWorksheets();
+            unset($spreadsheet, $writer);
+
+            $size = is_file($tmpPath) ? filesize($tmpPath) : 0;
+            $head = $size > 0
+                ? (string) file_get_contents($tmpPath, false, null, 0, 4)
+                : '';
+
+            $zip = new ZipArchive();
+            $zipOpen = $zip->open($tmpPath);
+            $zipEntries = $zipOpen === true ? $zip->numFiles : null;
+
+            if ($zipOpen === true) {
+                $zip->close();
+            }
+
+            Log::info("{$tag} FILE SAVED", [
+                'path' => $tmpPath,
+                'size_bytes' => $size,
+                'starts_with_PK' => str_starts_with($head, 'PK'),
+                'zip_open_result' => $zipOpen === true ? 'OK' : $zipOpen,
+                'zip_entries' => $zipEntries,
+            ]);
+
+            if ($size === 0 || !str_starts_with($head, 'PK') || $zipOpen !== true) {
+                Log::error("{$tag} INVALID XLSX GENERATED", [
+                    'size_bytes' => $size,
+                    'first_300_bytes' => $size > 0
+                        ? substr((string) file_get_contents($tmpPath, false, null, 0, 300), 0, 300)
+                        : '',
+                ]);
+
+                throw new \RuntimeException(
+                    'Generated XLSX file is invalid. Check storage/logs/laravel.log'
+                );
+            }
+
+            Log::info("{$tag} SENDING DOWNLOAD", [
+                'filename' => $filename,
+                'size_bytes' => $size,
+            ]);
+
+            return response()->download(
+                $tmpPath,
+                $filename,
+                [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'Cache-Control' => 'max-age=0, no-cache, must-revalidate',
+                    'Pragma' => 'public',
+                ]
+            )->deleteFileAfterSend(true);
+
+        } catch (Throwable $e) {
+            Log::error("{$tag} FAILED", [
+                'message' => $e->getMessage(),
+                'class' => get_class($e),
+                'file' => $e->getFile() . ':' . $e->getLine(),
+                'trace' => collect(explode("\n", $e->getTraceAsString()))
+                    ->take(15)
+                    ->all(),
+            ]);
+
+            if ($tmpPath && is_file($tmpPath)) {
+                @unlink($tmpPath);
+            }
+
+            if (config('app.debug')) {
+                dd([
+                    'EXPORT FAILED' => $e->getMessage(),
+                    'class' => get_class($e),
+                    'file' => $e->getFile() . ':' . $e->getLine(),
+                    'trace' => collect(explode("\n", $e->getTraceAsString()))
+                        ->take(15)
+                        ->all(),
+                ]);
+            }
+
+            return back()->with(
+                'error',
+                'Excel export failed. Please check the logs.'
+            );
+        }
     }
 }
