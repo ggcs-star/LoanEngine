@@ -25,7 +25,7 @@ use App\Http\Controllers\User\ToolController as UserToolController;
 use App\Http\Controllers\User\ToolJourneyController as UserToolJourneyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserManagementController;
-use App\Http\Controllers\Admin\Reports\AnalyticsController;
+// use App\Http\Controllers\Admin\Reports\AnalyticsController;
 use App\Http\Controllers\Admin\Reports\UserActivityController;
 use App\Http\Controllers\Admin\Reports\UserAnalyticsController;
 Route::middleware(['auth', 'role:admin'])
@@ -306,7 +306,7 @@ Route::middleware(['auth', 'role:user'])
 
 Route::prefix('reports')
     ->name('reports.')
-    ->controller(AnalyticsController::class)
+    ->controller(UserAnalyticsController::class)
     ->group(function () {
         Route::get('/analytics', 'index')->name('analytics');
         Route::get('/activities', 'activities')->name('activities');

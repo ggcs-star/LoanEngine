@@ -25,7 +25,7 @@ class CalendarController extends Controller
             ]);
 
             $month = Carbon::createFromFormat(
-                'Y-m',
+                '!Y-m',
                 $filters['month'] ?? now()->format('Y-m')
             )->startOfMonth();
 
@@ -121,7 +121,7 @@ class CalendarController extends Controller
             ]);
 
             $month = Carbon::createFromFormat(
-                'Y-m',
+                '!Y-m',
                 $filters['month'] ?? now()->format('Y-m')
             )->startOfMonth();
 
