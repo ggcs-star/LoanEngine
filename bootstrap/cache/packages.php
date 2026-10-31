@@ -34,4 +34,15 @@
       0 => 'Termwind\\Laravel\\TermwindServiceProvider',
     ),
   ),
+  'torann/geoip' => 
+  array (
+    'aliases' => 
+    array (
+      'GeoIP' => 'Torann\\GeoIP\\Facades\\GeoIP',
+    ),
+    'providers' => 
+    array (
+      0 => 'Torann\\GeoIP\\GeoIPServiceProvider',
+    ),
+  ),
 );

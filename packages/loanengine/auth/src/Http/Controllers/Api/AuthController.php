@@ -4,65 +4,421 @@ namespace LoanEngine\Auth\Http\Controllers\Api;
 
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use LoanEngine\Auth\Http\Requests\LoginRequest;
 use LoanEngine\Auth\Http\Requests\RegisterRequest;
+use LoanEngine\Auth\Support\ApiResponse;
+use LoanEngine\Auth\Support\AuthActivityLogger;
 
 class AuthController extends Controller
 {
+    /**
+     * Register a new API user.
+     */
     public function register(RegisterRequest $request): JsonResponse
     {
-        abort_unless(config('loanengine-auth.registration_enabled'), 404);
+        abort_unless(
+            config('loanengine-auth.registration_enabled'),
+            404
+        );
+
         $model = config('auth.providers.users.model');
 
-        $user = $model::query()->create([
-            'name' => $request->string('name')->trim()->toString(),
-            'email' => mb_strtolower($request->string('email')->trim()->toString()),
-            'password' => Hash::make($request->string('password')->toString()),
-            'role' => 'user',
-        ]);
+        abort_unless(
+            is_string($model) && class_exists($model),
+            500,
+            'User model is not configured.'
+        );
+
+        $email = mb_strtolower(
+            $request->string('email')->trim()->toString()
+        );
+
+        $user = DB::transaction(function () use ($model, $request, $email) {
+            return $model::query()->create([
+                'name' => $request->string('name')->trim()->toString(),
+                'email' => $email,
+                'password' => Hash::make(
+                    $request->string('password')->toString()
+                ),
+                'role' => 'user',
+            ]);
+        });
 
         event(new Registered($user));
-        $token = $user->createToken(config('loanengine-auth.token_name'), ['*'], now()->addMinutes(config('loanengine-auth.token_expiration_minutes')));
 
-        return response()->json([
-            'message' => 'Account created successfully.',
-            'user' => $user,
+        AuthActivityLogger::record(
+            'register_success',
+            (int) $user->getAuthIdentifier(),
+            $email,
+            ['status_code' => 201],
+            $request
+        );
+
+        if (!method_exists($user, 'createToken')) {
+            return ApiResponse::created(
+                [
+                    'user' => $this->safeUser($user),
+                ],
+                'Account created successfully.'
+            );
+        }
+
+        $token = $user->createToken(
+            config('loanengine-auth.token_name', 'loanengine-api'),
+            config('loanengine-auth.token_abilities', ['*']),
+            now()->addMinutes(
+                (int) config(
+                    'loanengine-auth.token_expiration_minutes',
+                    10080
+                )
+            )
+        );
+
+        return ApiResponse::created([
+            'user' => $this->safeUser($user),
             'token' => $token->plainTextToken,
             'token_type' => 'Bearer',
-        ], 201);
+            'expires_at' => $token->accessToken->expires_at?->toIso8601String(),
+        ], 'Account created successfully.');
     }
 
+    /**
+     * Authenticate API user.
+     */
     public function login(LoginRequest $request): JsonResponse
     {
         $model = config('auth.providers.users.model');
-        $email = mb_strtolower($request->string('email')->trim()->toString());
-        $user = $model::query()->where('email', $email)->first();
 
-        if (! $user || ! Hash::check($request->string('password')->toString(), $user->password)) {
-            throw ValidationException::withMessages(['email' => [__('auth.failed')]]);
+        abort_unless(
+            is_string($model) && class_exists($model),
+            500,
+            'User model is not configured.'
+        );
+
+        $email = mb_strtolower(
+            $request->string('email')->trim()->toString()
+        );
+
+        $user = $model::query()
+            ->where('email', $email)
+            ->first();
+
+        if (
+            !$user ||
+            !Hash::check(
+                $request->string('password')->toString(),
+                (string) $user->password
+            )
+        ) {
+            AuthActivityLogger::record(
+                'login_failed',
+                $user ? (int) $user->getAuthIdentifier() : null,
+                $email,
+                ['status_code' => 422],
+                $request
+            );
+
+            throw ValidationException::withMessages([
+                'email' => [__('auth.failed')],
+            ]);
         }
 
-        $token = $user->createToken(config('loanengine-auth.token_name'), ['*'], now()->addMinutes(config('loanengine-auth.token_expiration_minutes')));
+        if (!method_exists($user, 'createToken')) {
+            AuthActivityLogger::record(
+                'login_failed',
+                (int) $user->getAuthIdentifier(),
+                $email,
+                [
+                    'status_code' => 500,
+                    'reason' => 'token_authentication_not_configured',
+                ],
+                $request
+            );
 
-        return response()->json([
-            'message' => 'Login successful.',
-            'user' => $user,
+            return ApiResponse::serverError(
+                'API token authentication is not configured for the user model.'
+            );
+        }
+
+        $token = $user->createToken(
+            config('loanengine-auth.token_name', 'loanengine-api'),
+            config('loanengine-auth.token_abilities', ['*']),
+            now()->addMinutes(
+                (int) config(
+                    'loanengine-auth.token_expiration_minutes',
+                    10080
+                )
+            )
+        );
+
+        AuthActivityLogger::record(
+            'login_success',
+            (int) $user->getAuthIdentifier(),
+            $email,
+            ['status_code' => 200],
+            $request
+        );
+
+        // Fetch the exact activity generated by this login.
+        $loginActivity = DB::table('loanengine_auth_activities')
+            ->where('user_id', $user->getAuthIdentifier())
+            ->where('event', 'login_success')
+            ->orderByDesc('id')
+            ->first();
+
+        // Get account activity counts.
+        $summary = DB::table('loanengine_auth_activities')
+            ->where('user_id', $user->getAuthIdentifier())
+            ->selectRaw("
+                SUM(CASE WHEN event = 'login_success' THEN 1 ELSE 0 END) as successful_logins,
+                SUM(CASE WHEN event = 'login_failed' THEN 1 ELSE 0 END) as failed_logins,
+                SUM(CASE WHEN event = 'logout_success' THEN 1 ELSE 0 END) as successful_logouts
+            ")
+            ->first();
+
+        return ApiResponse::success([
+            'user' => $this->safeUser($user),
+
             'token' => $token->plainTextToken,
             'token_type' => 'Bearer',
-        ]);
+            'expires_at' => $token->accessToken->expires_at?->toIso8601String(),
+
+            'login_details' => $loginActivity ? [
+                'ip_address' => $loginActivity->ip_address,
+                'country' => $loginActivity->country,
+                'country_code' => $loginActivity->country_code,
+                'state' => $loginActivity->region,
+                'district' => $loginActivity->district,
+                'city' => $loginActivity->city,
+                'postal_code' => $loginActivity->postal_code,
+                'latitude' => $loginActivity->latitude,
+                'longitude' => $loginActivity->longitude,
+                'timezone' => $loginActivity->timezone,
+                'isp' => $loginActivity->isp,
+                'asn' => $loginActivity->asn,
+                'network_type' => $loginActivity->network_type,
+                'device_id' => $loginActivity->device_id,
+                'device_type' => $loginActivity->device_type,
+                'operating_system' => $loginActivity->operating_system,
+                'browser' => $loginActivity->browser,
+                'session_id' => $loginActivity->session_id,
+                'risk_score' => $loginActivity->risk_score,
+                'risk_level' => $loginActivity->risk_level,
+                'recorded_at' => $loginActivity->created_at,
+            ] : null,
+
+            'activity_summary' => [
+                'successful_logins' => (int) ($summary->successful_logins ?? 0),
+                'failed_logins' => (int) ($summary->failed_logins ?? 0),
+                'successful_logouts' => (int) ($summary->successful_logouts ?? 0),
+            ],
+        ], 'Login successful.');
     }
 
-    public function me(): JsonResponse
+    /**
+     * Get authenticated user.
+     */
+    public function me(Request $request): JsonResponse
     {
-        return response()->json(['user' => request()->user()]);
+        return ApiResponse::success([
+            'user' => $this->safeUser($request->user()),
+        ], 'Authenticated user retrieved.');
     }
 
-    public function logout(): JsonResponse
+    /**
+     * Logout API user and revoke current token.
+     */
+    public function logout(Request $request): JsonResponse
     {
-        request()->user()->currentAccessToken()?->delete();
-        return response()->json(['message' => 'Logged out successfully.']);
+        $user = $request->user();
+
+        $userId = $user
+            ? (int) $user->getAuthIdentifier()
+            : null;
+
+        $token = $user?->currentAccessToken();
+
+        if ($token && method_exists($token, 'delete')) {
+            $token->delete();
+        }
+
+        AuthActivityLogger::record(
+            'logout_success',
+            $userId,
+            $user?->email,
+            ['status_code' => 200],
+            $request
+        );
+
+        return ApiResponse::success(
+            null,
+            'Logged out successfully.'
+        );
+    }
+
+    /**
+     * Get authenticated user's activity history.
+     */
+    public function activity(Request $request): JsonResponse
+    {
+        $activities = DB::table('loanengine_auth_activities')
+            ->where('user_id', $request->user()->getAuthIdentifier())
+            ->select([
+                'id',
+                'event',
+                'ip_address',
+                'country',
+                'country_code',
+                'region',
+                'district',
+                'city',
+                'postal_code',
+                'latitude',
+                'longitude',
+                'timezone',
+                'isp',
+                'asn',
+                'network_type',
+                'device_id',
+                'device_type',
+                'operating_system',
+                'browser',
+                'session_id',
+                'user_agent',
+                'http_method',
+                'route_name',
+                'path',
+                'status_code',
+                'risk_score',
+                'risk_level',
+                'created_at',
+            ])
+            ->orderByDesc('id')
+            ->paginate(
+                min(
+                    max((int) $request->query('per_page', 15), 1),
+                    100
+                )
+            );
+
+        return ApiResponse::success(
+            $activities->items(),
+            'Account activity retrieved.',
+            200,
+            [
+                'current_page' => $activities->currentPage(),
+                'last_page' => $activities->lastPage(),
+                'per_page' => $activities->perPage(),
+                'total' => $activities->total(),
+            ]
+        );
+    }
+
+    /**
+     * Get authenticated user's activity summary.
+     */
+    public function activitySummary(Request $request): JsonResponse
+    {
+        $userId = $request->user()->getAuthIdentifier();
+
+        $query = DB::table('loanengine_auth_activities')
+            ->where('user_id', $userId);
+
+        $counts = (clone $query)
+            ->selectRaw("
+                SUM(CASE WHEN event = 'login_success' THEN 1 ELSE 0 END) as successful_logins,
+                SUM(CASE WHEN event = 'login_failed' THEN 1 ELSE 0 END) as failed_logins,
+                SUM(CASE WHEN event = 'logout_success' THEN 1 ELSE 0 END) as successful_logouts
+            ")
+            ->first();
+
+        $lastLogin = (clone $query)
+            ->where('event', 'login_success')
+            ->latest('id')
+            ->value('created_at');
+
+        $lastLogout = (clone $query)
+            ->where('event', 'logout_success')
+            ->latest('id')
+            ->value('created_at');
+
+        return ApiResponse::success([
+            'successful_logins' => (int) ($counts->successful_logins ?? 0),
+            'failed_logins' => (int) ($counts->failed_logins ?? 0),
+            'successful_logouts' => (int) ($counts->successful_logouts ?? 0),
+            'last_login_at' => $lastLogin,
+            'last_logout_at' => $lastLogout,
+        ], 'Account activity summary retrieved.');
+    }
+
+    /**
+     * Get admin security events.
+     */
+    public function securityEvents(Request $request): JsonResponse
+    {
+        abort_unless(
+            $request->user()?->role === 'admin',
+            403
+        );
+
+        $events = DB::table('loanengine_auth_activities')
+            ->orderByDesc('risk_score')
+            ->orderByDesc('id')
+            ->paginate(
+                min(
+                    max((int) $request->query('per_page', 25), 1),
+                    100
+                )
+            );
+
+        return ApiResponse::success(
+            $events->items(),
+            'Security events retrieved.',
+            200,
+            [
+                'current_page' => $events->currentPage(),
+                'last_page' => $events->lastPage(),
+                'per_page' => $events->perPage(),
+                'total' => $events->total(),
+            ]
+        );
+    }
+
+    /**
+     * Return only safe user fields.
+     */
+    private function safeUser(mixed $user): array
+    {
+        if (!$user) {
+            return [];
+        }
+
+        $fields = [
+            'id',
+            'name',
+            'email',
+            'role',
+            'email_verified_at',
+            'created_at',
+        ];
+
+        $attributes = method_exists($user, 'getAttributes')
+            ? $user->getAttributes()
+            : [];
+
+        return collect($fields)
+            ->filter(function (string $field) use ($user, $attributes) {
+                return isset($user->{$field})
+                    || array_key_exists($field, $attributes);
+            })
+            ->mapWithKeys(function (string $field) use ($user) {
+                return [$field => $user->{$field}];
+            })
+            ->all();
     }
 }
