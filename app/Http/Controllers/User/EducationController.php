@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\EducationCategory;
 use App\Models\EducationLesson;
 use App\Models\EducationModule;
+use App\Services\Tracking\UserActivityTracker;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -43,9 +44,18 @@ class EducationController extends Controller
         ));
     }
 
-    public function category(EducationCategory $category): View
-    {
+    public function category(
+        EducationCategory $category,
+        UserActivityTracker $tracker
+    ): View {
         abort_unless($category->is_active, 404);
+
+        $tracker->education(
+            auth()->user(),
+            'category_viewed',
+            'category',
+            $category->id
+        );
 
         $modules = EducationModule::query()
             ->where('education_category_id', $category->getKey())
@@ -70,10 +80,19 @@ class EducationController extends Controller
         ));
     }
 
-    public function module(EducationModule $module)
-    {
+    public function module(
+        EducationModule $module,
+        UserActivityTracker $tracker
+    ) {
         abort_unless($module->status === 'published', 404);
         abort_unless($module->category?->is_active, 404);
+
+        $tracker->education(
+            auth()->user(),
+            'module_viewed',
+            'module',
+            $module->id
+        );
 
         $firstLesson = $module->publishedLessons()
             ->whereHas('module', function ($query) {
@@ -101,7 +120,8 @@ class EducationController extends Controller
 
     public function lesson(
         Request $request,
-        EducationLesson $lesson
+        EducationLesson $lesson,
+        UserActivityTracker $tracker
     ): View {
         abort_unless($lesson->status === 'published', 404);
 
@@ -112,6 +132,13 @@ class EducationController extends Controller
                 && $lesson->module->status === 'published'
                 && $lesson->module->category?->is_active,
             404
+        );
+
+        $tracker->education(
+            $request->user(),
+            'lesson_viewed',
+            'lesson',
+            $lesson->id
         );
 
         $siblings = EducationLesson::query()

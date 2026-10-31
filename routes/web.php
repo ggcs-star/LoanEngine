@@ -26,6 +26,9 @@ use App\Http\Controllers\User\ToolController as UserToolController;
 use App\Http\Controllers\User\ToolJourneyController as UserToolJourneyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\Reports\AnalyticsController;
+use App\Http\Controllers\Admin\Reports\UserActivityController;
+use App\Http\Controllers\Admin\Reports\UserAnalyticsController;
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin/users')
     ->name('admin.users.')
@@ -174,7 +177,31 @@ Route::middleware(['auth', 'role:admin'])
                 Route::delete('/{calculator}', [AdminCalculatorController::class, 'destroy'])
                     ->name('destroy');
             });
-    });
+
+        Route::prefix('reports')->name('reports.')->group(function () {
+
+    Route::get('/activities', [
+        UserActivityController::class,
+        'index'
+    ])->name('activities');
+
+    Route::get('/export', [
+        UserActivityController::class,
+        'exportAll'
+    ])->name('export');
+
+    Route::get('/users/{user}/export', [
+        UserActivityController::class,
+        'exportUser'
+    ])->whereNumber('user')->name('users.export');
+
+    Route::get('/users/{user}', [
+        UserAnalyticsController::class,
+        'show'
+    ])->whereNumber('user')->name('users.show');
+
+});
+             });
 
 Route::middleware('auth')
     ->prefix('education')
@@ -277,3 +304,16 @@ Route::middleware(['auth', 'role:user'])
             'calculate',
         ])->name('calculators.calculate');
     });
+
+Route::prefix('reports')
+    ->name('reports.')
+    ->controller(AnalyticsController::class)
+    ->group(function () {
+        Route::get('/analytics', 'index')->name('analytics');
+        Route::get('/activities', 'activities')->name('activities');
+        Route::get('/users/{user}', 'user')
+            ->whereNumber('user')
+            ->name('users.show');
+    });
+
+
